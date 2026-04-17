@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<!-- BEGIN: Head-->
+<head>
+	<?php
+	$menuStateClass = $_COOKIE['menu_state'] ?? 'menu-expanded';
+	?>
+    <script>/* Theme color restore — runs before CSS paints to avoid flash */
+    (function(){var s=localStorage.getItem('themeColors');if(s){var c=JSON.parse(s);Object.keys(c).forEach(function(k){document.documentElement.style.setProperty(k,c[k]);});}})();
+    </script>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, minimal-ui, interactive-widget=resizes-visual">
+    <meta name="description" content="Stack admin is super flexible, powerful, clean &amp; modern responsive bootstrap 4 admin template with unlimited possibilities.">
+    <meta name="keywords" content="admin template, stack admin template, dashboard template, flat admin template, responsive admin template, web app">
+    <meta name="author" content="PIXINVENT">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    @hasSection('seo-tags')
+        @yield('seo-tags')
+    @endif
+    <link rel="apple-touch-icon" href="{{asset('/app-assets/images/ico/apple-icon-120.png')}}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{asset('/app-assets/images/ico/favicon.ico')}}">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,300i,400,400i,500,500i%7COpen+Sans:300,300i,400,400i,600,600i,700,700i" rel="stylesheet">
+    <!-- BEGIN: Vendor CSS-->
+    <link rel="stylesheet" type="text/css" href="{{asset('/app-assets/vendors/css/vendors.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('/app-assets/vendors/css/forms/icheck/icheck.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('/app-assets/vendors/css/forms/icheck/custom.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('/app-assets/vendors/css/extensions/unslider.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('/app-assets/vendors/css/weather-icons/climacons.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('/app-assets/fonts/meteocons/style.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('/app-assets/vendors/css/charts/morris.css')}}">
+    <!-- CSS-->
+    <!-- BEGIN: Theme CSS-->
+    <link rel="stylesheet" type="text/css" href="{{asset('/app-assets/css/bootstrap.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('/app-assets/css/bootstrap-extended.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('/app-assets/css/colors.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('/app-assets/css/components.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('/app-assets/css/pages/page-users.css')}}">
+    <!-- END: Theme CSS-->
+    <!-- BEGIN: Page CSS-->
+    <link rel="stylesheet" type="text/css" href="{{asset('/app-assets/css/core/menu/menu-types/vertical-menu.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('/app-assets/css/core/colors/palette-gradient.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('/app-assets/fonts/simple-line-icons/style.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('/app-assets/css/pages/timeline.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('/app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('/assets/css/dataTables.dateTime.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('/app-assets/css/plugins/forms/checkboxes-radios.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('/app-assets/vendors/css/forms/toggle/switchery.min.css')}}">
+	<link rel="stylesheet" type="text/css" href="{{asset('/app-assets/css/plugins/forms/switch.css')}}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <style>
+    /* ── DataTable pagination dropdown — modern style ── */
+    .rdt_Pagination select {
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        background-color: #fff !important;
+        border: 1.5px solid #e2e8f0 !important;
+        border-radius: 10px !important;
+        padding: 0 32px 0 12px !important;
+        height: 34px !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        color: #374151 !important;
+        cursor: pointer !important;
+        outline: none !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23F27420' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 10px center !important;
+        transition: border-color 0.15s, box-shadow 0.15s !important;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+    }
+    .rdt_Pagination select:focus {
+        border-color: #F27420 !important;
+        box-shadow: 0 0 0 3px rgba(242,116,32,0.1) !important;
+    }
+    .rdt_Pagination select:hover {
+        border-color: #F27420 !important;
+    }
+    .rdt_Pagination select option {
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        color: #374151 !important;
+        padding: 8px !important;
+    }
+    /* ── Hide hamburger menu icon — shown on mobile via media query ── */
+    .nav-item.mobile-menu { display: none !important; }
+    @media (max-width: 767.98px) {
+        .header-navbar .navbar-header .navbar-brand { left: unset !important; position: static !important; }
+    }
+    @media (max-width: 767px) {
+        /* Hide ellipsis toggle li entirely */
+        .nav-item .open-navbar-container { display: none !important; }
+        .navbar-header .navbar-nav.flex-row > li:last-child { display: none !important; }
+        /* 3-column grid: hamburger | brand (center) | sale btn */
+        .navbar-header .navbar-nav.flex-row {
+            display: grid !important;
+            grid-template-columns: 1fr auto 1fr !important;
+            align-items: center !important;
+            width: 100% !important;
+            padding: 0 10px !important;
+        }
+        /* Hamburger: column 1, left-aligned */
+        .nav-item.mobile-menu { display: flex !important; align-items: center !important; justify-self: start !important; margin: 0 !important; grid-column: 1 !important; }
+        .nav-item.mobile-menu .feather { color: black !important; }
+        /* Brand: column 2, centered */
+        #navbar-brand-li { display: flex !important; align-items: center !important; justify-content: center !important; justify-self: center !important; grid-column: 2 !important; position: static !important; transform: none !important; margin: 0 !important; padding: 0 !important; }
+        #navbar-brand-li .navbar-brand { display: flex !important; align-items: center !important; justify-content: center !important; padding: 0 !important; margin: 0 !important; white-space: nowrap !important; }
+        /* Force brand-text visible — kill theme fadeout */
+        #navbar-brand-li .brand-text,
+        body.menu-collapsed #navbar-brand-li .brand-text,
+        body.menu-expanded #navbar-brand-li .brand-text { display: block !important; visibility: visible !important; opacity: 1 !important; animation: none !important; -webkit-animation: none !important; white-space: nowrap !important; font-size: 13px !important; margin: 0 !important; }
+        #navbar-brand-li .brand-text-mini { display: none !important; }
+        #navbar-brand-li img { max-width: 100% !important; height: auto !important; }
+        /* Sale btn: column 3, right-aligned */
+        #mobile-sale-btn { display: flex !important; align-items: center !important; justify-self: end !important; grid-column: 3 !important; margin: 0 !important; }
+        #mobile-sale-btn a { height: 30px !important; padding: 0 12px !important; gap: 5px !important; display: flex !important; align-items: center !important; justify-content: center !important; white-space: nowrap !important; }
+        #mobile-sale-btn a i { margin: 0 !important; padding: 0 !important; line-height: 1 !important; font-size: 11px !important; }
+        #mobile-sale-btn .mobile-sale-text { display: inline !important; font-size: 11px !important; font-weight: 700 !important; color: #fff !important; }
+        .mobile-sale-short { display: none !important; }
+    }
+    /* ── Mobile z-index: sidebar drawer above navbar ── */
+    @media (max-width: 767px) {
+        .header-navbar { z-index: 1000 !important; }
+        .ph-table-wrap { overflow-x: scroll !important; -webkit-overflow-scrolling: touch !important; }
+        .rdt_TableCell, .rdt_TableCol { padding: 0 8px !important; }
+        .rdt_TableCell { font-size: 12px !important; }
+    }
+    /* ══════════════════════════════════════════════
+       Tablet Sidebar — Professional Slim Bar + Tooltips
+       ══════════════════════════════════════════════ */
+    @media (min-width: 768px) and (max-width: 1024px) {
+
+        /* ══ COLLAPSED: strict 75px ══ */
+        body.vertical-layout.vertical-menu.menu-collapsed .main-menu,
+        body.vertical-layout.vertical-menu.menu-collapsed .navbar .navbar-header {
+            width: 75px !important;
+            min-width: 75px !important;
+            max-width: 75px !important;
+            overflow: visible !important;
+            transition: width 0.3s ease !important;
+        }
+        /* ── Content: starts exactly at 75px ── */
+        body.vertical-layout.vertical-menu.menu-collapsed .app-content,
+        body.vertical-layout.vertical-menu.menu-collapsed .content,
+        body.vertical-layout.vertical-menu.menu-collapsed .footer {
+            margin-left: 75px !important;
+            transition: margin-left 0.3s ease !important;
+        }
+
+        /* ── Sidebar shell: white, shadow ── */
+        .main-menu {
+            background: #ffffff !important;
+            border-right: 1px solid #f1f5f9 !important;
+            box-shadow: 2px 0 20px rgba(0,0,0,0.07) !important;
+            transition: width 0.3s ease !important;
+        }
+        .main-menu .main-menu-content,
+        .main-menu .navigation { background: #ffffff !important; }
+
+        /* ── Clamp nav list width ── */
+        body.vertical-layout.vertical-menu.menu-collapsed .main-menu .main-menu-content {
+            padding-top: 10px !important;
+            width: 75px !important;
+            overflow: visible !important;
+        }
+        body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation {
+            width: 75px !important;
+            overflow: visible !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        /* ── Brand logo — orange gradient, centered pill ── */
+        .sidebar-brand-logo {
+            display: flex !important; align-items: center !important; justify-content: center !important;
+            height: 60px !important; min-height: 60px !important;
+            background: linear-gradient(135deg,#f97316,#ea580c) !important;
+            border-bottom: none !important; flex-shrink: 0 !important; overflow: hidden !important;
+        }
+        .sidebar-brand-logo a {
+            display: flex !important; align-items: center !important; justify-content: center !important;
+            width: 40px !important; height: 40px !important;
+            background: rgba(255,255,255,0.18) !important; border-radius: 11px !important;
+            text-decoration: none !important;
+        }
+        .sidebar-brand-logo img {
+            max-height: 24px !important; max-width: 24px !important;
+            object-fit: contain !important; filter: brightness(0) invert(1) !important;
+        }
+
+        /* ══ EXPANDED: sidebar 240px, content starts at 240px ══ */
+        body.vertical-layout.vertical-menu.menu-expanded .main-menu,
+        body.vertical-layout.vertical-menu.menu-expanded .navbar .navbar-header {
+            width: 240px !important;
+            min-width: 240px !important;
+            transition: width 0.3s ease !important;
+            overflow-x: hidden !important;
+        }
+        body.vertical-layout.vertical-menu.menu-expanded .app-content,
+        body.vertical-layout.vertical-menu.menu-expanded .content,
+        body.vertical-layout.vertical-menu.menu-expanded .footer {
+            margin-left: 240px !important;
+            transition: margin-left 0.3s ease !important;
+        }
+        body.vertical-layout.vertical-menu.menu-expanded .main-menu .main-menu-content {
+            padding-top: 10px !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+        }
+
+        /* ══ COLLAPSED: completely remove section headers ══ */
+        body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li.navigation-header {
+            display: none !important;
+        }
+
+        /* ── Nav item: full 75px width, flex column (icon + label stacked) ── */
+        body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li:not(.navigation-header) {
+            width: 75px !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            padding: 0 !important;
+            margin: 2px 0 !important;
+            overflow: visible !important;
+        }
+
+        /* ── Nav link: full 75px wide, column layout — icon on top, mini label below ── */
+        body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li:not(.navigation-header) > a {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 75px !important;
+            min-width: 75px !important;
+            height: 56px !important;
+            min-height: 56px !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            border: none !important;
+            text-decoration: none !important;
+            overflow: visible !important;
+            transition: background 0.2s ease !important;
+            gap: 4px !important;
+        }
+
+        /* ── Icons: 20px centered ── */
+        body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li:not(.navigation-header) > a > i {
+            font-size: 20px !important;
+            line-height: 1 !important;
+            margin: 0 !important;
+            margin-right: 0 !important;
+            padding: 0 !important;
+            color: #94a3b8 !important;
+            display: block !important;
+            text-align: center !important;
+            float: none !important;
+            position: static !important;
+            flex-shrink: 0 !important;
+            transition: color 0.2s ease !important;
+        }
+
+        /* ══ MINI LABEL: always visible below icon ══ */
+        body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li:not(.navigation-header) > a > span.menu-title {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: static !important;
+            clip: auto !important;
+            width: 75px !important;
+            max-width: 75px !important;
+            height: auto !important;
+            max-height: none !important;
+            font-size: 9px !important;
+            font-weight: 600 !important;
+            color: #94a3b8 !important;
+            text-align: center !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            padding: 0 4px !important;
+            margin: 0 !important;
+            line-height: 1.2 !important;
+            letter-spacing: 0.2px !important;
+            pointer-events: none !important;
+        }
+
+        /* ══ Fly-out submenu — reposition from vendor's 60px to our 75px ══ */
+        body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li > ul.menu-content,
+        body.vertical-layout.vertical-menu.menu-collapsed .main-menu .main-menu-content > ul.menu-content {
+            left: 75px !important;
+            width: 210px !important;
+            background: #fff !important;
+            border-radius: 12px !important;
+            box-shadow: 0 8px 28px rgba(0,0,0,0.12) !important;
+            border: 1px solid #f1f5f9 !important;
+            padding: 6px 0 !important;
+        }
+        body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li > ul.menu-content li a {
+            padding: 9px 16px !important;
+            font-size: 13px !important; color: #374151 !important;
+            border-radius: 0 !important;
+            display: flex !important; align-items: center !important; gap: 8px !important;
+        }
+        body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li > ul.menu-content li a:hover {
+            background: #fff7ed !important; color: #f97316 !important;
+        }
+
+        /* ── Hover: tinted bg ── */
+        body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li:not(.navigation-header):hover > a {
+            background: #fff7ed !important;
+        }
+        body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li:not(.navigation-header):hover > a > i {
+            color: #f97316 !important;
+        }
+        body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li:not(.navigation-header):hover > a > span.menu-title {
+            color: #f97316 !important;
+        }
+
+        /* ── Active: left orange bar ── */
+        body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li.active:not(.navigation-header) > a {
+            background: #fff3e6 !important;
+            box-shadow: inset 3px 0 0 #f97316 !important;
+        }
+        body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li.active:not(.navigation-header) > a > i {
+            color: #f97316 !important;
+        }
+        body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li.active:not(.navigation-header) > a > span.menu-title {
+            color: #f97316 !important;
+        }
+
+        /* ══ EXPANDED: section header dividers ══ */
+        body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li.navigation-header {
+            font-size: 0 !important;
+            padding: 18px 16px 6px 16px !important;
+            margin: 0 !important;
+            overflow: hidden !important;
+        }
+        body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li.navigation-header:first-child {
+            padding-top: 10px !important;
+        }
+        body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li.navigation-header span {
+            display: block !important;
+            font-size: 10px !important;
+            letter-spacing: 1.4px !important;
+            font-weight: 700 !important;
+            color: #94a3b8 !important;
+            text-transform: uppercase !important;
+            line-height: 1 !important;
+        }
+        body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li.navigation-header .feather { display: none !important; }
+
+        /* ══ EXPANDED: nav item wrapper ══ */
+        body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li:not(.navigation-header) {
+            margin: 1px 8px !important;
+            border-radius: 10px !important;
+            overflow: hidden !important;
+        }
+
+        /* ══ EXPANDED: nav link — icon + label ══ */
+        body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li:not(.navigation-header) > a {
+            display: flex !important;
+            align-items: center !important;
+            min-height: 44px !important;
+            padding: 0 14px !important;
+            border-radius: 10px !important;
+            color: #374151 !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            background: transparent !important;
+            transition: all 0.2s ease !important;
+            text-decoration: none !important;
+        }
+        body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li:not(.navigation-header) > a > i {
+            font-size: 16px !important;
+            margin-right: 11px !important;
+            margin-left: 0 !important;
+            color: #94a3b8 !important;
+            flex-shrink: 0 !important;
+            width: 20px !important;
+            text-align: center !important;
+            transition: color 0.2s ease !important;
+            float: none !important;
+            position: static !important;
+        }
+        body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li:not(.navigation-header) > a > span.menu-title {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            width: auto !important;
+            max-width: none !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            color: #374151 !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            position: static !important;
+            clip: auto !important;
+        }
+
+        /* ══ EXPANDED: hover state ══ */
+        body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li:not(.navigation-header):hover > a {
+            background: #fff7ed !important; color: #f97316 !important;
+        }
+        body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li:not(.navigation-header):hover > a > i { color: #f97316 !important; }
+        body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li:not(.navigation-header):hover > a > span.menu-title { color: #f97316 !important; }
+
+        /* ══ EXPANDED: active state ══ */
+        body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li.active:not(.navigation-header) > a {
+            background: #fff7ed !important;
+            box-shadow: inset 3px 0 0 #f97316 !important;
+            color: #f97316 !important;
+            font-weight: 600 !important;
+        }
+        body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li.active:not(.navigation-header) > a > i { color: #f97316 !important; }
+        body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li.active:not(.navigation-header) > a > span.menu-title { color: #f97316 !important; }
+
+        /* ══ EXPANDED: dropdown submenu ══ */
+        body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li.has-sub > ul.menu-content {
+            background: #f8fafc !important;
+            border-top: none !important;
+            padding: 4px 0 !important;
+        }
+        body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li.has-sub > ul.menu-content li {
+            margin: 0 !important;
+        }
+        body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li.has-sub > ul.menu-content li a {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            padding: 9px 14px 9px 44px !important;
+            font-size: 12px !important;
+            color: #6b7280 !important;
+            font-weight: 500 !important;
+            border-radius: 0 !important;
+            transition: all 0.15s ease !important;
+        }
+        body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li.has-sub > ul.menu-content li a:hover {
+            background: #fff7ed !important; color: #f97316 !important;
+        }
+        body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li.has-sub > ul.menu-content li.active a {
+            color: #f97316 !important; font-weight: 600 !important; background: #fff7ed !important;
+        }
+    }
+    /* ── Collapsed sidebar: small top padding (all screen sizes) ── */
+    body.vertical-layout.vertical-menu.menu-collapsed .main-menu .main-menu-content {
+        padding-top: 10px !important;
+    }
+    /* ══ Collapsed sidebar fly-out popover ══ */
+    #csFlyout {
+        position: fixed;
+        left: 75px;
+        z-index: 99999;
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.16), 0 2px 8px rgba(0,0,0,0.08);
+        border: 1px solid #f1f5f9;
+        min-width: 200px;
+        max-width: 240px;
+        padding: 6px 0 8px;
+        display: none;
+        overflow: hidden;
+    }
+    #csFlyout .csf-title {
+        font-size: 10px;
+        font-weight: 800;
+        color: #94a3b8;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        padding: 8px 16px 6px;
+        border-bottom: 1px solid #f1f5f9;
+        margin-bottom: 4px;
+    }
+    #csFlyout .csf-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 16px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #374151;
+        text-decoration: none;
+        transition: background 0.15s, color 0.15s;
+        line-height: 1;
+    }
+    #csFlyout .csf-item i {
+        font-size: 13px;
+        color: #94a3b8;
+        width: 16px;
+        text-align: center;
+        flex-shrink: 0;
+        transition: color 0.15s;
+    }
+    #csFlyout .csf-item:hover,
+    #csFlyout .csf-item:active { background: #fff7ed !important; color: #f97316 !important; }
+    #csFlyout .csf-item:hover i,
+    #csFlyout .csf-item:active i { color: #f97316 !important; }
+    body.menu-collapsed .main-menu .navigation > li.cs-flyout-open > a {
+        background: #fff3e6 !important;
+        box-shadow: inset 3px 0 0 #f97316 !important;
+    }
+    body.menu-collapsed .main-menu .navigation > li.cs-flyout-open > a > i { color: #f97316 !important; }
+    body.menu-collapsed .main-menu .navigation > li.cs-flyout-open > a > span.menu-title { color: #f97316 !important; }
+    /* ── Hide Roles/Users from Management sidebar - moved to Settings page ── */
+    .navigation a.menu-item[href*="management.roles"] { display: none !important; }
+    .navigation a.menu-item[href*="management.users"] { display: none !important; }
+    .navigation li.nav-item a.menu-item[href*="management.roles"] + ul { display: none !important; }
+    /* ── Global Modern Buttons ── */
+    .btn-primary, .btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary:not(:disabled):not(.disabled):active {
+        background: #F27420 !important; border-color: #F27420 !important; color: #fff !important;
+        border-radius: 12px !important; font-weight: 600 !important; font-size: 13.5px !important;
+        box-shadow: 0 2px 8px rgba(242,116,32,0.3) !important; outline: none !important;
+        height: 44px; display: inline-flex; align-items: center; padding: 0 24px;
+    }
+    .btn-primary:hover { background: #e0600e !important; }
+    .btn-primary:focus { box-shadow: 0 0 0 4px rgba(242,116,32,0.15) !important; }
+    /* ── Form action buttons (Cancel + Save) — global ── */
+    .form-actions {
+        display: flex !important; align-items: center !important; justify-content: flex-end !important;
+        gap: 12px !important; padding-top: 20px !important; border-top: 1px solid #f1f5f9 !important; margin-top: 20px !important;
+    }
+    /* Cancel link */
+    .form-actions a {
+        display: inline-flex !important; align-items: center !important; gap: 6px !important;
+        height: 42px !important; padding: 0 24px !important; border-radius: 10px !important;
+        border: 2px solid #e2e8f0 !important; background: #fff !important; color: #64748b !important;
+        font-size: 14px !important; font-weight: 600 !important; text-decoration: none !important;
+        transition: border-color 0.15s, color 0.15s !important; outline: none !important;
+    }
+    .form-actions a:hover { border-color: #f97316 !important; color: #f97316 !important; }
+    /* Cancel icon always black */
+    a .fa-times, button .fa-times { color: #000 !important; }
+    /* Save button */
+    .form-actions .btn-primary {
+        display: inline-flex !important; align-items: center !important; gap: 6px !important;
+        height: 42px !important; padding: 0 28px !important; border-radius: 10px !important;
+        background: linear-gradient(135deg, #f97316, #ea580c) !important;
+        color: #fff !important; font-size: 14px !important; font-weight: 700 !important;
+        border: none !important; box-shadow: 0 3px 10px rgba(249,115,22,0.3) !important;
+        cursor: pointer !important; outline: none !important;
+    }
+    .form-actions .btn-primary:hover { opacity: 0.92 !important; box-shadow: 0 4px 14px rgba(249,115,22,0.4) !important; }
+    /* ── Global Orange Dropdown Hover ── */
+    /* Native select */
+    select option:checked { background-color: #F27420 !important; color: #fff !important; }
+    select option:hover { background-color: #F27420 !important; color: #fff !important; }
+    select:focus { border-color: #F27420 !important; outline: none !important; }
+    .rdt_Pagination select { accent-color: #F27420; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 4px 8px; outline: none; }
+    .rdt_Pagination select:focus { border-color: #F27420 !important; box-shadow: 0 0 0 3px rgba(242,116,32,0.08); }
+    /* Bootstrap dropdowns */
+    .dropdown-item:hover, .dropdown-item:focus, .dropdown-item:active { background-color: #FFF5ED !important; color: #F27420 !important; }
+    .dropdown-item.active { background-color: #F27420 !important; color: #fff !important; }
+    /* DataTables length menu */
+    .dataTables_length select:focus { border-color: #F27420 !important; outline: none; }
+    .dataTables_wrapper .dataTables_length select option:checked { background-color: #F27420 !important; color: #fff !important; }
+    /* General focus override */
+    .form-control:focus { border-color: #F27420 !important; box-shadow: 0 0 0 0.2rem rgba(242,116,32,0.15) !important; }
+    .select2-container--default .select2-results__option--highlighted[aria-selected] { background-color: #F27420 !important; color: #fff !important; }
+    .select2-container--default .select2-results__option--highlighted { background-color: #F27420 !important; color: #fff !important; }
+    .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable { background-color: #F27420 !important; color: #fff !important; }
+    .select2-results__option--highlighted { background-color: #F27420 !important; color: #fff !important; }
+    .select2-container--default .select2-results__option--selected { background-color: #FFF5ED !important; color: #F27420 !important; }
+    .select2-container--default .select2-results__option[aria-selected=true] { background-color: #FFF5ED !important; color: #F27420 !important; }
+    .select2-container--default .select2-selection--single { display: flex !important; align-items: center !important; }
+    .select2-container--default .select2-selection--single .select2-selection__rendered { line-height: normal !important; padding-top: 0 !important; padding-bottom: 0 !important; flex: 1; }
+    .select2-container--default .select2-selection--single .select2-selection__arrow { position: static !important; height: auto !important; display: flex; align-items: center; padding-right: 8px; }
+    .select2-container--default .select2-selection--single .select2-selection__arrow b { border-color: #94a3b8 transparent transparent transparent !important; margin-top: 0 !important; position: static !important; }
+    </style>
+	<!-- END: Page CSS-->
+    <!-- BEGIN: Custom CSS-->
+    <link rel="stylesheet" type="text/css" href="{{asset('/assets/css/style.css')}}">
+    <!-- END: Custom CSS-->
+    <style>
+    /* ── Equal spacing: content-wrapper padding matches header card margin ── */
+    html body .content .content-wrapper { padding-top: 18px !important; padding-bottom: 18px !important; }
+    @media (max-width: 767.98px) { html body .content .content-wrapper { padding-top: 14px !important; padding-bottom: 14px !important; } }
+    /* ── Desktop sidebar scroll (>1024px) ── */
+    @media (min-width: 1025px) {
+        .main-menu.menu-fixed .navigation-main {
+            scrollbar-width: thin !important;
+            scrollbar-color: #cccccc transparent !important;
+        }
+        .main-menu.menu-fixed .navigation-main::-webkit-scrollbar { width: 5px !important; }
+        .main-menu.menu-fixed .navigation-main::-webkit-scrollbar-thumb { background: #cccccc !important; border-radius: 10px !important; }
+        .main-menu.menu-fixed .navigation-main::-webkit-scrollbar-track { background: transparent !important; }
+    }
+    </style>
+    @stack('stylesheets')
+</head>
+<!-- END: Head-->
+
+<!-- BEGIN: Body-->
+<body class="vertical-layout vertical-menu 2-columns fixed-navbar brand {{$menuStateClass}}" data-open="click" data-menu="vertical-menu-modern" data-col="2-columns">
+    <!-- BEGIN: Header-->
+    <nav class="
+		header-navbar navbar-expand-md navbar navbar-with-menu fixed-top navbar-semi-dark navbar-shadow">
+        <div class="navbar-wrapper">
+            <div class="navbar-header">
+                <ul class="nav navbar-nav flex-row">
+                  @php( $companydetail = \App\Models\CompanyDetailModel::first() )
+
+                  <li class="nav-item mobile-menu d-md-none mr-auto"><a class="nav-link nav-menu-main menu-toggle hidden-xs" href="#"><i class="feather icon-menu font-large-1"></i></a></li>
+                  <li class="nav-item" id="navbar-brand-li"><a class="navbar-brand" href="{{route('dashboard.view.index')}}">
+                      <span class="brand-text-mini">R&A</span>
+                      <h3 class="brand-text">R & A Veg Ltd</h3>
+                      </a></li>
+
+
+                    <li id="mobile-sale-btn" class="nav-item d-md-none">
+                        <a href="/data_entry/sales_entry/view" style="display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 11px;border-radius:10px;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;font-weight:700;font-size:11.5px;text-decoration:none;box-shadow:0 2px 8px rgba(249,115,22,0.3);white-space:nowrap;">
+                            <i class="fa fa-plus" style="font-size:10px;color:#fff;"></i><span class="mobile-sale-text"> Sale Order</span><span class="mobile-sale-short">Sale</span>
+                        </a>
+                    </li>
+                    <li class="nav-item d-md-none"><a class="nav-link open-navbar-container" data-toggle="collapse" data-target="#navbar-mobile"><i class="fa fa-ellipsis-v"></i></a></li>
+                </ul>
+            </div>
+            <div class="navbar-container content">
+                <div class="collapse navbar-collapse" id="navbar-mobile">
+                    <ul class="nav navbar-nav mr-auto float-left">
+                        <li class="nav-item d-none d-md-block"><a class="nav-link nav-menu-main menu-toggle hidden-xs" href="#"><i onclick="toggleMenuNav()" class="feather icon-menu"></i></a></li>
+                    </ul>
+                    <ul class="nav navbar-nav float-right">
+                        <!-- Theme color picker, notifications bell, and messages mail icons - commented out
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-label" href="#" onclick="event.preventDefault();toggleColorPicker();" title="Theme Colors">
+                                <i class="ficon feather icon-sliders"></i>
+                            </a>
+                        </li>
+						<li class="dropdown dropdown-notification nav-item"><a class="nav-link nav-link-label" href="#" data-toggle="dropdown"><i class="ficon feather icon-bell"></i><span class="badge badge-pill badge-danger badge-up">5</span></a>
+                            <ul class="dropdown-menu dropdown-menu-media dropdown-menu-right">
+                                <li class="dropdown-menu-header">
+                                    <h6 class="dropdown-header m-0"><span class="grey darken-2">Notifications</span><span class="notification-tag badge badge-danger float-right m-0">5 New</span></h6>
+                                </li>
+                                <li class="scrollable-container media-list"><a href="javascript:void(0)">
+                                        <div class="media">
+                                            <div class="media-left align-self-center"><i class="feather icon-plus-square icon-bg-circle bg-cyan"></i></div>
+                                            <div class="media-body">
+                                                <h6 class="media-heading">You have new order!</h6>
+                                                <p class="notification-text font-small-3 text-muted">Lorem ipsum dolor sit amet, consectetuer elit.</p><small>
+                                                    <time class="media-meta text-muted" datetime="2015-06-11T18:29:20+08:00">30 minutes ago</time></small>
+                                            </div>
+                                        </div>
+                                    </a><a href="javascript:void(0)">
+                                        <div class="media">
+                                            <div class="media-left align-self-center"><i class="feather icon-download-cloud icon-bg-circle bg-red bg-darken-1"></i></div>
+                                            <div class="media-body">
+                                                <h6 class="media-heading red darken-1">99% Server load</h6>
+                                                <p class="notification-text font-small-3 text-muted">Aliquam tincidunt mauris eu risus.</p><small>
+                                                    <time class="media-meta text-muted" datetime="2015-06-11T18:29:20+08:00">Five hour ago</time></small>
+                                            </div>
+                                        </div>
+                                    </a><a href="javascript:void(0)">
+                                        <div class="media">
+                                            <div class="media-left align-self-center"><i class="feather icon-alert-triangle icon-bg-circle bg-yellow bg-darken-3"></i></div>
+                                            <div class="media-body">
+                                                <h6 class="media-heading yellow darken-3">Warning notifixation</h6>
+                                                <p class="notification-text font-small-3 text-muted">Vestibulum auctor dapibus neque.</p><small>
+                                                    <time class="media-meta text-muted" datetime="2015-06-11T18:29:20+08:00">Today</time></small>
+                                            </div>
+                                        </div>
+                                    </a><a href="javascript:void(0)">
+                                        <div class="media">
+                                            <div class="media-left align-self-center"><i class="feather icon-check-circle icon-bg-circle bg-cyan"></i></div>
+                                            <div class="media-body">
+                                                <h6 class="media-heading">Complete the task</h6><small>
+                                                    <time class="media-meta text-muted" datetime="2015-06-11T18:29:20+08:00">Last week</time></small>
+                                            </div>
+                                        </div>
+                                    </a><a href="javascript:void(0)">
+                                        <div class="media">
+                                            <div class="media-left align-self-center"><i class="feather icon-file icon-bg-circle bg-teal"></i></div>
+                                            <div class="media-body">
+                                                <h6 class="media-heading">Generate monthly report</h6><small>
+                                                    <time class="media-meta text-muted" datetime="2015-06-11T18:29:20+08:00">Last month</time></small>
+                                            </div>
+                                        </div>
+                                    </a></li>
+                                <li class="dropdown-menu-footer"><a class="dropdown-item text-muted text-center" href="javascript:void(0)">Read all notifications</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown dropdown-notification nav-item"><a class="nav-link nav-link-label" href="#" data-toggle="dropdown"><i class="ficon feather icon-mail"></i><span class="badge badge-pill badge-warning badge-up">3</span></a>
+                            <ul class="dropdown-menu dropdown-menu-media dropdown-menu-right">
+                                <li class="dropdown-menu-header">
+                                    <h6 class="dropdown-header m-0"><span class="grey darken-2">Messages</span><span class="notification-tag badge badge-warning float-right m-0">4 New</span></h6>
+                                </li>
+                                <li class="scrollable-container media-list"><a href="javascript:void(0)">
+                                        <div class="media">
+                                            <div class="media-left">
+                                                <div class="avatar avatar-online avatar-sm rounded-circle"><img src="../../../app-assets/images/portrait/small/avatar-s-1.png" alt="avatar"><i></i></div>
+                                            </div>
+                                            <div class="media-body">
+                                                <h6 class="media-heading">Margaret Govan</h6>
+                                                <p class="notification-text font-small-3 text-muted">I like your portfolio, let's start.</p><small>
+                                                    <time class="media-meta text-muted" datetime="2015-06-11T18:29:20+08:00">Today</time></small>
+                                            </div>
+                                        </div>
+                                    </a><a href="javascript:void(0)">
+                                        <div class="media">
+                                            <div class="media-left"><span class="avatar avatar-sm avatar-busy rounded-circle"><img src="../../../app-assets/images/portrait/small/avatar-s-2.png" alt="avatar"><i></i></span></div>
+                                            <div class="media-body">
+                                                <h6 class="media-heading">Bret Lezama</h6>
+                                                <p class="notification-text font-small-3 text-muted">I have seen your work, there is</p><small>
+                                                    <time class="media-meta text-muted" datetime="2015-06-11T18:29:20+08:00">Tuesday</time></small>
+                                            </div>
+                                        </div>
+                                    </a><a href="javascript:void(0)">
+                                        <div class="media">
+                                            <div class="media-left">
+                                                <div class="avatar avatar-online avatar-sm rounded-circle"><img src="../../../app-assets/images/portrait/small/avatar-s-3.png" alt="avatar"><i></i></div>
+                                            </div>
+                                            <div class="media-body">
+                                                <h6 class="media-heading">Carie Berra</h6>
+                                                <p class="notification-text font-small-3 text-muted">Can we have call in this week ?</p><small>
+                                                    <time class="media-meta text-muted" datetime="2015-06-11T18:29:20+08:00">Friday</time></small>
+                                            </div>
+                                        </div>
+                                    </a><a href="javascript:void(0)">
+                                        <div class="media">
+                                            <div class="media-left"><span class="avatar avatar-sm avatar-away rounded-circle"><img src="../../../app-assets/images/portrait/small/avatar-s-6.png" alt="avatar"><i></i></span></div>
+                                            <div class="media-body">
+                                                <h6 class="media-heading">Eric Alsobrook</h6>
+                                                <p class="notification-text font-small-3 text-muted">We have project party this saturday.</p><small>
+                                                    <time class="media-meta text-muted" datetime="2015-06-11T18:29:20+08:00">last month</time></small>
+                                            </div>
+                                        </div>
+                                    </a></li>
+                                <li class="dropdown-menu-footer"><a class="dropdown-item text-muted text-center" href="javascript:void(0)">Read all messages</a></li>
+                            </ul>
+                        </li>
+                        -->
+                        <li class="nav-item d-none d-md-block" style="display:flex;align-items:center;"><a style="display:flex;align-items:center;margin-right:14px;padding:0;" class="nav-link" href="/data_entry/sales_entry/view"><button type="button" class="btn btn-primary m-0"><i class="fa fa-plus" style="color:#fff !important;"></i> Sale Order</button></a></li>
+                        {{-- Hidden logout form used by sidebar logout link --}}
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                            @csrf
+                        </form>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+<!-- END: Header-->
+@hasSection('sidebar')
+	@yield('sidebar')
+@endif
+    <?php
+        $Heading='';
+        if(Request::segment(1)=='permissionModule'){
+            $Heading  = 'Modules';
+        }elseif(Request::segment(1)=='permissionGroup'){
+            $Heading  = 'Groups';
+        }elseif(Request::segment(1)=='permissionurl'){
+            $Heading  = 'Group Permission';
+        }elseif(Request::segment(1)=='role'){
+            $Heading  = 'Roles';
+        }elseif(Request::segment(1)=='permissionRole'){
+            $Heading  = 'Role Permission';
+        }elseif(Request::segment(1)=='user'){
+            $Heading  = 'Users';
+        }elseif(Request::segment(1)=='customer'){
+            $Heading  = 'Customers';
+        }elseif(Request::segment(1)=='supplier'){
+            $Heading  = 'Suppliers';
+        }elseif(Request::segment(1)=='product'){
+            $Heading  = 'Products';
+        }elseif(Request::segment(1)=='dailyReport'){
+            $Heading  = 'Reports';
+        }
+    ?>
+	<!-- BEGIN: Content-->
+    <div class="app-content content">
+        <div class="content-overlay"></div>
+        <div class="content-wrapper">
+            <div class="content-header row mb-sm-0">
+				
+				@include('layouts.breadcrumbs')
+			
+                <!--<div class="content-header-left col-md-6 col-6 mb-1">
+                    <h3 class="content-header-title">{{$Heading}}</h3>
+                </div>-->
+
+                <!--<div class="content-header-right breadcrumbs-right breadcrumbs-top col-md-6 col-6">
+                    <div class="breadcrumb-wrapper col-12">
+                        <ol class="breadcrumb">
+                            <?php //if($Heading!=''){ ?>
+                                <li class="breadcrumb-item"><a href="/dashboard.view.index">Home</a>
+                                </li>
+                                <li class="breadcrumb-item"><a href="#">{{$Heading}}</a>
+                                </li>
+                            <?php //} ?>
+                        </ol>
+                    </div>
+                </div>
+                -->
+
+            </div>
+            <div class="content-body">
+                @include('helpers.flash-message')
+                @hasSection('content')
+                    @yield('content')
+                @endif
+            </div>
+        </div>
+    </div>
+    <!-- END: Content-->
+
+    <div class="sidenav-overlay"></div>
+    <div class="drag-target"></div>
+    <!-- BEGIN: Footer-->
+    <footer class="footer footer-static footer-dark navbar-border">
+        <p class="clearfix blue-grey lighten-2 text-sm-center mb-0 px-2"><span class="float-md-left d-block d-md-inline-block">Copyright &copy; 2020 </span><span class="float-md-right d-none d-lg-block">Hand-crafted & Made with <i class="feather icon-heart pink"></i></span></p>
+    </footer>
+    <!-- END: Footer-->
+    <!-- BEGIN: Vendor JS-->
+    <script src="{{asset('/app-assets/vendors/js/vendors.min.js')}}"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.19.1/js/mdb.min.js"></script>
+    <!-- BEGIN Vendor JS-->
+    <!-- END: Page Vendor JS-->
+    <!-- BEGIN: Theme JS-->
+
+
+    <script src="{{asset('/app-assets/js/core/app-menu.js')}}?v={{time()}}"></script>
+    <script src="{{asset('/app-assets/js/core/app.js')}}"></script>
+    <script src="{{asset('/assets/forms.js')}}"></script>
+    <script src="{{asset('/app-assets/vendors/js/tables/datatable/datatables.min.js')}}"></script>
+    <!-- <script src="{{asset('/app-assets/js/scripts/tables/datatables/datatable-advanced.js')}}"></script> -->
+    <script src="{{asset('/assets/js/pdfmake.min.js')}}"></script>
+    <script src="{{asset('/assets/js/vfs_fonts.js')}}"></script>
+    <script src="{{asset('/assets/js/moment.min.js')}}"></script>
+    <script src="{{asset('/assets/js/dataTables.dateTime.min.js')}}"></script>
+    <script src="{{asset('/app-assets/vendors/js/forms/icheck/icheck.min.js')}}"></script>
+    <script src="{{asset('/app-assets/js/scripts/forms/checkbox-radio.js')}}"></script>
+    <script src="{{asset('/app-assets/js/scripts/pages/page-users.js')}}"></script>
+    <script src="{{asset('/assets/js/scripts.js')}}"></script>
+    <script src="{{asset('/app-assets/js/scripts/modal/components-modal.js')}}"></script>
+    <script src="{{asset('/app-assets/vendors/js/extensions/unslider-min.js')}}"></script>
+    <script src="{{asset('/app-assets/vendors/js/forms/toggle/bootstrap-checkbox.min.js')}}"></script>
+    <script src="{{asset('/app-assets/vendors/js/forms/toggle/switchery.min.js')}}"></script>
+    <script src="{{asset('/app-assets/js/scripts/forms/switch.js')}}"></script>
+    <script>
+    // Force all switchery toggles to use orange instead of red/green
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            document.querySelectorAll('.switchery').forEach(function(el) {
+                el.style.cssText += 'background-color: #F27420 !important; border-color: #F27420 !important; box-shadow: inset 0 0 0 16px #F27420 !important;';
+                var obs = new MutationObserver(function() {
+                    el.style.cssText += 'background-color: #F27420 !important; border-color: #F27420 !important; box-shadow: inset 0 0 0 16px #F27420 !important;';
+                });
+                obs.observe(el, { attributes: true, attributeFilter: ['style'] });
+            });
+        }, 300);
+    });
+    </script>
+    <!-- Bootstrap tooltips -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.4/umd/popper.min.js"></script>
+    <!-- MDB core JavaScript -->
+    <script src ="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.4.0/bootbox.min.js"></script>
+    <!-- END: Theme JS-->
+    <!-- END: Page JS-->
+	<script type="text/javascript">
+	// Close sidebar function for mobile/tablet
+	function closeMobileMenu() {
+		$('body').removeClass('menu-open menu-expanded');
+		$('.main-menu').removeClass('expanded');
+		$('.sidenav-overlay').removeClass('d-block').addClass('d-none');
+		$('body').css('overflow', '');
+	}
+	// Close on overlay click
+	$(document).on('click touchstart', '.sidenav-overlay', function(e) {
+		e.preventDefault();
+		closeMobileMenu();
+	});
+	// Close when touching outside sidebar on mobile/tablet
+	$(document).on('touchstart click', function(e) {
+		if ($(window).width() <= 1024 && $('body').hasClass('menu-open')) {
+			if (!$(e.target).closest('.main-menu').length && !$(e.target).closest('.menu-toggle').length && !$(e.target).closest('.navbar-header').length) {
+				closeMobileMenu();
+			}
+		}
+	});
+	// Close when a menu item is clicked on mobile
+	$(document).on('click', '.main-menu .navigation > li > a', function() {
+		if ($(window).width() <= 1024) {
+			setTimeout(closeMobileMenu, 150);
+		}
+	});
+
+	function toggleMenuNav() {
+		var newState = $('body').hasClass('menu-collapsed') ? 'menu-expanded' : 'menu-collapsed';
+		document.cookie = "menu_state=" + newState + "; path=/; max-age=31536000";
+	}
+
+	// Collapsed sidebar fly-out menu (tablet + mobile, max 1024px)
+	$(document).ready(function() {
+		// Inject fly-out container
+		var $flyout = $('<div id="csFlyout"></div>').appendTo('body');
+
+		function closeFlyout() {
+			$flyout.hide().empty();
+			$('.main-menu .navigation > li').removeClass('cs-flyout-open');
+		}
+
+		// Close on outside tap/click
+		$(document).on('click touchstart', function(e) {
+			if (!$(e.target).closest('#csFlyout, .main-menu .navigation > li > a').length) {
+				closeFlyout();
+			}
+		});
+
+		// Has-sub items: show fly-out
+		$(document).on('click', 'body.menu-collapsed .main-menu .navigation > li.has-sub > a', function(e) {
+			if (window.innerWidth > 1024) return;
+			e.preventDefault();
+			e.stopPropagation();
+			var $li = $(this).closest('li');
+
+			// Toggle off if already open
+			if ($li.hasClass('cs-flyout-open')) { closeFlyout(); return; }
+			closeFlyout();
+			$li.addClass('cs-flyout-open');
+
+			// Build items from submenu
+			var label = $(this).attr('data-label') || $(this).find('.menu-title').text().trim();
+			var html = '<div class="csf-title">' + label + '</div>';
+			$li.find('> ul.menu-content > li > a').each(function() {
+				var href = $(this).attr('href') || '#';
+				var txt  = $(this).text().trim();
+				var ico  = $(this).find('i').attr('class') || '';
+				html += '<a href="' + href + '" class="csf-item"><i class="' + ico + '"></i><span>' + txt + '</span></a>';
+			});
+
+			// Position relative to clicked li
+			var rect = $li[0].getBoundingClientRect();
+			$flyout.html(html).css({ top: rect.top, left: 75 }).show();
+		});
+
+		// Don't close when clicking inside fly-out
+		$flyout.on('click touchstart', function(e) { e.stopPropagation(); });
+	});
+
+	// Desktop sidebar scroll is handled in app-menu.js (document capture wheel handler)
+	</script>
+    @stack('scripts')
+    <script type="text/javascript" src="{{env('CDN_DOMAIN')}}/js/manifest.js"></script>
+    <script type="text/javascript" src="{{env('CDN_DOMAIN')}}/js/vendor.js"></script>
+    <script type="text/javascript" src="{{env('CDN_DOMAIN')}}/js/app.js"></script>
+    <!-- <script src="{{asset('/assets/js/jquery.dataTables.min.js')}}"></script> -->
+    <script type="text/javascript">$('#productsTable').DataTable({ordering: false,language : {
+            "zeroRecords": " "
+        },bInfo : false, bPaginate:false, searching:false });</script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+        <script>
+            $('.select2').select2();
+        </script>
+
+	<script>
+	  $(document).ready(function () {
+		// Initialize all current tooltips
+		$('[data-bs-toggle="tooltip"]').tooltip();
+
+		// Re-initialize tooltips for dynamically added elements (like DataTables)
+		$(document).on('mouseenter', '[data-bs-toggle="tooltip"]', function () {
+			if (!$(this).data('bs.tooltip')) { // avoid re-initializing
+				new bootstrap.Tooltip(this);
+			}
+		});
+	});
+	</script>
+
+    @include('helpers.color-picker')
+
+    <style>
+    /* Tablet landscape keyboard fixes */
+    .keyboard-open .react-select__menu,
+    .keyboard-open .react-select__menu-list {
+        max-height: 120px !important;
+    }
+    .keyboard-open .dropdown-menu {
+        max-height: 150px !important;
+        overflow-y: auto !important;
+    }
+    .keyboard-open .select2-results__options {
+        max-height: 120px !important;
+    }
+    </style>
+    <script>
+    (function(){
+        // Detect keyboard open/close via visualViewport
+        if (!window.visualViewport) return;
+        var vv = window.visualViewport;
+        var lastHeight = vv.height;
+
+        vv.addEventListener('resize', function() {
+            var diff = lastHeight - vv.height;
+            // Keyboard opened (height reduced by >150px)
+            if (vv.height < lastHeight * 0.75) {
+                document.body.classList.add('keyboard-open');
+                // Scroll focused element into view
+                var el = document.activeElement;
+                if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) {
+                    setTimeout(function() {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 150);
+                }
+            } else {
+                document.body.classList.remove('keyboard-open');
+            }
+        });
+
+        // Update base height on orientation change
+        window.addEventListener('orientationchange', function() {
+            setTimeout(function() { lastHeight = vv.height; }, 500);
+        });
+    })();
+    </script>
+
+</body>
+<!-- END: Body-->
+
+</html>

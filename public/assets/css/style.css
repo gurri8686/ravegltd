@@ -1,0 +1,2919 @@
+/*================================================================================
+	Item Name: Stack - Responsive Admin Theme
+	Author: PIXINVENT
+	Author URL: http://www.themeforest.net/user/pixinvent
+================================================================================
+
+NOTE:
+------
+PLACE HERE YOUR OWN SCSS CODES AND IF NEEDED, OVERRIDE THE STYLES FROM THE OTHER STYLESHEETS.
+WE WILL RELEASE FUTURE UPDATES SO IN ORDER TO NOT OVERWRITE YOUR STYLES IT'S BETTER LIKE THIS.  */
+/* ============================================================
+   THEME COLOR VARIABLES — Version 5: Orange Light
+   All 11 variables individually configurable via the color picker.
+   --color-primary-hover is the button hover shade (darker primary).
+   ============================================================ */
+:root {
+  --sidebar-width: 240px;
+  /* --- Navigation --- */
+  --color-deeper:         #ffffff; /* Sidebar · Header · Footer background */
+  --color-dark:           #fff7ed; /* Active menu item · Table header */
+  --color-on-dark:        #374151; /* Text & icons on navigation surfaces */
+  --color-nav-section:    #9ca3af; /* Sidebar section label text */
+  --color-sidebar-search: #f3f4f6; /* Sidebar search input background */
+  --color-light:          #fb923c; /* Active left-border highlight */
+
+  /* --- Buttons & Accents --- */
+  --color-primary:        #f97316; /* Primary buttons · active state */
+  --color-primary-hover:  #ea580c; /* Primary button hover (darker shade) */
+  --color-secondary:      #f59e0b; /* Edit buttons (amber) */
+
+  /* --- Page & Text --- */
+  --color-bg:             #f9fafb; /* Content area background */
+  --color-text-body:      #111827; /* Body form input text */
+  --color-text-muted:     #6b7280; /* Labels · secondary text */
+
+  /* --- Tables --- */
+  --color-table-header-text: #374151; /* Invoice/data table header text */
+}
+
+
+.invalid-feedback{display:block;}
+.display-none{display:none;}
+/* Hide DataTables auto-injected empty row on React-managed productsTable */
+#productsTable tbody tr:not([index]) { display: none !important; }
+
+
+/* accordion style */
+
+.card-tabs .card {
+    margin: 0px 0px 10px;
+    box-shadow: 0 2px 5px 0 rgb(0 0 0 / 16%), 0 2px 10px 0 rgb(0 0 0 / 12%)!important;
+    }
+.card-tabs .card h5 i {
+    position: absolute;
+    right: 0px;
+    transform: rotate(180deg)!important;
+}
+.card-tabs .card h5 {
+    position: relative;
+    margin-bottom: 16px!important;
+}
+.card-tabs a.collapsed i {
+    transform: rotate(0deg)!important;
+}
+.app-content .card {
+    height: 100%!important;
+}
+.card-tabs .card-body {
+    padding-bottom: 16px!important;
+}
+.card-tabs .card-header a {
+    padding: 2px 0px;
+    display: block;
+    padding: 5px 15px;
+}
+.card-tabs table tbody tr th {
+    padding: 12px 5px 4px 41px;
+}
+
+.card-tabs table tbody tr:last-child{
+	 border-bottom: 0px!important;
+}
+.file {
+    visibility: hidden;
+    position: absolute;
+  }
+/*  end accordion style */
+
+/* custom checkbox */
+
+.custom-check {
+    display: block;
+    position: relative;
+    padding-left: 35px;
+    padding: 0;
+    margin-bottom: 12px;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    padding-left: 29px;
+}
+
+  /* Hide the browser's default checkbox */
+  .custom-check input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+
+  /* Create a custom checkbox */
+  .checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 17px;
+    width: 17px;
+    background-color: #eee;
+    border-radius: 4px;
+  }
+
+  /* On mouse-over, add a grey background color */
+  .custom-check:hover input ~ .checkmark {
+    background-color: #ccc;
+  }
+
+  /* When the checkbox is checked, add a blue background */
+  .custom-check input:checked ~ .checkmark {
+    background-color: var(--color-primary);
+  }
+
+  /* Create the checkmark/indicator (hidden when not checked) */
+  .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+  }
+
+  /* Show the checkmark when checked */
+  .custom-check input:checked ~ .checkmark:after {
+    display: block;
+  }
+
+  /* Style the checkmark/indicator */
+  .custom-check .checkmark:after {
+    left: 6px;
+    top: 3px;
+    width: 6px;
+    height: 9px;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+/* End custom checkbox */
+ul.sub-Modules-ul li {
+    margin-bottom: 5px;
+   }
+   li.sub-Modules-li {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+}
+ul.sub-Modules-ul .checkmark {
+    top: 4px;
+}
+
+.stretchClass {
+    margin-bottom: -0.125rem!important;
+}
+button.add-table-row , .remove-row-product{
+  padding: 2px;
+}
+.invoice-table {
+  background: var(--color-dark);
+  color: var(--color-table-header-text);
+}
+
+/* Light row borders on the invoice products table */
+#productsTable tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+#productsTable tbody tr td {
+  border-top: none;
+  border-bottom: none;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+#productsTable {
+  border-collapse: collapse;
+}
+#productsTable tbody tr:hover {
+  background-color: #fff7ed !important;
+  box-shadow: inset 3px 0 0 var(--color-primary);
+}
+table.dataTable > thead > tr.invoice-table > th {
+  border-bottom: 1px solid var(--color-primary);
+}
+@media (max-width: 1024px) {
+  .content-header.row.mb-sm-0 {
+    display: none !important;
+  }
+}
+.invoice-total {
+  float: none;
+  margin-right: 0;
+}
+input.product-qty {
+  width: auto;
+}
+.products-table-container{
+  margin-top: 20px;
+}
+.demoB {
+  display: grid;
+  grid-template-columns: 20% 55% 25%;
+}
+
+/* (B) ON SMALL SCREENS */
+@media screen and (max-width: 600px) {
+  .demoB { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .colC { display: none; }
+}
+
+/* (C) COSMETICS */
+.colA, .colB, .colC{ padding: 10px; }
+
+.switch {
+  position: relative;
+  display: inline-block;
+  /*width: 59px;*/
+  height: 23px;
+  margin-left: 5px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 21px;
+  left: 2px;
+  bottom: 3px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: var(--color-primary);
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px var(--color-primary);
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 46%;
+}
+
+.datatable{overflow-x: none;}
+.overflow-x{overflow-x: hidden;}
+#grid_element_filter input{
+  border: solid 1px #cecece;
+  height: 35px;
+}
+.paginate_button{margin: 0px 5px 0 5px;}
+.save-product-detail {
+  padding: 2px 5px 2px 5px;
+}
+
+div.dt-buttons {
+  margin-left: 25px;
+  margin-bottom: 15px;
+  display: flex;
+  float: right;
+}
+.filter-button{
+    width: 64px;
+    height: 30px;
+    margin: 0 auto;
+    padding: 0;
+    display: inline-block;
+    line-height: 20px;
+    text-align: center;
+}
+#daily-book-sales_wrapper {
+  margin-top: 10px;
+  margin-left: 5px;
+  width: auto;
+}
+#daily-book-sales_wrapper div.dt-buttons {
+  text-align: center;
+}
+div.dt-buttons button.btn.btn-secondary.mb-2 {
+  height: 36px;
+  line-height: 20px;
+  margin: 0 auto;
+  padding-left: 15px;
+  padding-top: 6px;
+  display: inline-block;
+  text-align: center;
+}
+.select-payments{
+  width: auto;
+  border-radius: 5px;
+}
+p.node-error {
+  font-weight: 600;
+  color: red;
+}
+.form-actions i.feather.icon-x {
+    background: var(--color-secondary)!important;
+    padding: 13px 10px;
+    border-radius: 10px;
+    display: inline-block;
+    font-weight: 400;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+    background-color: transparent;
+    border: 1px solid transparent;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    line-height: 1.25;
+    border-radius: 0.25rem;
+    color: #fff;
+}
+.sort-filter select#sort {
+    padding: 3px 15px!important;
+}
+.popupmodel {
+    text-align: end;
+    padding: 15px 1px;
+}
+.modal-dialog {
+    /*max-width: 700px;*/
+    margin: 1.75rem auto;
+
+}
+form .form-control {
+    border: 1.5px solid #e5e7eb;
+    color: var(--color-text-body);
+}
+.input-area1 {
+    margin: 10px 0px;
+}
+.button-set {
+    padding: 6px 11px;
+    margin: 7px 1px;
+    border: none;
+    background: var(--color-primary);
+    color: #f8f8f8;
+    border-radius: 5px;
+}
+.invoice-area {
+border: 1px solid #faf5f5;
+    padding: 3px 11px;
+    width: 74%;
+    border-radius: 5px
+}
+/* --- Select2 Orange Theme --- */
+.select2-container {
+  width: 100% !important;
+}
+.select2-container .select2-selection--single {
+	height: 42px;
+	padding-top: 8px;
+	border: 1.5px solid #e5e7eb !important;
+	border-radius: 10px !important;
+	background: #fff !important;
+}
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: normal !important;
+	color: #111827 !important;
+	font-size: 13px;
+	font-weight: 500;
+	padding-left: 14px;
+}
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 40px !important;
+	right: 8px;
+}
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+	color: #9ca3af !important;
+}
+.select2-container--default.select2-container--open .select2-selection--single {
+	border-color: #F27420 !important;
+	box-shadow: 0 0 0 0.2rem rgba(242,116,32,0.15);
+}
+.select2-dropdown {
+	border: 1.5px solid #e5e7eb !important;
+	border-radius: 10px !important;
+	box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+	overflow: hidden;
+	margin-top: 4px;
+}
+.select2-container--default .select2-search--dropdown {
+	padding: 8px;
+}
+.select2-container--default .select2-search--dropdown .select2-search__field {
+	border: 1.5px solid #e5e7eb !important;
+	border-radius: 8px !important;
+	padding: 8px 12px;
+	font-size: 13px;
+	outline: none;
+}
+.select2-container--default .select2-search--dropdown .select2-search__field:focus {
+	border-color: #F27420 !important;
+	box-shadow: 0 0 0 0.2rem rgba(242,116,32,0.15);
+}
+.select2-container--default .select2-results__option {
+	padding: 10px 14px;
+	font-size: 13px;
+	color: #374151;
+}
+.select2-container--default .select2-results__option--highlighted,
+.select2-container--default .select2-results__option--highlighted[aria-selected],
+.select2-container--default .select2-results__option--highlighted.select2-results__option--selectable,
+.select2-results__option--highlighted,
+.select2-container--default .select2-results__option--highlighted[aria-selected="true"],
+.select2-container--default .select2-results__option--highlighted[aria-selected="false"],
+.select2-results .select2-results__option--highlighted {
+	background-color: #F27420 !important;
+	color: #fff !important;
+}
+.select2-container--default .select2-results__option[aria-selected=true],
+.select2-container--default .select2-results__option--selected {
+	background-color: #FFF5ED !important;
+	color: #F27420 !important;
+	font-weight: 600;
+}
+.table-clr {
+    background: #FFF7F2;
+    vertical-align: middle;
+    padding: 30px!important;
+    width: 100%;
+}
+.card-body .table-clr {
+    padding: 30px!important;
+  background: #FFF7F2;
+    height: 70px;
+    margin-bottom:10px;
+}
+
+.loader {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+
+.inloder {
+    text-align: center;
+    position: absolute;
+    top: 50%;
+    left: 37%;
+    transform: translate(-50%, -50%);
+    z-index: 999999;
+}
+.loader-img {
+    width: 200px;
+}
+.pdfdownload {
+    background: var(--color-primary);
+    color: #fff;
+    border: navajowhite;
+    border-radius: 3px;
+    padding: 4px 10px;
+    outline: none;
+}
+.pdfdownload:hover {
+    background: var(--color-dark);
+}
+.checkbox-20{
+	height: 20px;
+    width: 20px;
+}
+.m-8l{
+	margin-left: 8px !important;
+}
+
+.c-table{width:100% !important;}
+.c-table th{padding-left: 10px !important;}
+
+/* Target elements inside any col-sm-* */
+[class^="col-sm-"] .w-100-target {
+    width: 100%;
+}
+[class*=" col-sm-"] .w-100-target {
+    width: 100%;
+}
+
+.cursor-pointer{cursor:pointer;}
+.cursor-pointer:hover{font-weight:bold !important;}
+
+.select2-100{
+	width:100% !important;
+}
+
+.select2-100 .select2-container{
+	width:100% !important;
+}
+.mt-27{margin-top:27px;}
+
+.c-pr3{padding-right:3px;}
+.c-pl3{padding-left:3px;}
+.m-t-26{margin-top:26px;}
+
+.modal-fullscreen{width:90%;}
+
+.blink-text {
+    animation: blinkText 1s infinite;
+}
+
+@keyframes blinkText {
+    0% {
+        background-color: red;
+        color: white;
+    }
+    50% {
+        background-color: yellow;
+        color: black;
+    }
+    100% {
+        background-color: red;
+        color: white;
+    }
+}
+
+.h-auto {
+  height: auto !important;
+}
+
+/**
+  styles for sales and purchase invoice apps
+ */
+@media only screen and (min-width: 768px) and (max-width: 1024px) {
+  .table-td-md tbody td, .table-td-md tbody th {
+    padding-bottom: 10px !important;
+    padding-top: 10px !important;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+    vertical-align:middle !important;
+  }
+  .table-td-md thead th {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+  #productsTable {
+    table-layout: fixed !important;
+    width: 100% !important;
+  }
+  #productsTable tbody tr td,
+  #productsTable tbody tr th {
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
+  .products-td-md {
+    font-size: 13px;
+  }
+  .qty-td-md {
+    width: 42px !important;
+    font-size: 13px;
+  }
+  .unitprice-td-md {
+    width: 80px !important;
+    font-size: 13px;
+  }
+  .products-purchase-td-md {
+    width: 140px !important;
+    font-size: 13px;
+  }
+  .suppliers-td-md {
+    width: 200px !important;
+    font-size: 13px;
+  }
+  .qty-price-td-md {
+    width: 68px !important;
+    font-size: 13px;
+    text-align: right !important;
+  }
+  .table-td-md tbody th {
+    text-align: right !important;
+  }
+  .table-td-md td input.product-qty {
+    text-align: right !important;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+  .table-td-md tbody tr td:nth-child(3) {
+    text-align: right;
+  }
+  .table-td-md tbody tr td:nth-child(3) .input-group {
+    display: inline-flex;
+    width: 100%;
+    max-width: 80px;
+  }
+  .table-td-md tbody tr td:nth-child(3) .input-group .form-control {
+    width: 46px;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+    border-radius: 0 4px 4px 0 !important;
+    text-align: right !important;
+  }
+  .actions-td-md {
+    width: 100px !important;
+    font-size: 13px;
+  }
+  .paddin-top-4{
+    padding-top: 4px !important;
+  }
+  .remarks-button{padding: 2px 10px !important;}
+  .remarks-input{
+    background: #fff;
+    
+    margin: 0;
+    border: none;
+  }
+
+  .add-stock-button{
+    padding: 4px 6px 6px 6px !important;
+    cursor: pointer;
+  }
+
+  .actions-purchase-td-md {
+    width: 80px !important;
+    font-size: 13px;
+  }
+  .products-purchase-td-md {
+    width: 120px !important;
+    font-size: 13px;
+  }
+
+  .form-control {
+    padding: 0.15rem 0.25rem !important;
+  }
+
+  .product-qty, .product-price {
+    padding: 4px 5px !important;
+    font-size: 13px !important;
+  }
+
+  /* Remarks input in edit mode */
+  td .form-control[placeholder="Remarks..."] {
+    padding: 4px 6px !important;
+    font-size: 13px !important;
+  }
+  td .form-control[placeholder="Add Remarks..."] {
+    padding-top: 9px !important;
+  }
+}
+
+@media only screen and (max-width: 767px) {
+  #productsTable {
+    table-layout: fixed !important;
+  }
+  #productsTable thead th {
+    font-size: 11px !important;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+  }
+  #productsTable tbody tr td,
+  #productsTable tbody tr th {
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+  }
+  #productsTable .form-control {
+    padding: 4px 3px !important;
+    font-size: 12px !important;
+  }
+  .actions-purchase-td-md {
+    width: 50px !important;
+  }
+  .products-purchase-td-md {
+    width: 72px !important;
+  }
+}
+
+@media only screen and (min-width: 1024px) {
+  .add-stock-button{
+    padding: 4px 6px 6px 6px !important;
+    cursor: pointer;
+  }
+
+  .products-td-md {
+    font-size: 13px;
+  }
+  .suppliers-td-md {
+    width: 280px !important;
+    font-size: 13px;
+  }
+
+  .remarks-td-md {
+    width: 120px !important;
+    font-size: 13px;
+  }
+
+  .qty-td-md {
+    width: 95px !important;
+    font-size: 13px;
+  }
+
+  .unitprice-td-md {
+    width: 110px !important;
+    font-size: 13px;
+  }
+
+  tr.row-pending-delete,
+  tr.row-pending-delete:hover,
+  tr.row-pending-delete td,
+  tr.row-pending-delete th {
+    background-color: rgba(220, 53, 69, 0.07) !important;
+  }
+
+  @keyframes rowErrorFadeIn {
+    from { opacity: 0; transform: translateY(-3px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .row-inline-error {
+    animation: rowErrorFadeIn 0.3s ease-out;
+    font-size: 12px;
+    color: #dc3545;
+    margin-top: 5px;
+  }
+
+  .qty-price-td-md {
+    width: 90px !important;
+    font-size: 13px;
+  }
+  .actions-td-md {
+    width: 130px !important;
+    font-size: 13px;
+  }
+
+  .paddin-top-4{
+    padding-top: 4px !important;
+  }
+
+  .actions-purchase-td-md {
+    width: 130px !important;
+    font-size: 13px;
+  }
+  .products-purchase-td-md {
+    width: 250px !important;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  /* Mobile styles */
+  .sm-p-0{padding: 0;}
+  .add-stock-button{
+    padding: 4px 6px 6px 6px !important;
+    cursor: pointer;
+  }
+
+  .products-td-md {
+    width: 80px !important;
+    font-size: 13px;
+  }
+  .suppliers-td-md {
+    width: 80px !important;
+    font-size: 13px;
+  }
+
+  .remarks-td-md {
+    width: 100px !important;
+    font-size: 13px;
+  }
+
+  .qty-td-md {
+    width: 100px !important;
+    font-size: 13px;
+  }
+
+  .unitprice-td-md {
+    width: 75px !important;
+    font-size: 13px;
+  }
+
+  .qty-price-td-md {
+    width: 70px !important;
+    font-size: 13px;
+  }
+  .actions-td-md {
+    width: 90px !important;
+    font-size: 13px;
+  }
+
+  .paddin-top-4{
+    padding-top: 4px !important;
+  }
+
+  .actions-purchase-td-md {
+    width: 50px !important;
+    font-size: 13px;
+  }
+  .products-purchase-td-md {
+    width: 72px !important;
+    font-size: 13px;
+  }
+  .remarks-button{padding: 2px 10px !important;}
+
+  .c-width-100{
+    width: 100% !important;
+  }
+
+  .c-font-13{
+    font-size: 13px !important;
+  }
+
+  .c-text-center{
+    text-align: center !important;
+  }
+}
+
+
+/* ============================================================
+   FRESH HARVEST THEME — Sidebar / Header / Footer / Buttons
+   All values driven by :root variables above.
+   ============================================================ */
+
+/* Page background */
+body { background-color: var(--color-bg) !important; }
+
+/* ================================================================
+   Sidebar — Premium UI/UX (All screens)
+   Consistent design across mobile, tablet, and desktop.
+   ================================================================ */
+
+/* ── Base backgrounds ── */
+.main-menu.menu-dark {
+  background-color: var(--color-deeper, #ffffff) !important;
+  border-right: 1px solid #e5e7eb !important;
+  overflow: hidden !important;
+}
+/* Remove empty space at top of sidebar — hide Vuexy's default navbar-header inside main-menu */
+.main-menu .navbar-header {
+  display: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+.main-menu.menu-dark .main-menu-content {
+  background-color: var(--color-deeper, #ffffff) !important;
+  padding-top: 10px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 100% !important;
+}
+.main-menu.menu-dark .navigation {
+  background: var(--color-deeper, #ffffff) !important;
+}
+
+/* ── Scrollable content ── */
+.main-menu.menu-fixed {
+  overflow: hidden !important;
+}
+.main-menu.menu-fixed .main-menu-content {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  height: calc(100% - 55px) !important;
+  max-height: calc(100% - 55px) !important;
+  padding-bottom: 10px !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: #e5e7eb transparent !important;
+}
+.main-menu.menu-fixed .main-menu-content::-webkit-scrollbar {
+  width: 4px !important;
+}
+.main-menu.menu-fixed .main-menu-content::-webkit-scrollbar-thumb {
+  background: #e5e7eb !important;
+  border-radius: 4px !important;
+}
+.main-menu.menu-fixed .main-menu-content::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+/* ── Sidebar logout: fixed at bottom of sidebar ── */
+.main-menu .sidebar-logout {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  padding: 14px 20px !important;
+  border-top: 1.5px solid #F27420 !important;
+  background: #fff !important;
+  z-index: 20 !important;
+  box-sizing: border-box !important;
+  display: block !important;
+}
+.main-menu .sidebar-logout a {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  color: #F27420 !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  text-decoration: none !important;
+}
+.main-menu .sidebar-logout a:hover {
+  opacity: 0.7 !important;
+}
+.main-menu .sidebar-logout i {
+  font-size: 17px !important;
+}
+/* Collapsed sidebar: match menu item style — icon + label stacked */
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .sidebar-logout {
+  padding: 8px 0 12px !important;
+  text-align: center !important;
+}
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .sidebar-logout a {
+  flex-direction: column !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  font-size: 8.5px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.4px !important;
+}
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .sidebar-logout i {
+  font-size: 20px !important;
+}
+
+/* Hide any PerfectScrollbar rails on the sidebar */
+.main-menu .ps__rail-y,
+.main-menu .ps__rail-x,
+.main-menu .ps-scrollbar-y-rail,
+.main-menu .ps-scrollbar-x-rail {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+/* ── Section headers ── */
+.main-menu.menu-dark .navigation .navigation-header {
+  color: var(--color-nav-section, #9ca3af) !important;
+  padding: 16px 20px 6px 20px !important;
+  margin-top: 0 !important;
+}
+.main-menu.menu-dark .navigation .navigation-header span {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.2px !important;
+  text-transform: uppercase !important;
+  color: var(--color-nav-section, #9ca3af) !important;
+}
+.main-menu.menu-dark .navigation .navigation-header .feather.icon-minus {
+  display: none !important;
+}
+/* Divider between sections */
+.main-menu.menu-dark .navigation > li.navigation-header:not(:first-child) {
+  border-top: 1px solid #f0f0f0 !important;
+  margin-top: 8px !important;
+  padding-top: 16px !important;
+}
+
+/* ── Parent menu items ── */
+.main-menu.menu-dark .navigation > li:not(.navigation-header) {
+  margin: 4px 10px !important;
+  border-radius: 10px !important;
+  overflow: visible !important;
+  transition: background 0.2s ease !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+.main-menu.menu-dark .navigation > li:not(.navigation-header) > a {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  color: var(--color-on-dark, #374151) !important;
+  min-height: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 0 14px !important;
+  border-radius: 10px !important;
+  transition: all 0.2s ease !important;
+  position: relative !important;
+  letter-spacing: 0.1px !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* ── Icon alignment ── */
+.main-menu.menu-dark .navigation > li:not(.navigation-header) > a > i,
+.main-menu.menu-dark .main-menu-content .navigation-main li a i {
+  width: 22px !important;
+  min-width: 22px !important;
+  font-size: 15px !important;
+  margin-right: 12px !important;
+  text-align: center !important;
+  color: var(--color-on-dark, #374151) !important;
+  transition: color 0.2s ease !important;
+  line-height: 1 !important;
+  float: none !important;
+  position: static !important;
+  top: auto !important;
+  margin-top: 0 !important;
+}
+
+/* ── Menu title text ── */
+.main-menu.menu-dark .navigation > li > a > span.menu-title {
+  flex: 1 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  color: inherit !important;
+}
+
+/* ── Hover state ── */
+.main-menu.menu-dark .navigation > li:not(.navigation-header):hover > a {
+  background: var(--color-dark, #fff7ed) !important;
+  color: var(--color-on-dark, #374151) !important;
+  box-shadow: none !important;
+}
+.main-menu.menu-dark .navigation > li:not(.navigation-header):hover > a > i {
+  color: var(--color-primary, #f97316) !important;
+}
+
+/* ── Active state: orange accent ── */
+.main-menu.menu-dark .navigation > li.active:not(.navigation-header) {
+  background: var(--color-dark, #fff7ed) !important;
+  border-left: none !important;
+}
+.main-menu.menu-dark .navigation > li.active:not(.navigation-header) > a {
+  color: var(--color-on-dark, #374151) !important;
+  font-weight: 600 !important;
+  background: transparent !important;
+  box-shadow: inset 3px 0 0 var(--color-primary, #f97316) !important;
+}
+.main-menu.menu-dark .navigation > li.active:not(.navigation-header) > a > i {
+  color: var(--color-primary, #f97316) !important;
+}
+
+/* ── Open/expanded parent ── */
+.main-menu.menu-dark .navigation > li.open:not(.navigation-header) {
+  border-left: none !important;
+}
+.main-menu.menu-dark .navigation > li.open:not(.navigation-header) > a {
+  background: var(--color-dark, #fff7ed) !important;
+  color: var(--color-on-dark, #374151) !important;
+  padding-left: 14px !important;
+  box-shadow: none !important;
+}
+
+/* ── Chevron arrow for has-sub items ── */
+.main-menu.menu-dark .navigation li.has-sub > a:not(.mm-next)::after {
+  font-family: 'FontAwesome' !important;
+  content: "\f105" !important;
+  position: absolute !important;
+  right: 14px !important;
+  top: 50% !important;
+  transform: translateY(-50%) rotate(0deg) !important;
+  font-size: 13px !important;
+  color: var(--color-nav-section, #9ca3af) !important;
+  transition: transform 0.25s ease, color 0.2s ease !important;
+  display: inline-block !important;
+}
+.main-menu.menu-dark .navigation li.open > a:not(.mm-next)::after {
+  transform: translateY(-50%) rotate(90deg) !important;
+  color: var(--color-on-dark, #374151) !important;
+}
+
+/* ── Sub-menu container ── */
+.main-menu.menu-dark .navigation > li > ul {
+  background: var(--color-deeper, #ffffff) !important;
+}
+.main-menu.menu-dark .navigation li.open > ul.menu-content {
+  display: block !important;
+  overflow: visible !important;
+  background: rgba(0, 0, 0, 0.02) !important;
+  border-radius: 0 0 10px 10px !important;
+  padding: 4px 0 6px 0 !important;
+  margin: 0 !important;
+}
+
+/* ── Sub-menu items ── */
+.main-menu.menu-dark .navigation li ul.menu-content > li {
+  margin: 1px 6px !important;
+  border-radius: 8px !important;
+  border-left: none !important;
+}
+.main-menu.menu-dark .navigation li ul.menu-content > li > a {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  color: #374151 !important;
+  min-height: 42px !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 0 12px 0 24px !important;
+  border-radius: 8px !important;
+  transition: all 0.18s ease !important;
+  position: relative !important;
+}
+/* Sub-item icons */
+.main-menu.menu-dark .navigation li ul.menu-content > li > a > i {
+  width: 18px !important;
+  min-width: 18px !important;
+  font-size: 12px !important;
+  margin-right: 10px !important;
+  text-align: center !important;
+  color: #64748b !important;
+  transition: color 0.18s ease !important;
+}
+/* Sub-item hover */
+.main-menu.menu-dark .navigation li ul.menu-content > li:hover > a {
+  background: var(--color-dark, #fff7ed) !important;
+  color: var(--color-on-dark, #374151) !important;
+}
+.main-menu.menu-dark .navigation li ul.menu-content > li:hover > a > i {
+  color: var(--color-primary, #f97316) !important;
+}
+/* Sub-item active */
+.main-menu.menu-dark .navigation li ul.menu-content > li.active > a {
+  color: #fff !important;
+  font-weight: 600 !important;
+  background: #F27420 !important;
+  border-radius: 6px;
+  margin: 2px 10px;
+  padding: 8px 12px !important;
+}
+.main-menu.menu-dark .navigation li ul.menu-content > li.active > a > i {
+  color: #fff !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   VENDOR TEAL (#F27420) & DARK-BLUE (#344054/#38445a) OVERRIDES
+   Kill ALL non-orange colors globally (not just mobile).
+   ══════════════════════════════════════════════════════════════════ */
+.main-menu.menu-dark .navigation li,
+.main-menu.menu-dark .navigation > li,
+.main-menu.menu-dark .navigation > li.active,
+.main-menu.menu-dark .navigation > li.open,
+.main-menu.menu-dark .navigation > li.hover,
+.main-menu.menu-dark .navigation li.active,
+.main-menu.menu-dark .navigation li.open {
+  border-left: none !important;
+  border-right: none !important;
+}
+.main-menu.menu-dark .navigation > li.active > a,
+.main-menu.menu-dark .navigation > li .active > a,
+.main-menu.menu-dark .navigation > li ul .active > a {
+  color: var(--color-on-dark, #374151) !important;
+  font-weight: 600 !important;
+}
+.main-menu.menu-dark .navigation > li .active,
+.main-menu.menu-dark .navigation > li ul .active {
+  background: var(--color-dark, #fff7ed) !important;
+}
+.main-menu.menu-dark .navigation > li .active .hover > a,
+.main-menu.menu-dark .navigation > li ul .hover > a,
+.main-menu.menu-dark .navigation > li ul .open .hover > a,
+.main-menu.menu-dark .navigation > li.open .hover > a {
+  background: var(--color-dark, #fff7ed) !important;
+  color: var(--color-on-dark, #374151) !important;
+}
+.main-menu.menu-dark .navigation > li ul li {
+  color: var(--color-text-muted, #6b7280) !important;
+  background: transparent !important;
+}
+.main-menu.menu-dark .navigation > li ul .open > a {
+  color: var(--color-on-dark, #374151) !important;
+}
+.main-menu.menu-dark .navigation li a {
+  color: var(--color-on-dark, #374151) !important;
+}
+
+/* ── Brand area ── */
+.main-menu.menu-dark .navbar-header .brand-logo,
+.main-menu.menu-dark .navbar-header .brand-text {
+  color: var(--color-on-dark, #374151) !important;
+}
+/* Sidebar logo — shown via collapsed/expanded rules below, hidden by default */
+.main-menu .sidebar-brand-logo {
+  display: none;
+}
+
+/* Navbar brand: collapsed shows short "R&A", expanded shows full name */
+.brand-text-mini {
+  display: none;
+}
+body.vertical-layout.vertical-menu.menu-collapsed .navbar-header .navbar-brand {
+  justify-content: center !important;
+  padding: 0 !important;
+}
+body.vertical-layout.vertical-menu.menu-collapsed .navbar .navbar-brand .brand-text {
+  display: none !important;
+}
+body.vertical-layout.vertical-menu.menu-collapsed .navbar .navbar-brand .brand-text-mini {
+  display: block !important;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--color-primary, #F27420) !important;
+  letter-spacing: 1px;
+  margin: 0;
+  line-height: 1;
+}
+
+/* --- Header Navbar --- */
+.header-navbar .navbar-header {
+  display: flex !important;
+  align-items: center !important;
+}
+.header-navbar .navbar-header .navbar-brand {
+  padding: 0 5px !important;
+  margin-right: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  height: 100% !important;
+}
+.header-navbar .navbar-header .brand-text {
+  margin: 0 !important;
+  line-height: 1 !important;
+}
+.header-navbar .navbar-header .nav.navbar-nav {
+  gap: 0 !important;
+  align-items: center !important;
+}
+.header-navbar .navbar-header .nav-item {
+  padding: 0 2px !important;
+}
+/* Move sidebar toggle icon closer to left */
+.header-navbar .navbar-container .nav.mr-auto .nav-item .nav-link {
+  padding-left: 0 !important;
+}
+.header-navbar.navbar-semi-dark,
+.header-navbar.navbar-semi-dark .navbar-header {
+  background: var(--color-deeper) !important;
+}
+.header-navbar.navbar-semi-dark .navbar-header .navbar-brand .brand-text,
+.header-navbar.navbar-semi-dark .navbar-container ul.nav li > a {
+  color: var(--color-on-dark) !important;
+}
+.header-navbar.navbar-semi-dark .navbar-container ul.nav li > a i {
+  color: var(--color-on-dark) !important;
+}
+
+/* --- Footer --- */
+.footer.footer-dark {
+  background: var(--color-deeper) !important;
+  color: var(--color-on-dark) !important;
+}
+.footer.footer-dark a {
+  color: var(--color-on-dark) !important;
+}
+
+/* --- Primary buttons --- */
+.btn-primary {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: #fff !important;
+}
+.btn-primary i,
+.btn-primary .fa {
+  color: #fff !important;
+}
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+  background-color: var(--color-primary-hover) !important;
+  border-color: var(--color-primary-hover) !important;
+  color: #fff !important;
+}
+.btn-outline-primary {
+  border-color: #F27420 !important;
+  color: #F27420 !important;
+}
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary:active {
+  background-color: #F27420 !important;
+  border-color: #F27420 !important;
+  color: #fff !important;
+}
+.btn-outline-primary:hover i,
+.btn-outline-primary:focus i,
+.btn-outline-primary:active i {
+  color: #fff !important;
+}
+
+/* --- Checkbox orange theme --- */
+.chk-remember {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #d1d5db;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  vertical-align: middle;
+  position: relative;
+  transition: all 0.2s;
+}
+.chk-remember:hover {
+  border-color: #F27420 !important;
+}
+.chk-remember:checked {
+  background-color: #F27420 !important;
+  border-color: #F27420 !important;
+}
+.chk-remember:checked::after {
+  content: '\2713';
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.chk-remember:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.15rem rgba(242,116,32,0.25);
+}
+input[type="checkbox"]:checked {
+  accent-color: #F27420 !important;
+}
+
+/* --- Save buttons (btn-success → primary) --- */
+.btn-success {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: #fff !important;
+}
+.btn-success:hover,
+.btn-success:focus,
+.btn-success:active {
+  background-color: var(--color-primary-hover) !important;
+  border-color: var(--color-primary-hover) !important;
+  color: #fff !important;
+}
+
+/* --- Edit buttons (btn-warning → palette amber) --- */
+.btn-warning {
+  background-color: var(--color-secondary) !important;
+  border-color: var(--color-secondary) !important;
+  color: #fff !important;
+}
+.btn-warning:hover,
+.btn-warning:focus,
+.btn-warning:active {
+  background-color: #d97706 !important;
+  border-color: #d97706 !important;
+  color: #fff !important;
+}
+
+/* --- Delete buttons (btn-danger → clean deep red) --- */
+.btn-danger {
+  background-color: #c0392b !important;
+  border-color: #c0392b !important;
+  color: #fff !important;
+}
+.btn-danger:hover,
+.btn-danger:focus,
+.btn-danger:active {
+  background-color: #a93226 !important;
+  border-color: #a93226 !important;
+}
+
+/* --- Make Invoice Payments / btn-info → primary --- */
+.btn-info {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: #fff !important;
+}
+.btn-info:hover,
+.btn-info:focus,
+.btn-info:active {
+  background-color: var(--color-primary-hover) !important;
+  border-color: var(--color-primary-hover) !important;
+  color: #fff !important;
+}
+
+/* ============================================================
+   MINI SIDEBAR — Collapsed state shows icon + short label
+   Overrides vendor vertical-menu.css without modifying it.
+   ============================================================ */
+
+/* Widen collapsed sidebar from 60px to 85px */
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu,
+body.vertical-layout.vertical-menu.menu-collapsed .navbar .navbar-header {
+  width: 85px !important;
+}
+body.vertical-layout.vertical-menu.menu-collapsed {
+  --sidebar-width: 85px;
+}
+
+body.vertical-layout.vertical-menu.menu-collapsed .navbar .navbar-container,
+body.vertical-layout.vertical-menu.menu-collapsed .content,
+body.vertical-layout.vertical-menu.menu-collapsed .footer {
+  margin-left: 85px !important;
+}
+
+/* Sidebar logo: default hidden, overridden in collapsed/expanded rules */
+
+/* iPad: reduce collapsed sidebar to 70px to gain 15px of content width */
+@media only screen and (min-width: 768px) and (max-width: 1024px) {
+  /* Override: no collapsed sidebar on tablet — use overlay instead */
+  body.vertical-layout.vertical-menu.menu-collapsed .main-menu,
+  body.vertical-layout.vertical-menu.menu-collapsed .navbar .navbar-header {
+    width: 0 !important;
+  }
+  body.vertical-layout.vertical-menu.menu-collapsed .navbar .navbar-container,
+  body.vertical-layout.vertical-menu.menu-collapsed .content,
+  body.vertical-layout.vertical-menu.menu-collapsed .footer {
+    margin-left: 0 !important;
+  }
+}
+
+/* Mobile (<768px): show sidebar logo */
+@media only screen and (max-width: 767px) {
+  .sidebar-brand-logo {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 60px;
+    border-bottom: 1px solid #e5e7eb;
+    background: var(--color-deeper, #ffffff) !important;
+  }
+  .sidebar-brand-logo img {
+    max-width: 46px;
+    object-fit: contain;
+  }
+}
+
+/* Stack icon + label vertically, centred */
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li:not(.navigation-header) {
+  margin: 4px 6px !important;
+}
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li > a {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 14px 6px !important;
+  text-align: center !important;
+}
+
+/* Show the text label (vendor hides it with display:none) */
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li > a > span,
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li:hover > a > span {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: static !important;
+  right: auto !important;
+  width: 77px !important;
+  max-width: 77px !important;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--color-on-dark) !important;
+  font-size: 8.5px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.4px !important;
+  margin-top: 5px !important;
+  padding: 0 !important;
+  line-height: 1.3 !important;
+  text-align: center !important;
+  white-space: normal !important;
+  overflow: hidden !important;
+  /* clamp to 2 lines */
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+}
+
+/* Icon: centred, no right margin */
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li > a > i {
+  margin-right: 0 !important;
+  font-size: 1.15rem !important;
+  line-height: 1 !important;
+}
+
+/* Active/hover item: orange accent, no border (use box-shadow like expanded) */
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li.active > a,
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li:hover > a {
+  border-left: none !important;
+  background: var(--color-dark, #fff7ed) !important;
+  box-shadow: inset 3px 0 0 var(--color-primary, #f97316) !important;
+}
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li.active > a > i,
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li:hover > a > i {
+  color: var(--color-primary, #f97316) !important;
+}
+
+/* Section headers: hide completely in collapsed sidebar */
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li.navigation-header {
+  display: none !important;
+}
+
+/* ── Sidebar brand text ── */
+.sidebar-brand-text {
+  color: var(--color-on-dark, #374151) !important;
+  text-decoration: none !important;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+}
+.sidebar-brand-text:hover {
+  color: var(--color-primary, #F27420) !important;
+}
+/* Sidebar brand logo: hidden on desktop (navbar header shows brand) */
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .sidebar-brand-logo,
+body.vertical-layout.vertical-menu.menu-expanded .main-menu .sidebar-brand-logo {
+  display: none !important;
+}
+
+/* ── Collapsed sidebar: force-hide inline submenus (only flyout clones should show) ── */
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li > ul {
+  display: none !important;
+}
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li.open > ul {
+  display: none !important;
+}
+
+/* ── Collapsed sidebar: overflow visible so flyout popups can appear ── */
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .main-menu-content {
+  overflow: visible !important;
+}
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation {
+  overflow: visible !important;
+}
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu {
+  overflow: visible !important;
+}
+
+/* ── Collapsed sidebar: flyout submenu styling ── */
+
+/* Hide flyout title for non-submenu items (a.menu-title = no children) */
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .main-menu-content > a.menu-title {
+  display: none !important;
+}
+
+/* Hide the separate title — we'll show title inside the submenu container instead */
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .main-menu-content > span.menu-title,
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .main-menu-content > a.menu-title {
+  display: none !important;
+}
+
+/* Single flyout popup card */
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .main-menu-content > ul.menu-content {
+  left: 80px !important;
+  width: 225px;
+  position: fixed !important;
+  background: #fff !important;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
+  border: 1px solid #f0f0f0;
+  z-index: 9999 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Flyout submenu items */
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .main-menu-content > ul.menu-content li > a {
+  color: #475569 !important;
+  padding: 10px 18px 10px 20px !important;
+  display: flex !important;
+  align-items: center;
+  transition: all 0.15s ease;
+  font-size: 13px;
+  font-weight: 500;
+  border-left: none !important;
+  text-decoration: none !important;
+}
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .main-menu-content > ul.menu-content li > a:hover {
+  background: #fff7ed !important;
+  color: #F27420 !important;
+}
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .main-menu-content > ul.menu-content li > a > i {
+  margin-right: 10px;
+  font-size: 14px;
+  color: #94a3b8;
+  width: 18px;
+  text-align: center;
+  transition: color 0.15s;
+}
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .main-menu-content > ul.menu-content li > a:hover > i {
+  color: #F27420 !important;
+}
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .main-menu-content > ul.menu-content li.active > a {
+  color: #fff !important;
+  background: #F27420 !important;
+  border-left: none !important;
+  font-weight: 600;
+  border-radius: 6px;
+  margin: 2px 8px;
+  padding: 10px 12px !important;
+}
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu .main-menu-content > ul.menu-content li.active > a > i {
+  color: #fff !important;
+}
+
+/* Flyout menu-popout (cloned by JS for has-sub items) */
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu ul.menu-popout {
+  left: 80px !important;
+  width: 225px;
+  background: #fff !important;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
+  border: 1px solid #f0f0f0;
+  z-index: 9999 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 0;
+}
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu ul.menu-popout li a {
+  color: #475569 !important;
+  padding: 10px 18px 10px 20px !important;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex !important;
+  align-items: center;
+  transition: all 0.15s ease;
+  border-left: none !important;
+  text-decoration: none !important;
+}
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu ul.menu-popout li a:hover,
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu ul.menu-popout li.hover > a {
+  background: #fff7ed !important;
+  color: #F27420 !important;
+}
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu ul.menu-popout li a > i {
+  margin-right: 10px;
+  font-size: 14px;
+  color: #94a3b8;
+  width: 18px;
+  text-align: center;
+  transition: color 0.15s;
+}
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu ul.menu-popout li a:hover > i {
+  color: #F27420 !important;
+}
+body.vertical-layout.vertical-menu.menu-collapsed .main-menu ul.menu-popout li.active > a {
+  color: #fff !important;
+  background: #F27420 !important;
+  border-left: none !important;
+  font-weight: 600;
+  border-radius: 6px;
+  margin: 2px 8px;
+  padding: 10px 12px !important;
+}
+
+.orange-input {
+  border-color: #ced4da !important;
+}
+.orange-input:focus,
+.form-control:focus {
+  border-color: #f97316 !important;
+  box-shadow: 0 0 0 0.2rem rgba(249,115,22,0.25) !important;
+  outline: none;
+}
+
+.payment-modal-wide {
+  width: 92vw !important;
+  max-width: 92vw !important;
+}
+
+/* Fix textarea height to match input on iPad/mobile */
+.payment-modal-wide textarea.form-control {
+  height: 38px !important;
+  min-height: 38px !important;
+  resize: none;
+  overflow: hidden;
+}
+.payment-modal-wide.modal-dialog {
+  max-height: calc(100vh - 60px);
+  margin: 30px auto;
+}
+.payment-modal-wide .modal-content {
+  max-height: calc(100vh - 60px);
+  overflow: hidden;
+}
+.payment-history-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+.payment-history-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.payment-history-scroll::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 4px;
+}
+.payment-history-scroll::-webkit-scrollbar-thumb:hover {
+  background: #f97316;
+}
+@media (min-width: 1200px) {
+  .payment-modal-wide {
+    width: 720px !important;
+    max-width: 720px !important;
+  }
+}
+
+/* ============================================================
+   Invoice Page — iPad / Desktop Design Improvements
+   (CustomerInvoiceApp desktop layout, width >= 768px)
+   ============================================================ */
+
+/* ── Pay Invoice button: complete border, shadow, hover ── */
+#customer-invoice-app .col-md-6.mt-0:first-child > div > div:first-child > button {
+  padding: 6px 14px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  border: 2px solid #f97316 !important;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.2) !important;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease !important;
+  letter-spacing: 0.3px !important;
+}
+#customer-invoice-app .col-md-6.mt-0:first-child > div > div:first-child > button:hover,
+#customer-invoice-app .col-md-6.mt-0:first-child > div > div:first-child > button:active {
+  background: #f97316 !important;
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.35) !important;
+}
+
+/* ── Date row: calendar icon before "DATE" label ── */
+#customer-invoice-app .col-md-6.mt-0:first-child > div > div:last-child > div:first-child > span:first-child::before {
+  font-family: FontAwesome;
+  content: "\f133";
+  color: #f97316;
+  margin-right: 5px;
+  font-size: 12px;
+}
+
+/* ── Customer row: user icon before "CUSTOMER" label ── */
+#customer-invoice-app .col-md-6.mt-0:first-child > div > div:last-child > div:last-child > span:first-child::before {
+  font-family: FontAwesome;
+  content: "\f007";
+  color: #f97316;
+  margin-right: 5px;
+  font-size: 12px;
+}
+
+/* ── Date / Customer value: subtle orange pill badge ── */
+#customer-invoice-app .col-md-6.mt-0:first-child > div > div:last-child > div > span:nth-child(2) {
+  background: #fff7ed;
+  padding: 3px 10px;
+  border-radius: 20px;
+  color: #374151 !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  display: inline-block;
+}
+
+/* ── Additional Notes inbox: orange dashed border + warm background ── */
+#customer-invoice-app div:has(> label > .fa-pencil) + div:not(:has(textarea)) {
+  border: 1.5px dashed #f97316 !important;
+  background: #fffbf7 !important;
+  border-radius: 8px !important;
+  min-height: 70px !important;
+  color: #555 !important;
+  transition: border-color 0.2s ease;
+}
+
+/* ============================================================
+   iPad Invoice Layout — Column proportions & polish
+   Covers iPad Pro 11 (834px), Air 4 (820px) — both in md range
+   ============================================================ */
+@media only screen and (min-width: 768px) and (max-width: 1024px) {
+
+  /* ── Invoice top section: full width on iPad ── */
+  #customer-invoice-app .row.align-items-stretch > div:first-child {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+  }
+  #customer-invoice-app .row.align-items-stretch > div:nth-child(2) {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* ── Invoice card: elevated shadow + rounder corners on iPad ── */
+  #customer-invoice-app .col-md-6.mt-0:first-child > div {
+    border-radius: 12px !important;
+    box-shadow: 0 3px 16px rgba(0,0,0,0.09) !important;
+    border-color: #ece8e8 !important;
+  }
+
+  /* ── Right section: add left spacing from invoice card ── */
+  #customer-invoice-app .col-sm-12.mt-0 > div {
+    padding-left: 6px;
+  }
+
+  /* ── Payment badges: compact to fit cleanly in 58% column ── */
+  #customer-invoice-app .col-sm-12.mt-0 > div > div:last-child > div {
+    min-width: 85px !important;
+    padding: 6px 12px !important;
+  }
+
+  /* ── Products table header: slightly tighter on iPad ── */
+  #customer-invoice-app #productsTable thead th {
+    padding: 10px 8px !important;
+    font-size: 12px !important;
+  }
+
+  /* ── Row spacing: reduce gap above products table ── */
+  #customer-invoice-app .row.mt-1 {
+    margin-top: 8px !important;
+  }
+}
+
+/* ── iPad: hide Stack logo icon, let brand-text follow menu-expanded/collapsed naturally ── */
+@media only screen and (min-width: 768px) and (max-width: 1024px) {
+  .navbar .navbar-header .navbar-brand .brand-logo {
+    display: none !important;
+  }
+}
+
+/* ================================================================
+   Invoice Payments Modal — Design Polish
+   ================================================================ */
+
+/* ── Summary badges: stretch to fill full row, no empty gap ── */
+.payment-modal-wide .modal-body > div:first-child > div:first-child {
+  justify-content: stretch !important;
+  gap: 12px !important;
+}
+.payment-modal-wide .modal-body > div:first-child > div:first-child > div {
+  flex: 1 !important;
+  min-width: 0 !important;
+  border-radius: 10px !important;
+  padding: 10px 16px !important;
+  text-align: center;
+}
+
+/* ── Summary badge labels: uppercase, spaced ── */
+.payment-modal-wide .modal-body > div:first-child > div:first-child > div > span:first-child {
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  font-size: 10px !important;
+}
+
+/* ── Summary badge values: larger ── */
+.payment-modal-wide .modal-body > div:first-child > div:first-child > div > span:last-child {
+  font-size: 16px !important;
+}
+
+/* ── Payment method cards: uniform height, flex centered ── */
+.payment-modal-wide .modal-body > div:first-child > form > div:first-child > div:last-child > div {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 68px !important;
+  border-radius: 10px !important;
+  gap: 0 !important;
+}
+
+/* ── Payment method cards hover ── */
+.payment-modal-wide .modal-body > div:first-child > form > div:first-child > div:last-child > div:hover {
+  border-color: #f97316 !important;
+  background: #fff7ed !important;
+  color: #f97316 !important;
+}
+
+/* ── Amount + Note row: stack on small/iPad screens ── */
+@media only screen and (max-width: 600px) {
+  .payment-modal-wide .modal-body > div:first-child > form > div:nth-child(2) {
+    flex-direction: column !important;
+  }
+}
+
+/* ── Payment History header row ── */
+.payment-modal-wide .modal-body > div:last-child > div:first-child {
+  border-bottom: 1px solid #f0f0f0 !important;
+  padding-bottom: 10px !important;
+  margin-bottom: 12px !important;
+}
+
+/* ── History item cards: hover lift ── */
+.payment-modal-wide .payment-history-scroll > div {
+  transition: box-shadow 0.15s ease !important;
+}
+.payment-modal-wide .payment-history-scroll > div:hover {
+  box-shadow: 0 3px 12px rgba(0,0,0,0.08) !important;
+}
+
+/* ================================================================
+   Invoice Payments Modal — iPad Specific Fixes
+   ================================================================ */
+@media only screen and (min-width: 768px) and (max-width: 1024px) {
+
+  /* ── Modal wider on iPad ── */
+  .payment-modal-wide {
+    width: 90vw !important;
+    max-width: 90vw !important;
+  }
+
+  /* ── Payment method cards: no text wrap, compact font ── */
+  .payment-modal-wide .modal-body > div:first-child > form > div:first-child > div:last-child > div {
+    min-height: 60px !important;
+    font-size: 11px !important;
+    white-space: nowrap !important;
+    padding: 6px 8px !important;
+  }
+
+  /* ── Payment method icon: smaller on iPad ── */
+  .payment-modal-wide .modal-body > div:first-child > form > div:first-child > div:last-child > div i {
+    font-size: 16px !important;
+  }
+
+  /* ── Badges: larger text on iPad ── */
+  .payment-modal-wide .modal-body > div:first-child > div:first-child > div > span:last-child {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+  }
+
+  /* ── Amount + Note row: side by side on iPad (enough width) ── */
+  .payment-modal-wide .modal-body > div:first-child > form > div:nth-child(2) {
+    flex-direction: row !important;
+    gap: 12px !important;
+  }
+
+  /* ── Amount field: fixed width ── */
+  .payment-modal-wide .modal-body > div:first-child > form > div:nth-child(2) > div:first-child {
+    flex: 0 0 160px !important;
+  }
+
+  /* ── Note field: take remaining space ── */
+  .payment-modal-wide .modal-body > div:first-child > form > div:nth-child(2) > div:last-child {
+    flex: 1 !important;
+  }
+}
+
+/* ================================================================
+   Mobile Sidebar Navigation — Premium UI/UX (Light Theme)
+   Uses theme CSS variables for consistent look with desktop sidebar.
+   No functional changes — purely visual + scroll + interaction.
+   ================================================================ */
+
+@media only screen and (max-width: 767px) {
+
+  /* ── Sidebar container: full-height drawer — above navbar ── */
+  .vertical-overlay-menu .main-menu,
+  body.vertical-layout.vertical-menu.menu-collapsed.vertical-overlay-menu .main-menu {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    position: fixed !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: -280px !important;
+    width: 280px !important;
+    overflow: hidden !important;
+    background: var(--color-deeper, #ffffff) !important;
+    border-right: none !important;
+    box-shadow: none !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    z-index: 1060 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Slide-in active state */
+  .vertical-overlay-menu.menu-open .main-menu,
+  body.vertical-layout.vertical-menu.menu-collapsed.vertical-overlay-menu.menu-open .main-menu {
+    transform: translate3d(280px, 0, 0) !important;
+    box-shadow: 6px 0 30px rgba(0, 0, 0, 0.18) !important;
+  }
+
+  /* ── Dark backdrop overlay ── */
+  .vertical-overlay-menu .sidenav-overlay {
+    background-color: rgba(0, 0, 0, 0) !important;
+    transition: background-color 0.3s ease !important;
+    z-index: 1059 !important;
+  }
+  .vertical-overlay-menu.menu-open .sidenav-overlay {
+    background-color: rgba(0, 0, 0, 0.5) !important;
+  }
+
+  /* ── Sidebar header: brand + close button ── */
+  .vertical-overlay-menu .main-menu .sidebar-brand-logo {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0 16px 0 20px !important;
+    height: 60px !important;
+    min-height: 60px !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    background: var(--color-deeper, #ffffff) !important;
+    flex-shrink: 0 !important;
+  }
+  .vertical-overlay-menu .main-menu .sidebar-brand-logo img {
+    max-height: 32px !important;
+    max-width: 120px !important;
+    object-fit: contain !important;
+  }
+  /* Close button injected via JS */
+  .sidebar-close-btn {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+    border: 1.5px solid #e2e8f0 !important;
+    background: #f8fafc !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    color: #64748b !important;
+    font-size: 16px !important;
+    flex-shrink: 0 !important;
+    outline: none !important;
+  }
+
+  /* ── Scrollable content area ── */
+  .vertical-overlay-menu .main-menu .main-menu-content,
+  body.vertical-layout.vertical-menu.menu-collapsed.vertical-overlay-menu .main-menu .main-menu-content {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    flex: 1 !important;
+    height: calc(100vh - 60px) !important;
+    max-height: calc(100vh - 60px) !important;
+    padding: 8px 0 100px 0 !important;
+    background: var(--color-deeper, #ffffff) !important;
+  }
+
+  /* Hidden scrollbar — clean look, still scrollable */
+  .vertical-overlay-menu .main-menu .main-menu-content::-webkit-scrollbar {
+    width: 0px !important;
+    background: transparent !important;
+  }
+  .vertical-overlay-menu .main-menu .main-menu-content {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  /* ── Navigation container ── */
+  .vertical-overlay-menu .main-menu .navigation,
+  body.vertical-layout.vertical-menu.menu-collapsed.vertical-overlay-menu .main-menu .navigation {
+    background: var(--color-deeper, #ffffff) !important;
+    overflow: visible !important;
+  }
+
+  /* ── Section headers (General, Data Entry, etc.) ── */
+  .vertical-overlay-menu .main-menu .navigation > li.navigation-header,
+  body.vertical-layout.vertical-menu.menu-collapsed.vertical-overlay-menu .main-menu .navigation > li.navigation-header {
+    padding: 20px 20px 8px 20px !important;
+    margin-top: 4px !important;
+    display: list-item !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  .vertical-overlay-menu .main-menu .navigation > li.navigation-header span,
+  body.vertical-layout.vertical-menu.menu-collapsed.vertical-overlay-menu .main-menu .navigation > li.navigation-header span {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    letter-spacing: 1.2px !important;
+    text-transform: uppercase !important;
+    color: var(--color-nav-section, #9ca3af) !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  .vertical-overlay-menu .main-menu .navigation > li.navigation-header .feather.icon-minus,
+  body.vertical-layout.vertical-menu.menu-collapsed.vertical-overlay-menu .main-menu .navigation > li.navigation-header .feather.icon-minus {
+    display: none !important;
+  }
+
+  /* Subtle divider line above each section (except the first) */
+  .vertical-overlay-menu .main-menu .navigation > li.navigation-header:not(:first-child) {
+    border-top: 1px solid #e5e7eb !important;
+    margin-top: 8px !important;
+    padding-top: 20px !important;
+  }
+
+  /* ── ALL nav items must be visible ── */
+  .vertical-overlay-menu .main-menu .navigation > li,
+  body.vertical-layout.vertical-menu.menu-collapsed.vertical-overlay-menu .main-menu .navigation > li {
+    display: list-item !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: auto !important;
+    height: auto !important;
+  }
+
+  /* ── Parent menu items (Dashboard, Data Entry, etc.) ── */
+  .vertical-overlay-menu .main-menu .navigation > li:not(.navigation-header) {
+    margin: 2px 10px !important;
+    border-radius: 10px !important;
+    overflow: visible !important;
+    transition: background 0.2s ease !important;
+  }
+
+  .vertical-overlay-menu .main-menu .navigation > li:not(.navigation-header) > a,
+  body.vertical-layout.vertical-menu.menu-collapsed.vertical-overlay-menu .main-menu .navigation > li:not(.navigation-header) > a {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-size: 13.5px !important;
+    font-weight: 500 !important;
+    color: var(--color-on-dark, #374151) !important;
+    min-height: 46px !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 14px !important;
+    border-radius: 10px !important;
+    transition: all 0.2s ease !important;
+    position: relative !important;
+    letter-spacing: 0.1px !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Icon alignment */
+  .vertical-overlay-menu .main-menu .navigation > li:not(.navigation-header) > a > i,
+  body.vertical-layout.vertical-menu.menu-collapsed.vertical-overlay-menu .main-menu .navigation > li:not(.navigation-header) > a > i {
+    width: 22px !important;
+    min-width: 22px !important;
+    font-size: 15px !important;
+    margin-right: 12px !important;
+    text-align: center !important;
+    color: var(--color-on-dark, #374151) !important;
+    transition: color 0.2s ease !important;
+    line-height: 1 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    float: none !important;
+  }
+
+  /* ── Menu title text — MUST be visible, undo all collapsed hiding ── */
+  .vertical-overlay-menu .main-menu .navigation > li > a > span,
+  .vertical-overlay-menu .main-menu .navigation > li > a > span.menu-title,
+  body.vertical-layout.vertical-menu.menu-collapsed.vertical-overlay-menu .main-menu .navigation > li > a > span,
+  body.vertical-layout.vertical-menu.menu-collapsed.vertical-overlay-menu .main-menu .navigation > li > a > span.menu-title {
+    flex: 1 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-size: 13.5px !important;
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: static !important;
+    right: auto !important;
+    top: auto !important;
+    width: auto !important;
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    text-transform: none !important;
+    font-weight: 500 !important;
+    color: inherit !important;
+  }
+
+  /* ── Hover state ── */
+  .vertical-overlay-menu .main-menu .navigation > li:not(.navigation-header):hover > a {
+    background: var(--color-dark, #fff7ed) !important;
+    color: var(--color-on-dark, #374151) !important;
+  }
+  .vertical-overlay-menu .main-menu .navigation > li:not(.navigation-header):hover > a > i {
+    color: var(--color-primary, #f97316) !important;
+  }
+
+  /* ── Force sub-menus visible for collapsed+overlay (vendor hides all ul) ── */
+  body.vertical-layout.vertical-menu.menu-collapsed.vertical-overlay-menu .main-menu .navigation > li > ul {
+    display: none !important;
+  }
+  body.vertical-layout.vertical-menu.menu-collapsed.vertical-overlay-menu .main-menu .navigation > li.open > ul {
+    display: block !important;
+  }
+
+  /* ── Collapsed+overlay: sub-menu container positioning ── */
+  body.vertical-layout.vertical-menu.menu-collapsed.vertical-overlay-menu .main-menu .navigation li.open > ul.menu-content {
+    position: static !important;
+    right: auto !important;
+    width: auto !important;
+  }
+
+}
+
+/* Tablet (768px - 1024px): sidebar scroll + hidden scrollbar */
+@media only screen and (min-width: 768px) and (max-width: 1024px) {
+  .main-menu.menu-fixed .main-menu-content {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-height: calc(100vh - 60px) !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  .main-menu.menu-fixed .main-menu-content::-webkit-scrollbar {
+    width: 0px !important;
+    display: none !important;
+  }
+  /* Hide PerfectScrollbar rails on tablet too */
+  .main-menu .ps__rail-y,
+  .main-menu .ps__rail-x {
+    display: none !important;
+  }
+  /* Collapsed sidebar: same premium look */
+  body.vertical-layout.vertical-menu.menu-collapsed .main-menu {
+    overflow: hidden !important;
+    background: var(--color-deeper, #ffffff) !important;
+    border-right: 1px solid #e5e7eb !important;
+  }
+}
+
+/* ============================================================
+   GLOBAL ORANGE THEME — Consistent UI across all pages
+   ============================================================ */
+
+/* --- Form Inputs --- */
+form .form-control {
+  border: 1.5px solid #e5e7eb !important;
+  border-radius: 10px !important;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--color-text-body);
+  transition: border-color 0.2s;
+}
+form .form-control:focus {
+  border-color: #F27420 !important;
+  box-shadow: 0 0 0 0.2rem rgba(242,116,32,0.15) !important;
+}
+form select.form-control {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 14px;
+  padding-right: 36px;
+  cursor: pointer;
+}
+form label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #9ca3af;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+/* --- Cards --- */
+.app-content .card {
+  border-radius: 16px !important;
+  border: 1px solid #f0f0f0 !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
+}
+
+/* --- Badges --- */
+.badge-success, .badge.badge-success {
+  background: #ecfdf5 !important;
+  color: #059669 !important;
+  border: 1px solid #a7f3d0;
+  border-radius: 20px !important;
+  padding: 4px 12px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+.badge-danger, .badge.badge-danger {
+  background: #fef2f2 !important;
+  color: #dc2626 !important;
+  border: 1px solid #fecaca;
+  border-radius: 20px !important;
+  padding: 4px 12px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+.badge-warning, .badge.badge-warning {
+  background: #fff7ed !important;
+  color: #F27420 !important;
+  border: 1px solid #fed7aa;
+  border-radius: 20px !important;
+  padding: 4px 12px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+.badge-info, .badge.badge-info {
+  background: #fff7ed !important;
+  color: #F27420 !important;
+  border: 1px solid #fed7aa;
+  border-radius: 20px !important;
+  padding: 4px 12px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+
+/* --- DataTables (jQuery) --- */
+table.dataTable thead th,
+table.dataTable thead td {
+  background: #FFF7F2 !important;
+  color: #9ca3af !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.6px !important;
+  text-transform: uppercase !important;
+  border-bottom: 1.5px solid #fed7aa !important;
+  padding: 12px 16px !important;
+}
+table.dataTable tbody tr:hover {
+  background: #fff7ed !important;
+}
+table.dataTable tbody td {
+  font-size: 13px;
+  color: #374151;
+  padding: 14px 16px !important;
+  border-bottom: 1px solid #f3f4f6 !important;
+}
+
+/* --- Dropdown Menus --- */
+.dropdown-menu {
+  border-radius: 10px !important;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12) !important;
+  border: 1px solid #f0f0f0 !important;
+  padding: 4px !important;
+}
+.dropdown-menu .dropdown-item {
+  border-radius: 6px;
+  font-size: 13px;
+  padding: 8px 14px;
+}
+.dropdown-menu .dropdown-item:hover,
+.dropdown-menu .dropdown-item:focus {
+  background: #FFF5ED !important;
+  color: #F27420 !important;
+}
+.dropdown-menu .dropdown-item.active,
+.dropdown-menu .dropdown-item:active {
+  background: #F27420 !important;
+  color: #fff !important;
+}
+
+/* --- Breadcrumbs --- */
+.breadcrumb {
+  background: transparent !important;
+}
+.breadcrumb-item a {
+  color: #F27420 !important;
+  font-weight: 600;
+  font-size: 12px;
+  text-decoration: none;
+}
+.breadcrumb-item a:hover {
+  color: #ea580c !important;
+}
+.breadcrumb-item.active,
+.breadcrumb-item {
+  font-size: 12px;
+  color: #9ca3af;
+}
+.content-header-title {
+  color: #1f2937 !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.5px;
+}
+
+/* --- Links --- */
+a {
+  color: #F27420;
+}
+a:hover {
+  color: #ea580c;
+}
+
+/* --- Pagination (DataTables) --- */
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+  background: #F27420 !important;
+  border-color: #F27420 !important;
+  color: #fff !important;
+  border-radius: 8px;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+  background: #FFF5ED !important;
+  border-color: #fed7aa !important;
+  color: #F27420 !important;
+  border-radius: 8px;
+}
+
+/* --- Page Header --- */
+h2, h3.content-header-title {
+  color: #1f2937;
+  font-weight: 800;
+}
+
+/* --- Filter Buttons --- */
+.filter-button {
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  padding: 8px 20px !important;
+}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f9fafb;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #F27420;
+}
+
+/* --- React DatePicker Orange Theme --- */
+input.orange-datepicker-input,
+form input.orange-datepicker-input,
+.orange-datepicker-input {
+  border: none !important;
+  border-radius: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #111827 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  width: 110px !important;
+  height: auto !important;
+  display: block !important;
+  font-family: inherit !important;
+  cursor: pointer;
+  caret-color: transparent !important;
+  user-select: none;
+}
+input.orange-datepicker-input:focus,
+form input.orange-datepicker-input:focus,
+.orange-datepicker-input:focus {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  caret-color: transparent !important;
+}
+.react-datepicker {
+  border: 1.5px solid #e5e7eb !important;
+  border-radius: 12px !important;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12) !important;
+  font-family: inherit !important;
+}
+.react-datepicker__header {
+  background: #FFF7F2 !important;
+  border-bottom: 1.5px solid #fed7aa !important;
+  border-radius: 12px 12px 0 0 !important;
+  padding-top: 10px !important;
+}
+.react-datepicker__current-month {
+  color: #374151 !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+}
+.react-datepicker__day-name {
+  color: #9ca3af !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+}
+.react-datepicker__day {
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  color: #374151 !important;
+}
+.react-datepicker__day:hover {
+  background: #FFF5ED !important;
+  color: #F27420 !important;
+}
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected,
+.react-datepicker__day--selected:hover,
+.react-datepicker__day--keyboard-selected:hover {
+  background-color: #F27420 !important;
+  color: #fff !important;
+  border-radius: 50% !important;
+}
+.react-datepicker__day--today {
+  font-weight: 700 !important;
+  color: #F27420 !important;
+}
+.react-datepicker__day--today.react-datepicker__day--selected,
+.react-datepicker__day--today.react-datepicker__day--keyboard-selected {
+  color: #fff !important;
+  background-color: #F27420 !important;
+}
+.react-datepicker__navigation-icon::before {
+  border-color: #F27420 !important;
+}
+.react-datepicker__day--disabled,
+.react-datepicker__day--disabled:hover {
+  color: #b0b5be !important;
+  cursor: not-allowed !important;
+  background: transparent !important;
+}
+.react-datepicker__triangle {
+  display: none !important;
+}
+.react-datepicker-popper {
+  z-index: 50 !important;
+}
+.react-datepicker select option:checked,
+.react-datepicker select option:hover {
+  background: #F27420 !important;
+  color: #fff !important;
+}
+.react-datepicker select:focus option:checked {
+  background: #F27420 linear-gradient(0deg, #F27420 0%, #F27420 100%) !important;
+  color: #fff !important;
+}
+
+/* --- Flash Toast Notification --- */
+.flash-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  padding: 14px 24px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  transition: all 0.4s ease;
+  animation: slideInRight 0.4s ease;
+}
+.flash-toast-success {
+  background: #F27420;
+  color: #fff;
+}
+.flash-toast-error {
+  background: #dc2626;
+  color: #fff;
+}
+.flash-toast-warning {
+  background: #f59e0b;
+  color: #fff;
+}
+.flash-toast-info {
+  background: #F27420;
+  color: #fff;
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+/* Select2 & native dropdown orange highlight */
+.select2-container--default .select2-results__option--highlighted[aria-selected],
+.select2-container--default .select2-results__option--highlighted,
+.select2-container--default .select2-results__option[aria-selected="true"] { background-color: #F27420 !important; color: #fff !important; }
+.select2-container--default .select2-results__option:hover { background-color: #FFF5ED !important; color: #F27420 !important; }
+.select2-container--default .select2-results__option--highlighted:hover { background-color: #F27420 !important; color: #fff !important; }
+.select2-container--default .select2-selection--single:focus,
+.select2-container--default.select2-container--focus .select2-selection--single,
+.select2-container--default.select2-container--open .select2-selection--single { border-color: #F27420 !important; box-shadow: 0 0 0 0.15rem rgba(242,116,32,0.15) !important; }
+.select2-dropdown { border-color: #e5e7eb !important; border-radius: 10px !important; box-shadow: 0 6px 20px rgba(0,0,0,0.1) !important; overflow: hidden !important; }
+.select2-results__option { padding: 8px 12px !important; font-size: 13px !important; }
+/* Native select dropdown styling */
+select.form-control, .form-group select {
+    border: 1.5px solid #e5e7eb !important;
+    border-radius: 10px !important;
+    padding: 8px 32px 8px 12px !important;
+    font-size: 13px !important;
+    color: #374151 !important;
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23f97316' d='M5 6L0 0h10z'/%3E%3C/svg%3E") no-repeat right 12px center !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+    cursor: pointer !important;
+    height: auto !important;
+    min-height: 42px !important;
+}
+select.form-control:focus, .form-group select:focus {
+    border-color: #F27420 !important;
+    box-shadow: 0 0 0 0.15rem rgba(242,116,32,0.15) !important;
+    outline: none !important;
+}
+select.form-control option, .form-group select option {
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+}
+/* Button focus fix - remove black border */
+.modal button:focus, .modal .btn:focus { outline: none !important; box-shadow: none !important; }
+.inv-action-btn:focus, .inv-action-btn:active { outline: none !important; box-shadow: none !important; }
+/* DataTable pagination styling */
+.rdt_Pagination select { border: 1.5px solid #fed7aa !important; border-radius: 6px !important; padding: 4px 20px 4px 10px !important; color: #374151 !important; font-weight: 600 !important; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23f97316' d='M5 6L0 0h10z'/%3E%3C/svg%3E") no-repeat right 6px center !important; outline: none !important; font-size: 13px !important; line-height: 1.4 !important; -webkit-appearance: none !important; -moz-appearance: none !important; appearance: none !important; cursor: pointer !important; }
+.rdt_Pagination select:focus { border-color: #f97316 !important; box-shadow: 0 0 0 2px rgba(249,115,22,0.15) !important; }
+.rdt_Pagination span { font-weight: 500 !important; }
+/* Hide react-data-table's own dropdown SVG icon (prevents double arrow) */
+.rdt_Pagination select + svg, .rdt_Pagination svg:has(+ select) { display: none !important; }
+.rdt_Pagination div[class*="Pagination"] > svg { display: none !important; }
+/* Bootstrap Switch orange theme */
+/* Bootstrap Switch - force orange theme on ALL states */
+.bootstrap-switch .bootstrap-switch-handle-on,
+.bootstrap-switch .bootstrap-switch-handle-on.bootstrap-switch-primary,
+.bootstrap-switch .bootstrap-switch-handle-on.bootstrap-switch-success,
+.bootstrap-switch .bootstrap-switch-handle-on.bootstrap-switch-info,
+.bootstrap-switch .bootstrap-switch-handle-on.bootstrap-switch-warning,
+.bootstrap-switch .bootstrap-switch-handle-on.bootstrap-switch-default { background-color: #F27420 !important; color: #fff !important; }
+.bootstrap-switch .bootstrap-switch-handle-off,
+.bootstrap-switch .bootstrap-switch-handle-off.bootstrap-switch-danger,
+.bootstrap-switch .bootstrap-switch-handle-off.bootstrap-switch-default,
+.bootstrap-switch .bootstrap-switch-handle-off.bootstrap-switch-warning,
+.bootstrap-switch .bootstrap-switch-handle-off.bootstrap-switch-primary { background-color: #F27420 !important; color: #fff !important; }
+.bootstrap-switch .bootstrap-switch-label { background: #f3f4f6 !important; }
+.bootstrap-switch { border-color: #e5e7eb !important; border-radius: 6px !important; }
+/* Force orange on native select option highlight (webkit) */
+select.form-control option:checked, select.form-control option:hover,
+.form-group select option:checked, .form-group select option:hover { background-color: #F27420 !important; color: #fff !important; }
+/* Pay Invoice button hover */
+.pay-invoice-btn:hover { background: #e55d00 !important; box-shadow: 0 4px 14px rgba(255,107,0,0.4) !important; }
+.pay-invoice-btn:focus { outline: none !important; box-shadow: 0 0 0 3px rgba(255,107,0,0.2) !important; }
+/* Hide vendor sidebar footer */
+.main-menu-footer { display: none !important; }
+/* Pace loading bar - theme color */
+.pace .pace-progress { background: #F27420 !important; }
+
+/* ==============================
+   Mobile & iPad Sidebar
+   ============================== */
+
+/* Mobile & Tablet: sidebar logout + menu text labels */
+@media (max-width: 1024px) {
+  .main-menu .sidebar-logout {
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    padding: 14px 20px !important;
+    border-top: 1.5px solid #F27420 !important;
+    background: #fff !important;
+    display: block !important;
+  }
+  .main-menu .sidebar-logout a {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 10px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    color: #F27420 !important;
+    text-transform: none !important;
+  }
+  .main-menu .sidebar-logout i {
+    font-size: 17px !important;
+  }
+  .main-menu .navigation > li > a > span,
+  .main-menu .navigation > li > a > span.menu-title {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+    clip: auto !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+  }
+  .main-menu .navigation > li > a {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 10px 20px !important;
+  }
+  .main-menu .navigation > li > a > i {
+    font-size: 16px !important;
+    width: 20px !important;
+    text-align: center !important;
+    flex-shrink: 0 !important;
+  }
+  .main-menu .navigation .navigation-header span {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
+
+/* Mobile: sidebar as overlay — hidden by default */
+@media (max-width: 767.98px) {
+  .main-menu {
+    position: fixed !important;
+    top: 0 !important;
+    width: 260px !important;
+    height: 100vh !important;
+    z-index: 1050 !important;
+    border-right: 1px solid #e5e7eb !important;
+    left: -270px !important;
+    right: auto !important;
+    transition: left 0.3s ease !important;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+  body.menu-open .main-menu {
+    left: 0 !important;
+    box-shadow: 8px 0 30px rgba(0,0,0,0.15) !important;
+  }
+  /* Overlay backdrop */
+  .sidenav-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(0,0,0,0.4) !important;
+    z-index: 1040 !important;
+  }
+  /* Content should NOT shift */
+  .app-content {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+  }
+  /* Brand text in sidebar */
+  .sidebar-brand-logo {
+    display: flex !important;
+    align-items: center;
+    padding: 16px 20px !important;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .sidebar-brand-logo .sidebar-brand-text {
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    text-decoration: none !important;
+  }
+  /* Navbar - single row, keep hamburger visible */
+  .header-navbar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 999 !important;
+    background: #fff !important;
+  }
+  .header-navbar .navbar-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+  }
+  .header-navbar .navbar-header {
+    flex-shrink: 0 !important;
+    width: auto !important;
+  }
+  .header-navbar .navbar-container {
+    flex: 1 !important;
+    margin-left: 0 !important;
+  }
+  /* Footer */
+  .footer { margin-left: 0 !important; }
+}
+
+/* iPad / Tablet — hidden by default, full overlay like mobile */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .main-menu,
+  body.vertical-layout.vertical-menu.menu-collapsed .main-menu {
+    position: fixed !important;
+    top: 0 !important;
+    width: 260px !important;
+    height: 100vh !important;
+    z-index: 1050 !important;
+    left: -270px !important;
+    right: auto !important;
+    transition: left 0.3s ease !important;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+  body.menu-open .main-menu {
+    left: 0 !important;
+    width: 260px !important;
+    box-shadow: 8px 0 30px rgba(0,0,0,0.15) !important;
+  }
+  /* Content should NOT have margin for collapsed sidebar */
+  body.vertical-layout.vertical-menu.menu-collapsed .content,
+  body.vertical-layout.vertical-menu.menu-collapsed .footer,
+  body.vertical-layout.vertical-menu.menu-collapsed .navbar .navbar-container,
+  .app-content {
+    margin-left: 0 !important;
+  }
+  body.vertical-layout.vertical-menu.menu-collapsed .navbar .navbar-header {
+    width: auto !important;
+  }
+  /* Navbar: single row on tablet */
+  .header-navbar .navbar-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+  }
+  .header-navbar .navbar-header {
+    flex-shrink: 0 !important;
+  }
+  .header-navbar .navbar-container {
+    flex: 1 !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+  }
+  /* Show hamburger and Sale Order on iPad — override Bootstrap d-md-none */
+  .header-navbar .nav .nav-item.mobile-menu,
+  .header-navbar .nav #mobile-sale-btn,
+  .header-navbar .nav .mobile-menu.d-md-none,
+  #mobile-sale-btn.d-md-none,
+  li.nav-item.mobile-menu.d-md-none {
+    display: flex !important;
+    align-items: center !important;
+  }
+  /* Hamburger icon color — dark on white header */
+  .header-navbar .navbar-header .nav-link i,
+  .header-navbar .navbar-header .menu-toggle i,
+  .header-navbar .mobile-menu .nav-link i {
+    color: #374151 !important;
+  }
+  /* Hide desktop hamburger on iPad (avoid duplicate) */
+  .header-navbar .nav-item.d-none.d-md-block {
+    display: none !important;
+  }
+  /* Fix Sale Order button — hide short text on iPad, show full text */
+  #mobile-sale-btn .mobile-sale-short {
+    display: none !important;
+  }
+  #mobile-sale-btn .mobile-sale-text {
+    display: inline !important;
+  }
+  /* Navbar items order: hamburger first, brand center, sale order right */
+  .header-navbar .navbar-header .nav {
+    width: 100%;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+  .header-navbar .navbar-header .mobile-menu {
+    order: 1 !important;
+    margin-right: 0 !important;
+  }
+  #navbar-brand-li {
+    order: 2 !important;
+    flex: 1 !important;
+    text-align: center !important;
+  }
+  #mobile-sale-btn {
+    order: 3 !important;
+  }
+  .sidenav-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(0,0,0,0.4) !important;
+    z-index: 1040 !important;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease !important;
+  }
+  body.menu-open .sidenav-overlay,
+  body.vertical-layout.menu-open .sidenav-overlay {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+  .app-content {
+    margin-left: 0 !important;
+  }
+  .main-menu .sidebar-brand-logo,
+  body.vertical-layout.vertical-menu.menu-collapsed .main-menu .sidebar-brand-logo,
+  body.vertical-layout.vertical-menu.menu-expanded .main-menu .sidebar-brand-logo {
+    display: flex !important;
+    align-items: center !important;
+    padding: 16px 20px !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+    background: #fff !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .sidebar-brand-logo .sidebar-brand-text {
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+  }
+  .footer { margin-left: 0 !important; }
+}

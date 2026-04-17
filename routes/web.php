@@ -1,0 +1,840 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PermissionGroup;
+use App\Http\Controllers\PermissionModule;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\PermissionRoleController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\MenuController;
+use App\Http\Controllers\MenuRoleController;
+use App\Http\Controllers\CompanyDetails;
+use App\Http\Controllers\SalesController;
+use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PassbookController;
+use App\Http\Controllers\CompanyDetailController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\HistoricalReportsController;
+use App\Http\Controllers\InvoicecronController;
+use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\ReportActionsController;
+use App\Http\Controllers\TestController;
+use App\Http\Controllers\CustomerPaymentsController;
+use App\Http\Controllers\SupplierPaymentsController;
+use App\Http\Controllers\OnAccountPaymentController;
+use App\Http\Controllers\WashDatabaseController;
+use App\Http\Controllers\GeneralSettingController;
+use App\Http\Controllers\CustomerPaymentHistoryController;
+use App\Http\Controllers\SupplierPaymentHistoryController;
+use App\Http\Controllers\CustomerReturnController;
+use App\Http\Controllers\SupplierReturnController;
+use App\Http\Controllers\DumpController;
+use App\Http\Controllers\StockClosingController;
+use App\Http\Controllers\StockCheckController;
+use App\Http\Controllers\CustomerHistoryController;
+use App\Http\Controllers\SupplierHistoryController;
+use App\Http\Controllers\ProductHistoryController;
+use App\Http\Controllers\ProfitLossController;
+
+/*
+  |--------------------------------------------------------------------------
+  | Web Routes
+  |--------------------------------------------------------------------------
+  |
+  | Here is where you can register web routes for your application. These
+  | routes are loaded by the RouteServiceProvider within a group which
+  | contains the "web" middleware group. Now create something great!
+  |
+ */
+ 
+Route::get('/logout', function () {
+    return view('logout'); 
+	//return response('<p style="text-align:center;margin-top:50px;font-size:20px;">Please logout from panel instead of direct logout from url. or <br/> </p>', 200);
+});
+
+// test cases.
+Route::get('/testing', [TestController::class, 'index'])->name('testing');
+Route::get('/email-testing', [\App\Http\Controllers\EmailsController::class, 'test'])->name('email-testing');
+
+Route::get('/wash', [WashDatabaseController::class, 'showTables'])->name('wash');
+Route::post('/wash-truncate', [WashDatabaseController::class, 'truncateTables'])->name('wash-truncate');
+
+require_once('common.php');
+
+Route::middleware(['localization', 'domains'])->group(function () {
+    Route::get('/', function () {
+        return view('auth.login');
+    });
+    Route::get('/invoicedeletecron', [InvoicecronController::class, 'invoicedeletecron'])->name('invoicedeletecron');
+
+    Auth::routes();
+    Route::group(['prefix' => 'company_details', 'as' => 'company_details.'], function(){
+        Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+            Route::get('/index', [CompanyDetailController::class, 'index'])->name('index');
+        });
+        Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
+            Route::get('/create', [CompanyDetailController::class, 'create'])->name('create');
+            Route::post('store', [CompanyDetailController::class, 'store'])->name('store');
+        });
+        Route::group(['prefix' => 'edit', 'as' => 'edit.'], function(){
+            Route::get('/index', [CompanyDetailController::class, 'edit'])->name('index');
+            Route::post('/update', [CompanyDetailController::class, 'update'])->name('update');
+        });
+        // Route::group(['prefix' => 'ajax', 'as' => 'ajax.'], function(){
+        //     Route::post('/purchases-list', [PurchaseController::class, 'ajaxDailyBookPurchase'])->name('purchases-list');
+        // });
+});
+    Route::get('/noPermission', [HomeController::class, 'noPermission'])->name('noPermission');
+	Route::get('/workTime', [HomeController::class, 'workTime'])->name('workTime');
+    Route::middleware(['auth','rbac','wtpermission'])->group(function () {
+
+        Route::group(['prefix' => 'management', 'as' => 'management.'], function(){
+
+            Route::group(['prefix' => 'roles', 'as' => 'roles.'], function(){
+                Route::group(['prefix' => 'modules', 'as' => 'modules.'], function(){
+                    Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+                        Route::get('index', [PermissionModule::class, 'index'])->name('index');
+                    });
+
+                    Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
+                        Route::get('/create', [PermissionModule::class, 'create'])->name('create');
+                        Route::post('store', [PermissionModule::class, 'store'])->name('store');
+                    });
+
+                    Route::group(['prefix' => 'edit', 'as' => 'edit.'], function(){
+                        Route::get('/{permissionModule}/edit', [PermissionModule::class, 'edit'])->name('edit');
+                        Route::put('/{permissionModule}', [PermissionModule::class, 'update'])->name('update');
+                    });
+
+                    Route::group(['prefix' => 'delete', 'as' => 'delete.'], function(){
+                        Route::delete('/{permissionModule}', [PermissionModule::class, 'destroy'])->name('destroy');
+                    });
+                });
+
+                Route::group(['prefix' => 'groups', 'as' => 'groups.'], function(){
+                    Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+                        Route::get('index', [PermissionGroup::class, 'index'])->name('index');
+                    });
+
+                    Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
+                        Route::get('create', [PermissionGroup::class, 'create'])->name('create');
+                        Route::post('store', [PermissionGroup::class, 'store'])->name('store');
+                    });
+
+                    Route::group(['prefix' => 'edit', 'as' => 'edit.'], function(){
+                        Route::get('/{permissionGroup}/edit', [PermissionGroup::class, 'edit'])->name('edit');
+                        Route::put('/{permissionGroup}', [PermissionGroup::class, 'update'])->name('update');
+                    });
+
+                    Route::group(['prefix' => 'delete', 'as' => 'delete.'], function(){
+                        Route::delete('/{permissionGroup}', [PermissionGroup::class, 'destroy'])->name('destroy');
+                    });
+                });
+
+                Route::group(['prefix' => 'role', 'as' => 'role.'], function(){
+                    Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+                        Route::get('index', [RoleController::class, 'index'])->name('index');
+						Route::get('list', [RoleController::class, 'list'])->name('list');
+                    });
+
+                    Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
+                        Route::get('/create', [RoleController::class, 'create'])->name('create');
+                        Route::post('store', [RoleController::class, 'store'])->name('store');
+                    });
+
+                    Route::group(['prefix' => 'edit', 'as' => 'edit.'], function(){
+                        Route::get('/{role}/edit', [RoleController::class, 'edit'])->name('edit');
+                        Route::put('/{role}', [RoleController::class, 'update'])->name('update');
+                    });
+
+                    Route::group(['prefix' => 'delete', 'as' => 'delete.'], function(){
+                        Route::delete('/{role}', [RoleController::class, 'destroy'])->name('destroy');
+                    });
+                });
+
+                Route::group(['prefix' => 'permission', 'as' => 'permission.'], function(){
+                    Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+                        Route::get('index', [PermissionRoleController::class, 'index'])->name('index');
+                        Route::get('list', [PermissionRoleController::class, 'list'])->name('list');
+                    });
+
+                    Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
+                        //Route::get('permissionRole/create', [PermissionRoleController::class, 'create'])->name('permissionRole.create');
+                        Route::post('store', [PermissionRoleController::class, 'store'])->name('store');
+                    });
+
+                    Route::group(['prefix' => 'edit', 'as' => 'edit.'], function(){
+                        Route::get('/{permissionRole}/edit', [PermissionRoleController::class, 'edit'])->name('edit');
+                        //Route::put('permissionRole/{permissionRole}', [PermissionRoleController::class, 'update'])->name('permissionRole.update');
+                    });
+
+                    Route::group(['prefix' => 'delete', 'as' => 'delete.'], function(){
+                        Route::delete('/{permissionRole}', [PermissionRoleController::class, 'destroy'])->name('destroy');
+                    });
+                });
+            });
+
+            Route::group(['prefix' => 'users', 'as' => 'users.'], function(){
+                Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+                    Route::get('index', [UserController::class, 'index'])->name('index');
+                    Route::get('list', [UserController::class, 'list'])->name('list');
+                });
+
+                Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
+                    Route::get('/create', [UserController::class, 'create'])->name('create');
+                    Route::post('store', [UserController::class, 'store'])->name('store');
+                });
+
+                Route::group(['prefix' => 'edit', 'as' => 'edit.'], function(){
+                    Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit');
+                    Route::put('/{user}', [UserController::class, 'update'])->name('update');
+                });
+
+                Route::group(['prefix' => 'delete', 'as' => 'delete.'], function(){
+                    Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+                });
+            });
+
+            // Settings page (combined Roles, Permissions, Users, Account, Company)
+            Route::get('settings', function() {
+                $adminData   = \Auth::user();
+                $companyData = \App\Models\CompanyDetailModel::first();
+                $supplierSetting = \App\Models\GeneralSetting::firstOrCreate(
+                    ['setting' => 'show_suppliers'],
+                    ['status' => 1, 'is_archive' => 0, 'user_id' => \Auth::id()]
+                );
+                $showSuppliers = (int) $supplierSetting->status;
+                return view('settings.index', compact('adminData', 'companyData', 'showSuppliers'));
+            })->name('settings.index');
+            Route::post('settings/password/update', [\App\Http\Controllers\AdminController::class, 'updatePassword'])->name('settings.password.update');
+            Route::post('settings/data-delete', function(\Illuminate\Http\Request $request) {
+                $section = $request->input('section');
+                $map = [
+                    'sales'     => ['customer_invoice_products','customer_invoice_orders','invoice_payments','customer_invoices'],
+                    'purchases' => ['supplier_invoice_products','supplier_invoice_orders','supplier_payments','supplier_invoices'],
+                    'customers' => ['customers'],
+                    'suppliers' => ['suppliers'],
+                    'products'  => ['products'],
+                    'stock'     => ['stock_closings','stock_products'],
+                    'payments'  => ['customer_payments','payments'],
+                ];
+                if (!isset($map[$section])) {
+                    return response()->json(['success'=>false,'message'=>'Invalid section.'], 422);
+                }
+                \DB::statement('SET FOREIGN_KEY_CHECKS=0');
+                foreach ($map[$section] as $table) {
+                    \DB::table($table)->delete();
+                }
+                \DB::statement('SET FOREIGN_KEY_CHECKS=1');
+                return response()->json(['success'=>true,'message'=>ucfirst($section).' data deleted successfully.']);
+            })->name('settings.data.delete');
+
+            Route::group(['prefix' => 'customers', 'as' => 'customers.'], function(){
+                Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+                    Route::get('index', [CustomerController::class, 'index'])->name('index');
+					Route::match(['get','post'], 'list', [CustomerController::class, 'list'])->name('list');
+                });
+
+                Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
+                    Route::get('/create', [CustomerController::class, 'create'])->name('create');
+                    Route::post('store', [CustomerController::class, 'store'])->name('store');
+                });
+
+                Route::group(['prefix' => 'edit', 'as' => 'edit.'], function(){
+                    Route::get('/{customer}/edit', [CustomerController::class, 'edit'])->name('edit');
+                    Route::put('/{customer}', [CustomerController::class, 'update'])->name('update');
+                });
+
+                Route::group(['prefix' => 'delete', 'as' => 'delete.'], function(){
+                    Route::delete('/{customer}', [CustomerController::class, 'destroy'])->name('destroy');
+                });
+				
+				// customer account payment.
+				Route::group(['prefix' => 'on_account_payment', 'as' => 'on_account_payment.'], function(){
+					Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
+						Route::post('store', [OnAccountPaymentController::class, 'store'])->name('store');
+					});
+					Route::group(['prefix' => 'edit', 'as' => 'edit.'], function(){
+						//Route::get('index', [SupplierController::class, 'index'])->name('index');
+					});
+					Route::group(['prefix' => 'delete', 'as' => 'delete.'], function(){
+						//Route::get('index', [SupplierController::class, 'index'])->name('index');
+					});
+					Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+						Route::get('', [OnAccountPaymentController::class, 'create'])->name('index');
+						Route::post('list', [OnAccountPaymentController::class, 'index'])->name('list');
+					});
+				});
+
+            });
+			
+            Route::group(['prefix' => 'suppliers', 'as' => 'suppliers.'], function(){
+                Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+                    Route::get('index', [SupplierController::class, 'index'])->name('index');
+                    Route::match(['get','post'], 'list', [SupplierController::class, 'list'])->name('list');
+                });
+
+                Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
+                    Route::get('supplier/create', [SupplierController::class, 'create'])->name('create');
+                    Route::post('store', [SupplierController::class, 'store'])->name('store');
+                });
+
+                Route::group(['prefix' => 'edit', 'as' => 'edit.'], function(){
+                    Route::get('/{supplier}/edit', [SupplierController::class, 'edit'])->name('edit');
+                    Route::put('/{supplier}', [SupplierController::class, 'update'])->name('update');
+                });
+
+                Route::group(['prefix' => 'delete', 'as' => 'delete.'], function(){
+                    Route::delete('/{supplier}', [SupplierController::class, 'destroy'])->name('destroy');
+                });
+				
+				// suppliers.
+				Route::group(['prefix' => 'on_account_payment', 'as' => 'on_account_payment.'], function(){
+					Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
+						Route::post('store', [SupplierPaymentsController::class, 'storeOnAccount'])->name('store');
+					});
+					Route::group(['prefix' => 'edit', 'as' => 'edit.'], function(){
+						//Route::get('index', [SupplierController::class, 'index'])->name('index');
+					});
+					Route::group(['prefix' => 'delete', 'as' => 'delete.'], function(){
+						//Route::get('index', [SupplierController::class, 'index'])->name('index');
+					});
+					Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+						Route::get('', [SupplierPaymentsController::class, 'createOnAccount'])->name('index');
+						Route::post('list', [SupplierPaymentsController::class, 'indexOnAccount'])->name('list');
+					});
+				});
+
+            });
+
+            Route::group(['prefix' => 'products', 'as' => 'products.'], function(){
+                Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+                    Route::get('index', [ProductController::class, 'index'])->name('index');
+                    Route::get('list', [ProductController::class, 'list'])->name('list');
+                });
+
+                Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
+                    Route::get('/create', [ProductController::class, 'create'])->name('create');
+                    Route::post('store', [ProductController::class, 'store'])->name('store');
+                });
+
+                Route::group(['prefix' => 'edit', 'as' => 'edit.'], function(){
+                    Route::get('/{product}/edit', [ProductController::class, 'edit'])->name('edit');
+                    Route::put('/{product}', [ProductController::class, 'update'])->name('update');
+                });
+
+                Route::group(['prefix' => 'delete', 'as' => 'delete.'], function(){
+                    Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
+                });
+            });
+
+            Route::group(['prefix' => 'passbooks', 'as' => 'passbooks.'], function(){
+                Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+                    Route::get('index', [PassbookController::class, 'index'])->name('index');
+                });
+
+                Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
+                    Route::get('/create', [PassbookController::class, 'create'])->name('create');
+                    Route::post('store', [PassbookController::class, 'store'])->name('store');
+                });
+                Route::group(['prefix' => 'ajax', 'as' => 'ajax.'], function(){
+                    Route::post('/passbooks-list', [PassbookController::class, 'ajaxPassbooksList'])->name('passbooks-list');
+
+                });
+            });
+        });
+		
+		Route::group(['prefix' => 'customer_payment_history', 'as' => 'customer_payment_history.'], function(){
+			Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
+				
+			});
+			Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+				Route::get('', [CustomerPaymentHistoryController::class, 'create'])->name('index');
+				Route::get('customers', [CustomerPaymentHistoryController::class, 'customers'])->name('customers');
+				Route::post('{customer_id}', [CustomerPaymentHistoryController::class, 'show'])->name('show');
+			});
+			Route::group(['prefix' => 'delete', 'as' => 'delete.'], function(){
+				Route::post('{invoice_id}', [CustomerPaymentHistoryController::class, 'destroy'])->name('delete');
+			});
+		});
+		
+		// stock manager.
+		Route::get('stock_manager/view', [StockClosingController::class, 'stockManager'])->name('stock_manager.view.index');
+
+		// closing stock.
+		Route::group(['prefix' => 'stock_closing', 'as' => 'stock_closing.'], function(){
+			Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
+				Route::post('save-all', [StockClosingController::class, 'saveAll'])->name('save-all');
+				Route::post('save-one', [StockClosingController::class, 'saveOne'])->name('save-one');
+			});
+			Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+				Route::get('index', [StockClosingController::class, 'crud'])->name('index');
+				Route::post('products', [StockClosingController::class, 'products'])->name('products');
+			});
+			Route::group(['prefix' => 'edit', 'as' => 'edit.'], function(){
+				Route::post('', [StockClosingController::class, 'update'])->name('edit');
+			});
+		});
+		
+		// stock check.
+		Route::group(['prefix' => 'stock_check', 'as' => 'stock_check.'], function(){
+			Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+				Route::get('', [StockCheckController::class, 'index'])->name('index');
+				Route::post('list', [StockCheckController::class, 'list'])->name('list');
+				Route::post('openingStock', [StockCheckController::class, 'openingStock'])->name('openingStock');
+				Route::post('newStock', [StockCheckController::class, 'newStock'])->name('newStock');
+				Route::post('sales', [StockCheckController::class, 'sales'])->name('sales');
+				Route::post('customerReturn', [StockCheckController::class, 'customerReturn'])->name('customerReturn');
+				Route::post('dumps', [StockCheckController::class, 'dumps'])->name('dumps');
+				Route::post('supplierReturn', [StockCheckController::class, 'supplierReturn'])->name('supplierReturn');
+				Route::post('closingStock', [StockCheckController::class, 'closingStock'])->name('closingStock');
+			});
+		});
+		
+		Route::group(['prefix' => 'supplier_payment_history', 'as' => 'supplier_payment_history.'], function(){
+			Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
+				
+			});
+			Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+				Route::get('', [SupplierPaymentHistoryController::class, 'create'])->name('index');
+				Route::get('suppliers', [SupplierPaymentHistoryController::class, 'suppliers'])->name('suppliers');
+				Route::post('{supplier_id}', [SupplierPaymentHistoryController::class, 'show'])->name('show');
+			});
+			Route::group(['prefix' => 'delete', 'as' => 'delete.'], function(){
+				Route::post('{invoice_id}', [SupplierPaymentHistoryController::class, 'destroy'])->name('delete');
+			});
+		});
+		
+		// customer return.
+		Route::group(['prefix' => 'customer_return', 'as' => 'customer_return.'], function(){
+			Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
+				
+			});
+			Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+				Route::get('', [CustomerReturnController::class, 'index'])->name('index');
+				Route::get('customers', [CustomerReturnController::class, 'customers'])->name('customers');
+				Route::get('products', [CustomerReturnController::class, 'products'])->name('products');
+				Route::post('invoices', [CustomerReturnController::class, 'invoices'])->name('invoices');
+				Route::post('returns', [CustomerReturnController::class, 'returns'])->name('returns');
+				Route::post('product', [CustomerReturnController::class, 'product'])->name('product');
+				Route::post('return/create', [CustomerReturnController::class, 'returnCreate'])->name('return-create');
+				Route::post('return/update', [CustomerReturnController::class, 'returnUpdate'])->name('return-update');
+				Route::post('return/delete', [CustomerReturnController::class, 'returnDelete'])->name('return-delete');
+			});
+		});
+		
+		// supplier return.
+		Route::group(['prefix' => 'supplier_return', 'as' => 'supplier_return.'], function(){
+			Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
+				
+			});
+			Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+				Route::get('', [SupplierReturnController::class, 'index'])->name('index');
+				Route::get('suppliers', [SupplierReturnController::class, 'suppliers'])->name('suppliers');
+				Route::get('products', [SupplierReturnController::class, 'products'])->name('products');
+				Route::post('invoices', [SupplierReturnController::class, 'invoices'])->name('invoices');
+				Route::post('returns', [SupplierReturnController::class, 'returns'])->name('returns');
+				Route::post('product', [SupplierReturnController::class, 'product'])->name('product');
+				Route::post('return/create', [SupplierReturnController::class, 'returnCreate'])->name('return-create');
+				Route::post('return/update', [SupplierReturnController::class, 'returnUpdate'])->name('return-update');
+				Route::post('return/delete', [SupplierReturnController::class, 'returnDelete'])->name('return-delete');
+			});
+		});
+		
+		// dump return.
+		Route::group(['prefix' => 'dump_return', 'as' => 'dump_return.'], function(){
+			Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
+				
+			});
+			Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+				Route::get('', [DumpController::class, 'index'])->name('index');
+				Route::get('suppliers', [SupplierReturnController::class, 'suppliers'])->name('suppliers');
+				Route::get('products', [SupplierReturnController::class, 'products'])->name('products');
+				Route::post('invoices', [DumpController::class, 'invoices'])->name('invoices');
+				Route::post('returns', [DumpController::class, 'returns'])->name('returns');
+				Route::post('product', [DumpController::class, 'product'])->name('product');
+				Route::post('return/create', [DumpController::class, 'returnCreate'])->name('return-create');
+				Route::post('return/update', [DumpController::class, 'returnUpdate'])->name('return-update');
+				Route::post('return/delete', [DumpController::class, 'returnDelete'])->name('return-delete');
+			});
+		});
+		
+		Route::group(['prefix' => 'customer_history', 'as' => 'customer_history.'], function(){
+			Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+				Route::get('', [CustomerHistoryController::class, 'index'])->name('index');
+				Route::get('customers', [CustomerHistoryController::class, 'customers'])->name('customers');
+				Route::post('history', [CustomerHistoryController::class, 'history'])->name('history');
+				Route::post('email', [CustomerHistoryController::class, 'email'])->name('email');
+				Route::post('print', [CustomerHistoryController::class, 'print'])->name('print');
+				Route::post('statement', [CustomerHistoryController::class, 'statement'])->name('statement');
+			});
+		});
+		
+		Route::group(['prefix' => 'supplier_history', 'as' => 'supplier_history.'], function(){
+			Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+				Route::get('', [SupplierHistoryController::class, 'index'])->name('index');
+				Route::get('suppliers', [SupplierHistoryController::class, 'suppliers'])->name('suppliers');
+				Route::post('history', [SupplierHistoryController::class, 'history'])->name('history');
+				Route::post('email', [SupplierHistoryController::class, 'email'])->name('email');
+				Route::post('print', [SupplierHistoryController::class, 'print'])->name('print');
+				Route::post('statement', [SupplierHistoryController::class, 'statement'])->name('statement');
+			});
+		});
+		
+		Route::group(['prefix' => 'product_history', 'as' => 'product_history.'], function(){
+			Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+				Route::get('', [ProductHistoryController::class, 'index'])->name('index');
+				Route::get('customers', [ProductHistoryController::class, 'customers'])->name('customers');
+				Route::get('suppliers', [ProductHistoryController::class, 'suppliers'])->name('suppliers');
+				Route::get('products', [ProductHistoryController::class, 'products'])->name('products');
+				
+				Route::post('supplier_invoices', [ProductHistoryController::class, 'supplierInvoices'])->name('supplier_invoices');
+				Route::post('supplier_returns', [ProductHistoryController::class, 'supplierReturns'])->name('supplier_returns');
+				Route::post('sales', [ProductHistoryController::class, 'sales'])->name('sales');
+				Route::post('customer_returns', [ProductHistoryController::class, 'customerReturns'])->name('customer_returns');
+				Route::post('dumps', [ProductHistoryController::class, 'dumps'])->name('dumps');
+			});
+		});
+		
+		Route::group(['prefix' => 'product_profit_loss', 'as' => 'product_profit_loss.'], function(){
+			Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+				Route::get('', [ProfitLossController::class, 'index'])->name('index');
+				Route::get('customers', [ProfitLossController::class, 'customers'])->name('customers');
+				Route::get('suppliers', [ProfitLossController::class, 'suppliers'])->name('suppliers');
+				Route::get('products', [ProfitLossController::class, 'products'])->name('products');
+				Route::post('profit_loss', [ProfitLossController::class, 'profitLoss'])->name('profit_loss');
+				
+				/*Route::post('supplier_invoices', [ProductHistoryController::class, 'supplierInvoices'])->name('supplier_invoices');
+				Route::post('supplier_returns', [ProductHistoryController::class, 'supplierReturns'])->name('supplier_returns');
+				Route::post('sales', [ProductHistoryController::class, 'sales'])->name('sales');
+				Route::post('customer_returns', [ProductHistoryController::class, 'customerReturns'])->name('customer_returns');
+				Route::post('dumps', [ProductHistoryController::class, 'dumps'])->name('dumps');*/
+			});
+		});
+		
+
+        //for admin editing
+        Route::group(['prefix' => 'admin', 'as' => 'admin.'], function(){
+
+          Route::group(['prefix' => 'edit', 'as' => 'edit.'], function(){
+              Route::get('/profile', [AdminController::class, 'edit'])->name('profile');
+              Route::post('/update', [AdminController::class, 'update'])->name('update');
+
+          });
+        });
+		
+		Route::group(['prefix' => 'general_settings', 'as' => 'general_settings.'], function(){
+			Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+				Route::get('', [GeneralSettingController::class, 'index'])->name('index');
+				Route::get('list', [GeneralSettingController::class, 'list'])->name('list');
+			});
+			Route::group(['prefix' => 'save', 'as' => 'save.'], function(){
+				Route::post('', [GeneralSettingController::class, 'update'])->name('save');
+			});
+		});
+		
+		Route::group(['prefix' => 'payments', 'as' => 'payments.'], function(){
+			
+			// customers.
+			Route::group(['prefix' => 'customer_payment', 'as' => 'customer_payment.'], function(){
+				Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
+					//Route::post('store', [CustomerPaymentsController::class, 'store'])->name('store');
+					Route::post('unpaid-invoices/{customer_id}', [CustomerPaymentsController::class, 'unpaidInvoices'])->name('unpaid-invoices');
+					Route::post('pay/{customer_id}', [CustomerPaymentsController::class, 'save'])->name('pay-invoices');
+					Route::get('on-account-payments/{customer_id}', [CustomerPaymentsController::class, 'onAccountPayments'])->name('on-account-payments');
+				});
+				Route::group(['prefix' => 'edit', 'as' => 'edit.'], function(){
+					//Route::get('index', [CustomerPaymentsController::class, 'index'])->name('index');
+				});
+				Route::group(['prefix' => 'delete', 'as' => 'delete.'], function(){
+					//Route::get('index', [CustomerPaymentsController::class, 'index'])->name('index');
+				});
+				Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+					Route::get('', [CustomerPaymentsController::class, 'create'])->name('index');
+					//Route::post('list', [CustomerPaymentsController::class, 'index'])->name('list');
+				});
+			});
+			
+			// suppliers.
+			Route::group(['prefix' => 'supplier_payment', 'as' => 'supplier_payment.'], function(){
+				Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
+					//Route::post('store', [SupplierPaymentsController::class, 'store'])->name('store');
+					Route::post('unpaid-invoices/{supplier_id}', [SupplierPaymentsController::class, 'unpaidInvoices'])->name('unpaid-invoices');
+					Route::post('pay/{supplier_id}', [SupplierPaymentsController::class, 'save'])->name('pay-invoices');
+					Route::get('suppliers/list', [SupplierPaymentsController::class, 'listSuppliers'])->name('list-suppliers');
+					Route::get('on-account-payments/{supplier_id}', [SupplierPaymentsController::class, 'onAccountPayments'])->name('on-account-payments');
+				});
+				Route::group(['prefix' => 'edit', 'as' => 'edit.'], function(){
+					//Route::get('index', [SupplierPaymentsController::class, 'index'])->name('index');
+				});
+				Route::group(['prefix' => 'delete', 'as' => 'delete.'], function(){
+					//Route::get('index', [SupplierPaymentsController::class, 'index'])->name('index');
+				});
+				Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+					Route::get('', [SupplierPaymentsController::class, 'create'])->name('index');
+					//Route::post('list', [SupplierPaymentsController::class, 'index'])->name('list');
+				});
+			});
+		});
+		
+        // end admin edit
+
+        Route::group(['prefix' => 'data_entry', 'as' => 'data_entry.'], function(){
+            Route::group(['prefix' => 'sales_entry', 'as' => 'sales_entry.'], function(){
+			
+				// email group.
+				Route::group(['prefix' => 'invoice_email', 'as' => 'invoice_email.'], function(){
+                    Route::group(['prefix' => 'send', 'as' => 'send.'], function(){
+						Route::get('/{invoice}', [\App\Http\Controllers\EmailsController::class, 'customerInvoice'])->name('send');
+					});
+                });
+				
+				// payment group.
+				Route::group(['prefix' => 'invoice_payment', 'as' => 'invoice_payment.'], function(){
+                    Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
+						Route::post('', [\App\Http\Controllers\CustomerPaymentsController::class, 'store'])->name('create');
+					});
+					Route::group(['prefix' => 'edit', 'as' => 'edit.'], function(){
+						Route::post('', [\App\Http\Controllers\CustomerPaymentsController::class, 'update'])->name('update');
+					});
+					Route::group(['prefix' => 'delete', 'as' => 'delete.'], function(){
+						Route::post('', [\App\Http\Controllers\CustomerPaymentsController::class, 'destroy'])->name('delete');
+					});
+					Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+						Route::get('/{id?}', [\App\Http\Controllers\CustomerPaymentsController::class, 'index'])->name('list');
+					});
+                });
+				
+				
+				//statements
+				Route::group(['prefix' => 'statements', 'as' => 'statements.'], function(){
+                    Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+						Route::get('', [\App\Http\Controllers\CustomerPaymentsController::class, 'statements'])->name('view');
+					});
+                });
+			
+                Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+                    //Route::get('/index', [SalesController::class, 'index'])->name('index');
+					Route::get('/', [SalesController::class, 'create'])->name('index');
+                });
+                Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
+                    //Route::get('/', [SalesController::class, 'create'])->name('index');
+                    Route::post('/store', [SalesController::class, 'store'])->name('store');
+                    Route::post('grid', [SalesController::class, 'grid'])->name('grid');
+                });
+                Route::group(['prefix' => 'invoice', 'as' => 'invoice.'], function(){
+                    Route::get('/', [SalesController::class, 'newInvoiceForm'])->name('new');
+                    Route::post('/generate', [SalesController::class, 'generateSalesInvoice'])->name('generate');
+                    Route::get('/{invoice}', [SalesController::class, 'edit'])->name('index');
+                    Route::post('/store-products/{invoice}', [SalesController::class, 'storeProducts'])->name('store');
+                    Route::get('invoiceview/{invoice}', [SalesController::class, 'invoiceview'])->name('invoiceview');
+					Route::get('invoiceview-delivery/{invoice}', [SalesController::class, 'invoiceviewDelivery'])->name('invoiceview-delivery');
+                    Route::get('invoicedownload/{invoice}', [SalesController::class, 'invoicedownload'])->name('invoicedownload');
+                    Route::get('mail/{invoice}', [SalesController::class, 'mail'])->name('mail');
+                    Route::get('delete/{invoice}', [SalesController::class, 'delete'])->name('delete');
+                });
+
+                Route::group(['prefix' => 'ajax', 'as' => 'ajax.'], function(){
+                    Route::get('/product-list', [SalesController::class, 'ajaxProductsList'])->name('product-list');
+					Route::get('/supplier-list/{product_id}', [SalesController::class, 'ajaxSuppliersList'])->name('supplier-list');
+					Route::get('/supplier-list-all', [SalesController::class, 'ajaxSuppliersListAll'])->name('supplier-list-all');
+					Route::get('/product-supplier-invoices/{product_id}/{supplier_id}', [SalesController::class, 'productSupplierInvoices'])->name('product-supplier-invoices');
+                    Route::get('/payment-list', [SalesController::class, 'ajaxPaymentsList'])->name('payment-list');
+                    Route::post('/add-invoice', [SalesController::class, 'ajaxCreateInvoice'])->name('add-invoice');
+                    Route::post('/add-single-invoice', [SalesController::class, 'ajaxCreateSingalInvoicenew'])->name('add-single-invoice');
+                    Route::post('/delete-single-invoice', [SalesController::class, 'ajaxDeleteSingalInvoice'])->name('delete-single-invoice');
+                    Route::post('/fetch-invoice-detail', [SalesController::class, 'ajaxfetchInvoiceDetail'])->name('fetch-invoice-detail');
+                    Route::get('/invoice-detail/{id}', [SalesController::class, 'ajaxfetchInvoiceAllDetail'])->name('invoice-detail');
+                    Route::post('/edit-single-invoice', [SalesController::class, 'ajaxEditSingleInvoice'])->name('edit-single-invoice');
+                    Route::post('/update-payment', [SalesController::class, 'ajaxEditPayment'])->name('update-payment');
+                    Route::post('/update-invoice-detail', [SalesController::class, 'ajaxEditInvoiceDetail'])->name('update-invoice-detail');
+                    Route::post('/save-invoice-notes', [SalesController::class, 'saveInvoiceNotes'])->name('save-invoice-notes');
+                    Route::get('/fetchuser', [SalesController::class, 'fetchuser'])->name('fetchuser');
+
+                });
+                Route::group(['prefix' => 'sales_customer', 'as' => 'sales_customer.'], function(){
+                    Route::get('/ajaxCustomer', [SalesController::class, 'ajaxCustomer'])->name('ajaxCustomer');
+                });
+                Route::group(['prefix' => 'sales_date', 'as' => 'sales_date.'], function(){
+                    Route::get('/ajaxDate', [SalesController::class, 'ajaxDate'])->name('ajaxDate');
+                });
+            });
+
+            Route::group(['prefix' => 'purchase_entry', 'as' => 'purchase_entry.'], function(){
+                Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+                    //Route::get('/index', [SalesController::class, 'index'])->name('index');
+					Route::get('/', [PurchaseController::class, 'create'])->name('index');
+                });
+                Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
+                    //
+                    Route::post('/store', [PurchaseController::class, 'store'])->name('store');
+                    Route::post('grid', [SalesController::class, 'grid'])->name('grid');
+                });
+                Route::group(['prefix' => 'invoice', 'as' => 'invoice.'], function(){
+                    Route::get('/', [PurchaseController::class, 'newInvoiceForm'])->name('new');
+                    Route::post('/generate', [PurchaseController::class, 'generateInvoice'])->name('generate');
+                    Route::get('/products/list', [PurchaseController::class, 'ajaxProductsList'])->name('products-list');
+                    Route::get('/{invoice}', [PurchaseController::class, 'edit'])->name('index');
+                    Route::post('/store-products/{invoice}', [SalesController::class, 'storeProducts'])->name('store');
+                    Route::get('invoiceview/{invoice}', [PurchaseController::class, 'invoiceview'])->name('invoiceview');
+                    Route::get('invoicedownload/{invoice}', [PurchaseController::class, 'invoicedownload'])->name('invoicedownload');
+                    Route::get('mail/{invoice}', [PurchaseController::class, 'mail'])->name('mail');
+                    Route::get('delete/{invoice}', [PurchaseController::class, 'delete'])->name('delete');
+                });
+				
+				Route::group(['prefix' => 'change_other_invoice', 'as' => 'change_other_invoice.'], function(){
+					Route::group(['prefix' => 'edit', 'as' => 'edit.'], function(){
+						Route::post('', [\App\Http\Controllers\PurchaseController::class, 'changeOtherInvoiceId'])->name('update');
+					});
+				});
+				Route::group(['prefix' => 'change_supplier', 'as' => 'change_supplier.'], function(){
+					Route::post('', [\App\Http\Controllers\PurchaseController::class, 'changeSupplier'])->name('update');
+				});
+				// payment group.
+				Route::group(['prefix' => 'invoice_payment', 'as' => 'invoice_payment.'], function(){
+                    Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
+						Route::post('', [\App\Http\Controllers\SupplierPaymentsController::class, 'store'])->name('create');
+					});
+					Route::group(['prefix' => 'edit', 'as' => 'edit.'], function(){
+						Route::post('', [\App\Http\Controllers\SupplierPaymentsController::class, 'update'])->name('update');
+					});
+					Route::group(['prefix' => 'delete', 'as' => 'delete.'], function(){
+						//Route::post('', [\App\Http\Controllers\SupplierPaymentsController::class, 'destroy'])->name('delete');
+					});
+					Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+						Route::get('/{id}', [\App\Http\Controllers\SupplierPaymentsController::class, 'index'])->name('list');
+					});
+                });
+				
+				Route::group(['prefix' => 'statements', 'as' => 'statements.'], function(){
+                    Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+						Route::get('', [\App\Http\Controllers\SupplierPaymentsController::class, 'statements'])->name('view');
+					});
+                });
+				
+                Route::group(['prefix' => 'ajax', 'as' => 'ajax.'], function(){
+                    Route::get('/product-list', [PurchaseController::class, 'ajaxProductsList'])->name('product-list');
+                    Route::post('/add-invoice', [PurchaseController::class, 'ajaxCreateInvoice'])->name('add-invoice');
+                    Route::post('/add-single-invoice', [PurchaseController::class, 'ajaxCreateSingalInvoicenew'])->name('add-single-invoice');
+                    Route::post('/delete-single-invoice', [PurchaseController::class, 'ajaxDeleteSingalInvoice'])->name('delete-single-invoice');
+                    Route::post('/fetch-invoice-detail', [PurchaseController::class, 'ajaxfetchInvoiceDetail'])->name('fetch-invoice-detail');
+                    Route::post('/edit-single-invoice', [PurchaseController::class, 'ajaxEditSingleInvoice'])->name('edit-single-invoice');
+                    Route::get('/invoice-detail/{id}', [PurchaseController::class, 'ajaxfetchInvoiceAllDetail'])->name('invoice-detail');
+					Route::post('/add-invoice-stock', [PurchaseController::class, 'addStockInvoice'])->name('add-invoice-stock');
+					Route::post('/delete-invoice-products', [PurchaseController::class, 'deleteInvoiceProducts'])->name('delete-invoice-products');
+                });
+            });
+            Route::group(['prefix' => 'closing_stock', 'as' => 'closing_stock.'], function(){
+                Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+                    Route::get('/index', [SalesController::class, 'index'])->name('index');
+                });
+            });
+
+        });
+
+        Route::group(['prefix' => 'dashboard', 'as' => 'dashboard.'], function(){
+            Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+                Route::get('/index', [HomeController::class, 'index'])->name('index');
+                Route::get('/chart-data', [HomeController::class, 'chartData'])->name('chart_data');
+            });
+        });
+        // Route::resource('permissionModule', PermissionModule::class);
+        // Route::resource('permissionGroup', PermissionGroup::class);
+        // Route::resource('role', RoleController::class);
+        // Route::resource('permissionRole', PermissionRoleController::class);
+        // Route::resource('user', UserController::class);
+        // Route::resource('customer', CustomerController::class);
+        // Route::resource('supplier', SupplierController::class);
+        // Route::resource('product', ProductController::class);
+        // Route::resource('menu', MenuController::class);
+        // Route::resource('menuRole', MenuRoleController::class);
+       // Route::get('/CompanyDetails/index', [CompanyDetails::class, 'index'])->name('index');
+       // Route::get('/CompanyDetails/create', [CompanyDetails::class, 'create'])->name('CompanyDetails.create');
+
+        Route::group(['prefix' => 'historical_reports', 'as' => 'historical_reports.'], function(){
+         Route::group(['prefix' => 'customer_history', 'as' => 'customer_history.'], function(){
+           Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+               Route::get('/index', [HistoricalReportsController::class, 'index'])->name('index');
+           });
+           Route::get('/customer_invoice_print', [HistoricalReportsController::class, 'customer_invoice_print'])->name('customer_invoice_print');
+            Route::group(['prefix' => 'ajax', 'as' => 'ajax.'], function(){
+               Route::post('/customer_history', [HistoricalReportsController::class, 'customerHistory'])->name('customer_history');
+               Route::post('/customer_history_pdf', [HistoricalReportsController::class, 'customerhistorypdf'])->name('customer_history_pdf');
+            });
+			
+			/** print, email, download & statement */
+			Route::group(['prefix' => 'report', 'as' => 'report.'], function(){
+               Route::get('/document/{type}', [ReportActionsController::class, 'customerCommonAction'])->name('download-pdf');
+			});
+			
+          });
+        });
+        Route::group(['prefix' => 'daily_report', 'as' => 'daily_report.'], function(){
+            Route::group(['prefix' => 'daily_book_sales', 'as' => 'daily_book_sales.'], function(){
+                Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+                    Route::get('/index', [SalesController::class, 'dailyBookSales'])->name('index');
+					Route::get('customers', [SalesController::class, 'customers'])->name('customers');
+                    Route::post('list', [SalesController::class, 'list'])->name('list');
+                    Route::get('print', [SalesController::class, 'print'])->name('print');
+                    Route::get('email', [SalesController::class, 'emailDailyBookSales'])->name('email');
+                    Route::get('statement', [SalesController::class, 'statementDailyBookSales'])->name('statement');
+                });
+
+                Route::group(['prefix' => 'ajax', 'as' => 'ajax.'], function(){
+                    Route::post('/sales-list', [SalesController::class, 'ajaxDailyBookSales'])->name('sales-list');
+                });
+            });
+
+            Route::group(['prefix' => 'daily_book_purchase', 'as' => 'daily_book_purchase.'], function(){
+                Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+                    Route::get('/index', [PurchaseController::class, 'dailyBookSales'])->name('index');
+                    Route::get('suppliers', [PurchaseController::class, 'suppliers'])->name('suppliers');
+                    Route::post('list', [PurchaseController::class, 'list'])->name('list');
+                    Route::get('print', [PurchaseController::class, 'print'])->name('print');
+                });
+                Route::group(['prefix' => 'ajax', 'as' => 'ajax.'], function(){
+                    Route::post('/purchases-list', [PurchaseController::class, 'ajaxDailyBookPurchase'])->name('purchases-list');
+                });
+            });
+        });
+        Route::group(['prefix' => 'settings', 'as' => 'settings.'], function(){
+            Route::group(['prefix' => 'payment_methods', 'as' => 'payment_methods.'], function(){
+                Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+                    Route::get('index', [PaymentController::class, 'index'])->name('index');
+                });
+
+                Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
+                    Route::get('/create', [PaymentController::class, 'create'])->name('create');
+                    Route::post('store', [PaymentController::class, 'store'])->name('store');
+                });
+
+                Route::group(['prefix' => 'edit', 'as' => 'edit.'], function(){
+                    Route::get('/{customer}/edit', [PaymentController::class, 'edit'])->name('edit');
+                    Route::put('/{customer}', [PaymentController::class, 'update'])->name('update');
+                });
+
+                Route::group(['prefix' => 'delete', 'as' => 'delete.'], function(){
+                    Route::delete('/{customer}', [PaymentController::class, 'destroy'])->name('destroy');
+                });
+            });
+        });
+
+        // activity log.
+        Route::group(['prefix' => 'activity_logs', 'as' => 'activity_logs.'], function(){
+            Route::group(['prefix' => 'users', 'as' => 'users.'], function(){
+                Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
+                    Route::get('/', [ActivityLogController::class, 'index'])->name('index');
+                    Route::post('list', [ActivityLogController::class, 'list'])->name('list');
+                    Route::get('users', [ActivityLogController::class, 'users'])->name('users');
+                    Route::get('events', [ActivityLogController::class, 'events'])->name('events');
+                });
+            });
+        });
+
+    });
+});

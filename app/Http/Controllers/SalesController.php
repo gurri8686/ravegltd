@@ -1,0 +1,1351 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Customer;
+use App\Models\CustomerInvoice;
+use App\Models\Product;
+use App\Models\Payment;
+use App\Models\CustomerInvoiceOrder;
+use App\Models\CustomerInvoiceProduct;
+use App\Models\StockProduct;
+use App\Models\CompanyDetailModel;
+use App\Models\InvoicePayment;
+use App\Mail\InvoiceMail;
+use Validator;
+use Response;
+use Session;
+use DB;
+use Illuminate\Support\Facades\Mail;
+use Auth;
+use App\Lib\Response as CustomResponse;
+use \PDF;
+use Carbon\Carbon;
+use Illuminate\Database\QueryException;
+use App\Services\StockProducts;
+use Redirect;
+
+class SalesController extends Controller
+{
+    use CustomResponse;
+
+    protected $porterage = 5.25;
+
+    protected $vat = 2;
+
+    public function index(Request $request)
+    {
+
+        return view('sales.index');
+    }
+
+    public function create(Request $request)
+    {
+        // Redirect to new invoice form instead of auto-creating
+        return redirect()->route('data_entry.sales_entry.invoice.new');
+    }
+
+    public function newInvoiceForm()
+    {
+        return view('sales.new-invoice');
+    }
+
+    public function generateSalesInvoice(Request $request, StockProducts $stockProducts)
+    {
+        DB::beginTransaction();
+        try {
+            // Determine customer
+            $c_id = $request->customer_id;
+            if (!$c_id) {
+                $findcustomer = Customer::where('name', 'Guest')->first();
+                if ($findcustomer) {
+                    $c_id = $findcustomer->id;
+                } else {
+                    $cusObj = new Customer();
+                    $cusObj->name = 'Guest';
+                    $cusObj->is_active = 1;
+                    $cusObj->save();
+                    $cusObj->customer_id = 'C'.(100 + $cusObj->id);
+                    $cusObj->update();
+                    $c_id = $cusObj->id;
+                }
+            }
+
+            $obj = new CustomerInvoice();
+            $obj->customer_id = $c_id;
+            $obj->salesman_id = Auth::user()->id;
+            $obj->status = 1;
+            if ($request->date) {
+                $obj->created_at = $request->date . ' ' . date('H:i:s');
+            } else {
+                $obj->created_at = date('Y-m-d H:i:s');
+            }
+            $obj->updated_at = date('Y-m-d H:i:s');
+            $obj->save();
+
+            \App\Services\CustomerPayments::initiateInvoice($obj->id, $c_id);
+
+            // Add products if provided
+            if ($request->has('products') && is_array($request->products) && count($request->products) > 0) {
+                $getinvoiceinformation = getinvoiceinformation();
+                $getporterage = $getinvoiceinformation['porterage'];
+                $getvat = $getinvoiceinformation['vat'];
+                $subTotal = 0;
+
+                foreach ($request->products as $product) {
+                    $productModel = Product::find($product['product_id']);
+                    $subtotalRow = $product['quantity'] * $product['price'];
+                    $subTotal += $subtotalRow;
+
+                    $data = [
+                        'product_id' => $product['product_id'],
+                        'supplier_id' => $product['supplier_id'],
+                        'quantity' => $product['quantity'],
+                        'remarks' => $product['remarks'] ?? '',
+                        'supplier_invoice_product_id' => $product['supplier_invoice_product_id'],
+                        'unit_price' => $product['price'],
+                        'sub_total' => $subtotalRow,
+                        'customer_id' => $c_id,
+                        'supplier_invoice_id' => $product['supplier_invoice_id'],
+                        'customer_invoice_id' => $obj->id,
+                        'product_info' => json_encode($productModel),
+                    ];
+
+                    $save = CustomerInvoiceProduct::create($data);
+
+                    // Record stock
+                    $stockProducts->recordStock([
+                        'supplier_invoice_product_id' => $product['supplier_invoice_product_id'],
+                        'supplier_invoice_id' => $product['supplier_invoice_id'],
+                        'customer_id' => $c_id,
+                        'product_id' => $product['product_id'],
+                        'stock' => $product['quantity'],
+                        'type' => 'customer',
+                        'invoice_id' => $obj->id,
+                        'event' => 'stock_consumed',
+                        'price' => $product['price'],
+                        'ref_id' => $save->id,
+                    ]);
+                }
+
+                // Create/update invoice order totals
+                $total = $subTotal + $getporterage + $getvat;
+                $cio = new CustomerInvoiceOrder();
+                $cio->customer_invoice_id = $obj->id;
+                $cio->customer_id = $c_id;
+                $cio->sub_total = $subTotal;
+                $cio->total = $total;
+                $cio->vat = $getvat;
+                $cio->porterage = $getporterage;
+                $cio->created_at = date('Y-m-d H:i:s');
+                $cio->updated_at = date('Y-m-d H:i:s');
+                $cio->save();
+            }
+
+            DB::commit();
+            return response()->json(['success' => true, 'invoice_id' => $obj->id]);
+        } catch(\Exception $ex) {
+            DB::rollback();
+            return response()->json(['success' => false, 'message' => $ex->getMessage()], 422);
+        }
+    }
+
+    public function grid(Request $request) {
+        $params = $request->all();
+
+        $start = $params['start'];
+        $length = $params['length'];
+        $draw = $params['draw'];
+
+        $query = new CustomerInvoice();
+
+        if (isset($params['search']['value']) && !empty($params['search']['value']) ) {
+            //$query = $query->where('name', 'like', '%'.$params['search']['value'].'%');
+        }
+
+        $recordsFiltered = $query->count();
+        $data = $query->with('customer')->with('order')->offset($start)->limit($length)->get();
+
+        $recordsTotal = count($data);
+
+        echo json_encode([
+            "draw" => $draw,
+            "recordsTotal" => $recordsTotal,
+            "recordsFiltered" => $recordsFiltered,
+            "data" => $data
+        ]);
+    }
+
+    public function store(Request $request, \App\Services\CustomerPayments $customerPayments)
+    {
+        try {
+			$c_id = 0;
+			$old_invlice_present = 0;
+			// check any pending invoice is present for today.
+			$past_id = (new CustomerInvoice())->getNotUsedInvoice();
+			
+			if(!empty($past_id)){
+				$obj = CustomerInvoice::where('id',$past_id->id)->first();
+			}else{
+				$obj = new CustomerInvoice();
+			}	
+			
+            if($request->input('customer') =="#"){
+             $findcustmer = Customer::where('name','Guest')->first();
+			 
+             if($findcustmer){
+               $customerID = $obj->customer_id = $findcustmer->id;
+			   $c_id = $customerID = $obj->customer_id;
+             }else{
+               $cusObj = new Customer();
+			   $c_id = $cusObj->id;
+               // $cusObj->name = 'Guest '.Customer::latest()->first()->id;
+               $cusObj->name = 'Guest';
+               $cusObj->is_active = 1;
+               $record = $cusObj->save();
+               $insertedId = $cusObj->id;
+               $customerID = 'C'.(100+$insertedId);
+               $cusObj->customer_id = $customerID;
+               $recordUpdate = $cusObj->update();
+               $obj->customer_id = $insertedId;
+             }
+            } else {
+                $obj->customer_id = $request->input('customer');
+				$c_id = $obj->customer_id;
+            }
+            $obj->salesman_id = Auth::user()->id;
+			$obj->created_at = date('Y-m-d H:i:s');
+			$obj->updated_at = date('Y-m-d H:i:s');
+            
+			
+			$obj->save();
+			
+			/*
+			if(!empty($past_id)){
+				$invicepaymeant = InvoicePayment::where('customer_invoice_id',$past_id->id)->first();
+			}else{
+				$invicepaymeant = new InvoicePayment();
+			}
+			
+            $invicepaymeant->customer_invoice_id = $obj->id;
+            $invicepaymeant->payment_id = 1;
+			$invicepaymeant->created_at = date('Y-m-d H:i:s');
+			$invicepaymeant->updated_at = date('Y-m-d H:i:s');
+            $invicepaymeant->save();
+			*/
+			$customerPayments::initiateInvoice($obj->id, $c_id);
+			
+			// initiate invoice new.
+			//echo $obj->id; echo $c_id;            
+            \Session::flash('redirect', ['type' => 'none', 'message' => "Invoice Created Successfully."]);
+            return $this->successResponse(['redirect' => route('data_entry.sales_entry.invoice.index',['invoice' => $obj->id])]);
+        }catch(\Exception $ex){
+
+        }
+    }
+
+    public function edit(Request $request, $invoice)
+    {
+
+        $i = CustomerInvoice::where('id', $invoice)->first();
+        if(empty($i)){
+            abort(404);
+        }
+        $showSuppliers = (int) (\App\Models\GeneralSetting::where('setting', 'show_suppliers')->value('status') ?? 1);
+        return view('sales.edit',['invoice' => $invoice, 'showSuppliers' => $showSuppliers]);
+    }
+
+    public function storeProducts(Request $request, $invoice)
+    {
+        return view('sales.edit');
+    }
+
+    public function ajaxProductsList(){
+        $productsList = (new Product())
+		->get();
+		//$productsList = Product::productsData();
+        return json_encode($productsList);
+    }
+
+    public function ajaxPaymentsList(){
+        $paymentsList = (new Payment())->get();
+        return json_encode($paymentsList);
+    }
+
+    public function ajaxCreateInvoice(Request $request){
+
+       $getcustmmoreinvoice = CustomerInvoiceOrder::where('customer_invoice_id',$request->invoiceId)->first();
+        if($getcustmmoreinvoice){
+            return response()->json([
+                'server' => $this->serverResponse(),
+                 'status' => '208',
+            ]);
+         }
+
+        $getinvoiceinformation = getinvoiceinformation();
+        $getporterage = $getinvoiceinformation['porterage'];
+        $getvat = $getinvoiceinformation['vat'];
+
+        DB::beginTransaction();
+        $total = [];
+
+        try {
+            $rules = [
+                'invoiceId' => 'required'
+            ];
+            $validator = Validator::make($request->all(), $rules);
+            if ($validator->fails()) {
+                return $this->validationErrorResponse($validator->errors()->messages());
+            }
+
+            $getCustomerInvoice = CustomerInvoice::find($request->input('invoiceId'));
+            foreach($request->input('rowsdata') as $key => $value){
+                $data['product_id'] = $value['product'];
+                $data['quantity'] = $value['quantity'];
+                $data['unit_price'] = $value['price'];
+                $data['sub_total'] = $value['totalPrice'];
+                $data['customer_id'] = $getCustomerInvoice['customer_id'];
+                $data['customer_invoice_id'] = $request->input('invoiceId');
+                $data['product_info'] = json_encode(Product::where('id',$value['product'])->first());
+                $total[] = $value['quantity'] * $value['price'];
+
+                // CustomerInvoiceProduct::create($data);
+            }
+
+            $cio = new CustomerInvoiceOrder();
+            $cio->customer_invoice_id = $request->input('invoiceId');
+            $cio->customer_id = $getCustomerInvoice['customer_id'];
+            $cio->sub_total = array_sum($total);
+            $cio->total = (array_sum($total) + $getporterage) + ((array_sum($total) + $getporterage) * 2 ) / 100;
+            $cio->vat = $getvat;
+            $cio->status = $request->input('status');
+            $cio->porterage = $getporterage;
+            $cio->created_at = date('Y-m-d H:i:s');
+            $cio->updated_at = date('Y-m-d H:i:s');
+
+             $cio->save();
+
+            DB::commit();
+            return $this->successResponse(['id' => $request->input('invoiceId')]);
+
+        }catch(\Exception $ex){
+            DB::rollback();
+            $this->exceptionResponse($ex);
+        }
+    }
+    public function ajaxCreateSingalInvoice(Request $request){
+        $getcustmmoreinvoice = CustomerInvoiceOrder::where('customer_invoice_id',$request->invoiceId)->first();
+        if($getcustmmoreinvoice){
+             return response()->json([
+                'server' => $this->serverResponse(),
+                        'status' => '208',
+            ]);
+         }
+
+        try {
+                $getCustomerInvoice = CustomerInvoice::find($request->invoiceId);
+
+                if($request->invoiceproductid == 0){
+                    $data['product_id'] = $request->product;
+                    $data['quantity'] = $request->quantity;
+                    $data['unit_price'] = $request->price;
+                    $data['sub_total'] = $request->totalPrice;
+                    $data['customer_id'] =$getCustomerInvoice['customer_id'];
+                    $data['customer_invoice_id'] = $request->invoiceId;
+                    $data['product_info'] = json_encode(Product::where('id',$request->product)->first());
+                    $save = CustomerInvoiceProduct::create($data);
+                    return $this->successResponse(['invoiceproductid' => $save->id,'indexvalue' => $request->indexvalue]);
+
+
+                }else{
+
+                    $updateData = CustomerInvoiceProduct::find($request->invoiceproductid);
+                    $updateData->product_id = $request->product;
+                    $updateData->quantity = $request->quantity;
+                    $updateData->unit_price = $request->price;
+                    $updateData->sub_total = $request->totalPrice;
+                    $updateData->product_info = json_encode(Product::where('id',$request->product)->first());
+                    $update = $updateData->update();
+                    return $this->successResponse(['invoiceproductid' => $request->invoiceproductid,'indexvalue' => $request->indexvalue]);
+
+
+                }
+
+
+
+                return $this->successResponse(['invoiceproductid' => $save->id,'indexvalue' => $request->indexvalue]);
+            }catch(\Exception $ex){
+                $this->exceptionResponse($ex);
+            }
+
+    }
+    public function ajaxDeleteSingalInvoice(Request $request, StockProducts $stockProducts, \App\Services\DBCountBlocks $DBCountBlocks){
+		DB::rollback();
+		try {
+            $getdata = CustomerInvoiceProduct::where('customer_invoice_id', $request->invoiceId)->count();
+            if($getdata == 1){
+				$deleteproduct  = CustomerInvoiceProduct::where('id', $request->invoiceproductid)->delete();
+				$deletecustmor = CustomerInvoiceOrder::where('customer_invoice_id', $request->invoiceId)->delete();
+				$pdfshow = 0;
+				$deleteproduct  = CustomerInvoiceProduct::where('id', $request->invoiceproductid)->update(['is_archive'=>1]);
+            }else{
+                /*$getproductdetail = CustomerInvoiceProduct::where('id', $request->invoiceproductid)->first();
+				$subtotal =  $getproductdetail->sub_total;
+				$getinvoicedetail = CustomerInvoiceOrder::where('customer_invoice_id', $request->invoiceId)->first();
+                $invoicesub_total = $getinvoicedetail->sub_total;
+                $invoicetotal = $getinvoicedetail->total;
+                $finalsubtotal = $invoicesub_total - $subtotal;
+                $finaltotal = $invoicetotal - $subtotal;
+                $getinvoicedetail->sub_total =  $finalsubtotal;
+                $getinvoicedetail->total = $finaltotal;
+                $update = $getinvoicedetail->update();
+                if($update){
+                $deleteproduct  = CustomerInvoiceProduct::where('id', $request->invoiceproductid)->update(['is_archive'=>1]);
+                $pdfshow = 1;
+                }*/
+				$deleteproduct  = CustomerInvoiceProduct::where('id', $request->invoiceproductid)->update(['is_archive'=>1]);
+                $pdfshow = 1;
+            }
+			
+			// stock record.
+			$stockProducts->removeStock([
+				'type' => 'customer',
+				'invoice_id' => $request->invoiceId,
+				'event' => 'customer_stock_deleted',
+				'ref_id' => $request->input('invoiceproductid')
+			]);
+						
+			DB::commit();
+			return $this->successResponse([
+				'invoiceproductid' =>$request->invoiceproductid, 
+				'pdfshow' =>$pdfshow, 
+				//'stock' => $DBCountBlocks::invoiceStockCount($request->invoiceId)]
+				//'stock' => StockProduct::customerSupplierStock([$request->invoiceId],$request->input('invoiceproductid'))
+				'stock' => []
+				]
+			);
+
+        }catch(\Exception $ex){
+			DB::rollback();
+            return $this->exceptionResponse($ex);
+        }
+    }
+    public function invoiceview($id){
+
+        $getinvoiceinformation = getinvoiceinformation();
+        $data =  CustomerInvoice::where('id',$id)->with('product')->with('order')->first();
+        $companyDetails = CompanyDetailModel::first();
+
+        return view('sales.invoice',compact('data','companyDetails'));
+    }
+	
+	public function invoiceviewDelivery($id){
+
+        $getinvoiceinformation = getinvoiceinformation();
+        $data =  CustomerInvoice::where('id',$id)->with('product')->with('order')->first();
+        $companyDetails = CompanyDetailModel::first();
+
+        return view('sales.invoice-delivery',compact('data','companyDetails'));
+    }
+	
+    public function invoicedownload($id){
+
+        $data =  CustomerInvoice::where('id',$id)->with('product')->with('order')->first();
+        $companyDetails = CompanyDetailModel::first();
+
+		//return view('invoice', compact('data', 'companyDetails'));
+		$pdf = PDF::loadView('invoice',compact('data','companyDetails'));
+		//return $pdf->stream('pdf_file.pdf');
+		return $pdf->download('pdf_file.pdf');
+  }
+
+  public function ajaxfetchInvoiceDetail(Request $request){
+
+    try {
+
+        $dataget = CustomerInvoice::where('id', $request->getInvoiceId)->with(['customer', 'invoicePayment'])->first();
+        $data = $dataget->toArray();
+        $data['payment_summary'] = \App\Services\CustomerPayments::details($request->getInvoiceId);
+        return json_encode($data);
+        }catch(\Exception $ex){
+            $this->exceptionResponse($ex);
+        }
+
+
+  }
+
+
+  public function ajaxCreateSingalInvoicenew(Request $request, 
+	StockProducts $stockProducts,
+	\App\Services\SalesPurchaseValidations $salePurchaseValidation,
+	\App\Services\DBCountBlocks $DBCountBlocks,
+	\App\Services\CustomerPayments $customerPayments){ 
+		
+	$showSuppliers = (bool) (\App\Models\GeneralSetting::where('setting', 'show_suppliers')->value('status') ?? 1);
+
+	$rules = [
+		'product' => ['required', 'array'],
+		'product.label' => ['required', 'string'],
+		'product.value' => ['required','integer'],
+		'quantity' => ['required','numeric'],
+		'price' => ['required','numeric']
+	];
+
+	if ($showSuppliers) {
+		$rules['supplier_id'] = ['required', 'array'];
+		$rules['supplier_id.label'] = ['required', 'string'];
+		$rules['supplier_id.value.supplier_invoice'] = ['required','integer'];
+		$rules['supplier_id.value.supplier'] = ['required','integer'];
+		$rules['supplier_id.value.product'] = ['required','integer'];
+		$rules['supplier_id.value.supplier_invoice_product_id'] = ['required','integer'];
+	}
+
+	$validator = Validator::make($request->all(), $rules);
+	if ($validator->fails()) {
+		return $this->errorResponse(json_encode($validator->errors()));
+	}
+
+	$request->product = is_array($request->product) ? $request->product['value'] : $request->product;
+
+	if ($showSuppliers) {
+		if (!$request->has('supplier_id')) {
+			return $this->errorResponse("Supplier Entry Is Required!");
+		}
+		// supplier invoice ID.
+		$request->supplier_invoice_product_id = is_array($request->supplier_id) ? $request->supplier_id['value']['supplier_invoice_product_id'] : $request->supplier_invoice_product_id;
+		$request->invoice_id = is_array($request->supplier_id) ? $request->supplier_id['value']['supplier_invoice'] : $request->supplier_invoice;
+		$request->supplier_id = is_array($request->supplier) ? $request->supplier_id['value']['supplier'] : $request->supplier;
+		// validation: should not add quantity more than stock.
+		try {
+			$e = $salePurchaseValidation->canAddSaleEntryFromInvoice($request->supplier_invoice_product_id, $request->quantity);
+		} catch(\Exception $ex) {
+			return $this->errorResponse($ex->getMessage());
+		}
+	} else {
+		$request->supplier_invoice_product_id = 0;
+		$request->invoice_id = 0;
+		$request->supplier_id = 0;
+	}
+	
+	// validation: only one combination of product is allowed to add. (supplier_invoice_id, customer_invoice_id, supplier_id, product_id)
+	/**
+	 * @description: settle with the unique(index) combinations of keys in table: customer_invoice_products
+	 */
+	DB::beginTransaction();
+	try{
+		$getinvoiceinformation = getinvoiceinformation();
+		$getporterage = $getinvoiceinformation['porterage'];
+		$getvat = $getinvoiceinformation['vat'];
+
+		$getcustmmoreinvoice = CustomerInvoiceOrder::where('customer_invoice_id',$request->invoiceId)->first();
+
+		$getCustomerInvoice = CustomerInvoice::find($request->invoiceId);
+		
+		// update just to avoid new ID generation.
+		CustomerInvoice::where('id',$request->invoiceId)->update(['status'=>1]);
+		
+		$supplier = \App\Models\SupplierInvoiceProduct::getProductSupplier($request->product,$request->supplier_id);
+		
+		if(empty($supplier)){
+			//return $this->errorResponse("No supplier found for this product.");
+		}
+		if($supplier && $request->input('quantity') > $supplier->total_quantity){
+			//return $this->errorResponse("Total stock left is ".$supplier->total_quantity. " for Product: ".$supplier->product->name.", Supplier: ".$supplier->supplier->name);
+		}
+		
+		if(!$getcustmmoreinvoice){
+			$product = Product::where('id',$request->product)->first();
+			$data['product_id'] = is_array($request->product) ? $request->product['value'] : $request->product;
+			$data['supplier_id'] = $request->supplier_id;
+			$data['quantity'] = $request->quantity;
+			$data['remarks'] = $request->remarks;
+			$data['supplier_invoice_product_id'] = $request->supplier_invoice_product_id;
+			$data['unit_price'] = $request->price;
+			$data['sub_total'] = $request->totalPrice;
+			$data['customer_id'] = $getCustomerInvoice['customer_id'];
+			// supplier invoice ID.
+			$data['supplier_invoice_id'] = $request->invoice_id;
+			$data['customer_invoice_id'] = $request->invoiceId;
+			$data['product_info'] = json_encode($product);
+			
+			$save = CustomerInvoiceProduct::create($data);
+
+
+			$subtotal = $request->quantity * $request->price;
+			$total = $subtotal + $getporterage + $getvat;
+			$cio = new CustomerInvoiceOrder();
+			$cio->customer_invoice_id = $request->input('invoiceId');
+			$cio->customer_id = $getCustomerInvoice['customer_id'];
+			$cio->sub_total = $subtotal;
+			$cio->total = $total;
+			$cio->vat = $getvat;
+			$cio->porterage = $getporterage;
+			$cio->created_at = date('Y-m-d H:i:s');
+			$cio->updated_at = date('Y-m-d H:i:s');
+
+			$cio->save();
+
+			if ($showSuppliers && $request->supplier_invoice_product_id) {
+				$stockProducts->recordStock([
+					'supplier_invoice_product_id' => $request->supplier_invoice_product_id,
+					'supplier_invoice_id' => $request->invoice_id,
+					'customer_id' => $getCustomerInvoice['customer_id'],
+					'product_id' => $data['product_id'],
+					'stock' => $request->quantity,
+					'type' => 'customer',
+					'invoice_id' => $request->invoiceId,
+					'event' => 'stock_consumed',
+					'price' => $request->price,
+					'ref_id' => $save->id
+				]);
+			}
+
+			DB::commit();
+			return $this->successResponse([
+				'invoiceproductid' => $save->id,
+				'indexvalue' => $request->indexvalue,
+				'stock' => $DBCountBlocks::invoiceStockCount($request->invoiceId),
+				'stock_selected_row' => $request->supplier_invoice_product_id ? $DBCountBlocks::productStockCount($request->supplier_invoice_product_id) : null
+			]);
+		}else{
+			$product = Product::where('id',$request->product)->first();
+            $data['product_id'] = is_array($request->product) ? $request->product['value'] : $request->product;
+            $data['supplier_id'] = $request->supplier_id;
+            $data['quantity'] = $request->quantity;
+			$data['remarks'] = $request->remarks;
+			$data['supplier_invoice_product_id'] = $request->supplier_invoice_product_id;
+            $data['unit_price'] = $request->price;
+            $data['sub_total'] = $request->totalPrice;
+            $data['customer_id'] =$getCustomerInvoice['customer_id'];
+			// supplier invoice ID.
+			$data['supplier_invoice_id'] = $request->invoice_id;
+            $data['customer_invoice_id'] = $request->invoiceId;
+            $data['product_info'] = json_encode($product);
+			
+			$save = CustomerInvoiceProduct::create($data);
+			//print_r($save); exit;
+
+            $subtotal = $request->quantity * $request->price;
+            $allsubtotal = $subtotal + $getcustmmoreinvoice->sub_total;
+            $alltotal = $subtotal + $getcustmmoreinvoice->total;
+            $getcustmmoreinvoice->sub_total = $allsubtotal;
+            $getcustmmoreinvoice->total = $alltotal;
+
+			if ($showSuppliers && $request->supplier_invoice_product_id) {
+				$stockProducts->recordStock([
+					'supplier_invoice_product_id' => $request->supplier_invoice_product_id,
+					'supplier_invoice_id' => $request->invoice_id,
+					'customer_id' => $getCustomerInvoice['customer_id'],
+					'product_id' => $data['product_id'],
+					'stock' => $request->quantity,
+					'type' => 'customer',
+					'invoice_id' => $request->invoiceId,
+					'event' => 'stock_consumed',
+					'price' => $request->price,
+					'ref_id' => $save->id
+				]);
+			}
+
+            $update = $getcustmmoreinvoice->update();
+			DB::commit();
+            //return $this->successResponse(['invoiceproductid' => $save->id,'indexvalue' => $request->indexvalue]);
+			return $this->successResponse([
+				//'invoiceproductid' => ['label' => $product->name, 'value' => $save->id],
+				'invoiceproductid' => $save->id,
+				'indexvalue' => $request->indexvalue,
+				'stock' => $DBCountBlocks::invoiceStockCount($request->invoiceId),
+				'stock_selected_row' => $request->supplier_invoice_product_id ? $DBCountBlocks::productStockCount($request->supplier_invoice_product_id) : null
+			]);
+
+			}
+		}catch (QueryException $e) {
+			DB::rollback();
+			if ($e->getCode() == 23000) {
+				return $this->errorResponse('This combination of supplier, customer, and product already exists.');
+			}
+			return $this->exceptionResponse($e);
+		}
+	}
+	
+	public function customers(Request $request)
+    {
+        return $this->successResponse(\App\Models\Customer::getActive());
+    }
+	
+	public function print(Request $request)
+    {
+		$rules = [
+			'start_date' => 'required',
+			'end_date' => 'required',
+		];
+
+		$validator = Validator::make($request->all(), $rules);
+		if ($validator->fails()) {
+		  return $this->validationErrorResponse($validator->errors()->messages());
+		}
+		
+		$customer_id = $product_id = $start_date = $end_date = "";
+		
+		extract($request->only('product_id', 'customer_id', 'start_date', 'end_date'));
+        print_r($request->all());
+    }
+	
+	public function statementDailyBookSales(Request $request)
+	{
+		$rules = [
+			'start_date' => 'required',
+			'end_date' => 'required',
+		];
+
+		$validator = Validator::make($request->all(), $rules);
+		if ($validator->fails()) {
+			return 'Start date and end date are required';
+		}
+
+		$start_date = $request->start_date;
+		$end_date = $request->end_date;
+		$customer_id = $request->customer_id;
+
+		$data = (new \App\Models\CustomerInvoice())
+			->whereDate('created_at', '>=', $start_date)
+			->whereDate('created_at', '<=', $end_date);
+
+		if (!empty($customer_id)) {
+			$data->where('customer_id', $customer_id);
+		}
+
+		$invoices = $data->withSum(['products as total' => function ($q) {
+				$q->where('is_archive', 0);
+			}], 'sub_total')
+			->with('customer')
+			->with(['payments' => function($q){
+				$q->where('initiated', 0)
+					->with('paymentMode')
+					->select('customer_invoice_id', 'payment_id', DB::raw('SUM(amount) as total_amount'))
+					->groupBy('customer_invoice_id', 'payment_id');
+			}])
+			->get()->map(function($invoice){
+				$totalPaid = [];
+				foreach($invoice->payments as $payment){
+					$totalPaid[] = $payment->total_amount;
+				}
+				$invoice->total_paid = array_sum($totalPaid);
+				return $invoice;
+			});
+
+		$companyDetails = \App\Models\CompanyDetailModel::first();
+		$currency = env('CURRENCY_SYMBOL', '$');
+
+		$html = view('daily-report.sales-statement', compact('invoices', 'start_date', 'end_date', 'companyDetails', 'currency'))->render();
+
+		$pdf = \PDF::loadHTML($html);
+		$pdf->setPaper('A4', 'portrait');
+
+		return $pdf->stream("daily-sales-statement-{$start_date}-to-{$end_date}.pdf");
+	}
+
+	public function emailDailyBookSales(Request $request)
+	{
+		$rules = [
+			'start_date' => 'required',
+			'end_date' => 'required',
+		];
+
+		$validator = Validator::make($request->all(), $rules);
+		if ($validator->fails()) {
+			return response()->json(['success' => false, 'payload' => 'Start date and end date are required']);
+		}
+
+		$start_date = $request->start_date;
+		$end_date = $request->end_date;
+		$customer_id = $request->customer_id;
+
+		$data = (new \App\Models\CustomerInvoice())
+			->whereDate('created_at', '>=', $start_date)
+			->whereDate('created_at', '<=', $end_date);
+
+		if (!empty($customer_id)) {
+			$data->where('customer_id', $customer_id);
+		}
+
+		$invoices = $data->withSum(['products as total' => function ($q) {
+				$q->where('is_archive', 0);
+			}], 'sub_total')
+			->with('customer')
+			->get();
+
+		$companyDetails = \App\Models\CompanyDetailModel::first();
+
+		try {
+			$toEmail = $companyDetails->email ?? config('mail.from.address');
+			$total = $invoices->sum('total');
+			$count = $invoices->count();
+			$currency = env('CURRENCY_SYMBOL', '$');
+			$body = "<h3>Daily Book Sales Report</h3><p>Period: {$start_date} to {$end_date}</p><p>Total Invoices: {$count}</p><p>Total Amount: {$currency}{$total}</p>";
+
+			\Illuminate\Support\Facades\Mail::raw('', function ($message) use ($toEmail, $start_date, $end_date, $body) {
+				$message->to($toEmail)
+					->subject("Daily Book Sales Report ({$start_date} to {$end_date})")
+					->setBody($body, 'text/html');
+			});
+			return response()->json(['success' => true, 'payload' => 'Email sent successfully!']);
+		} catch (\Exception $ex) {
+			return response()->json(['success' => false, 'payload' => $ex->getMessage()]);
+		}
+	}
+
+	public function list(Request $request)
+    {
+		$supplier_id = $product_id = $start_date = $end_date = "";
+
+		extract($request->only('product_id', 'customer_id', 'start_date', 'end_date'));
+
+		$data = (new \App\Models\CustomerInvoice());
+
+		if(!empty($start_date)){
+			$data = $data->whereDate('created_at', '>=', $start_date);
+		}
+		if(!empty($end_date)){
+			$data = $data->whereDate('created_at', '<=', $end_date);
+		}
+
+		if(!empty($customer_id)){
+			$data = $data->where('customer_id', $customer_id);
+		}
+
+		$data = $data->withSum(['products as total' => function ($q) {
+				$q->where('is_archive', 0);
+			}], 'sub_total')
+			->withCount(['products as products_count' => function ($q) {
+				$q->where('is_archive', 0);
+			}])
+			->with('customer')
+			->with(['payments' => function($q){
+				$q->where('initiated',0)
+					->with('paymentMode')
+					->select('customer_invoice_id', 'payment_id', DB::raw('SUM(amount) as total_amount'))
+					->groupBy('customer_invoice_id', 'payment_id');
+			}])
+			->orderBy('created_at', 'desc')
+			->get()->map(function($invoice){
+				$totalPaid = [];
+				foreach($invoice->payments as $payment){
+					$totalPaid[]= $payment->total_amount;
+					//print_r($payment->total_amount);
+				}
+				$invoice->total_paid = array_sum($totalPaid);
+				if($invoice->total_paid <= 0){
+					$invoice->paid_type = 'not-paid';
+				}else{
+					if( $invoice->total > $invoice->total_paid ){
+						$invoice->paid_type = 'partial-paid';
+					}
+					if( $invoice->total <= $invoice->total_paid ){
+						$invoice->paid_type = 'all-paid';
+					}
+				}			
+
+				return $invoice;
+			});
+		return $this->successResponse($data);
+		
+    }
+	
+    public function dailyBookSales(){
+
+        $allData = (new CustomerInvoice)->with(['customer', 'order'])->get();
+        //return view('daily-report.sales',['data'=> $allData]);
+        return view('daily-report.sales-new',['data'=> $allData]);
+    }
+    public function ajaxDailyBookSales(Request $request){
+        $totalFilteredRecord = $totalDataRecord = $draw_val = "";
+        $columns_list = array(0 =>'id',1 =>'created_at',2=> 'salesman',3=> 'id',4=> 'customer_name',5=> 'vat');
+        $totalDataRecord = CustomerInvoice::whereBetween('created_at', [ Carbon::today()->toDateString()." 00:00:00",  Carbon::today()->toDateString()." 23:59:59"])->count();
+        
+		$totalFilteredRecord = $totalDataRecord;
+        $limit = $request->input('length');
+        $start = $request->input('start');
+        $fromDate = $request->input('min');
+        $toDate = $request->input('max');
+        $order = $columns_list[$request->input('order.0.column')];
+        $dir = $request->input('order.0.dir');
+        $salesData = (new CustomerInvoice)->with(['customer','product', 'invoicePayment', 'invoicePayment.payment', 'salesman', 'order'])->whereBetween('created_at', [ Carbon::today()->toDateString()." 00:00:00",  Carbon::today()->toDateString()." 23:59:59"])->offset($start)->limit($limit)->orderBy('created_at','desc')->get();
+		//print_r($salesData->toArray());exit;
+		if($order == 'customer_name'){
+            $salesData = (new CustomerInvoice)->whereBetween('created_at', [ Carbon::today()->toDateString()." 00:00:00",  Carbon::today()->toDateString()." 23:59:59"])->with(['order','product', 'invoicePayment', 'invoicePayment.payment', 'salesman', 'customer'=> function ($query) use($dir){
+                $query->orderBy('name', $dir);
+                }])->offset($start)->limit($limit)->get();
+        } elseif($order == 'salesman'){
+            $salesData = (new CustomerInvoice)->whereBetween('created_at', [ Carbon::today()->toDateString()." 00:00:00",  Carbon::today()->toDateString()." 23:59:59"])->with(['customer','product', 'invoicePayment', 'invoicePayment.payment', 'order', 'salesman'=> function ($query) use($dir) {
+                $query->orderBy('first_name', $dir);
+                }])->offset($start)->limit($limit)->get();
+        } elseif($order == 'vat'){
+            $salesData = (new CustomerInvoice)->with(['customer','product', 'invoicePayment', 'invoicePayment.payment', 'salesman', 'order'=> function ($query) use($dir) {
+                $query->orderBy('vat', $dir);
+                }])->whereBetween('created_at', [ Carbon::today()->toDateString()." 00:00:00",  Carbon::today()->toDateString()." 23:59:59"])->offset($start)->limit($limit)->get();
+        } elseif(!empty($request->input('min'))){
+            $salesData = (new CustomerInvoice)->with(['customer','product', 'invoicePayment', 'invoicePayment.payment', 'salesman', 'order'])->whereBetween('created_at', [$fromDate." 00:00:00", $toDate." 23:59:59"])->offset($start)->limit($limit)->orderBy($order,$dir)->get();
+            $totalFilteredRecord = (new CustomerInvoice)->with(['customer', 'order'])->whereBetween('created_at', [$fromDate." 00:00:00", $toDate." 23:59:59"])->orderBy($order,$dir)->count();
+        } elseif(!empty($request->input('search.value'))){
+            $search_text = $request->input('search.value');
+            $salesData =  (new CustomerInvoice)->whereBetween('created_at', [ Carbon::today()->toDateString()." 00:00:00",  Carbon::today()->toDateString()." 23:59:59"])->whereHas('customer', function($query) use ($search_text){
+                $query->where('name', 'like', '%'.$search_text.'%');
+            })->orWhere('id', 'LIKE',"%{$search_text}%")->with(['customer','product', 'invoicePayment', 'invoicePayment.payment', 'order'])
+            ->offset($start)
+            ->limit($limit)
+            ->orderBy($order,$dir)
+            ->get();
+            $totalFilteredRecord = (new CustomerInvoice)->whereBetween('created_at', [ Carbon::today()->toDateString()." 00:00:00",  Carbon::today()->toDateString()." 23:59:59"])->whereHas('customer', function($query) use ($search_text){
+                $query->where('name', 'like', '%'.$search_text.'%');
+            })->orWhere('id', 'LIKE',"%{$search_text}%")->with(['customer','product', 'invoicePayment', 'invoicePayment.payment', 'order'])
+            ->count();
+        }
+        $sales = array();
+		//print_r($salesData->toArray()); exit;
+        if(!empty($salesData))
+        {
+            $index=1;
+            foreach ($salesData as $sale)
+            {
+            if($sale->product->sum('sub_total') > 0){
+			
+					$printButton = "<span onClick='print(".$sale->id.", 0)'><i class='fa fa-regular fa-print btn btn-sm' title='Print'></i> Invoice Print</span>";
+					$deliveryButton = "<span onClick='delivery(".$sale->id.", 0)'><i class='fa fa-regular fa-print btn btn-sm' title='Print'></i> Delivery Print</span>";
+					$downloadButton = "<span onClick='download(".$sale->id.", 0)'><i class='fa fa-regular fa-download btn btn-sm' title='download'></i> Invoice Download</span>";
+
+					$emailButton = "<span onClick='email(".$sale->id.", 0)'><i class='fa fa-envelope btn btn-sm' title='email'> </i> Invoice Email</span>";
+			
+                  $postnestedData['invoice_id'] = '<a href="'.route("data_entry.sales_entry.invoice.index",['invoice' => $sale->id]).'" ><b>'.$sale->id.'</b></a>';
+                  //$postnestedData['created_at'] = \Carbon\Carbon::parse($sale->created_at)->format('Y-m-d');
+                  $postnestedData['created_at'] = $sale->created_at;
+				  $postnestedData['salesman'] = !empty($sale->salesman)?$sale->salesman->first_name:"";
+                  $postnestedData['quantity'] = $sale->product->sum('quantity');
+                  //$postnestedData['customer_name'] = "&emsp;<i class='fa fa-regular fa-print' onClick='print(".$sale->id.", 0)'></i>&emsp;<i class='fa fa-regular fa-download' onClick='download(".$sale->id.", 0)'></i>&emsp;<i class='fa fa-envelope' onClick='mail(".$sale->id.", 0)'></i>&emsp;". $sale->customer->name;
+				  
+				  $postnestedData['customer_name'] = "";
+				  
+				  /*if($sale->invoicePayment->payment->type == 'None'){
+					$postnestedData['customer_name'] .= '<span class="text-danger"><span><a href="'.route("data_entry.sales_entry.invoice.index",['invoice' => $sale->id]).'" class="text-danger"><b>'.$sale->customer->name.'</b></a></span>';
+				  }else{
+					$postnestedData['customer_name'] .= '<span class=""><span><a href="'.route("data_entry.sales_entry.invoice.index",['invoice' => $sale->id]).'" class=""><b>'.$sale->customer->name.'</b></a></span>';
+				  }*/
+                  $postnestedData['customer_name'] .= '<span class=""><span><a href="'.route("data_entry.sales_entry.invoice.index",['invoice' => $sale->id]).'" class=""><b>'.$sale->customer->name.'</b></a></span>';
+				  
+				  /*$postnestedData['vat'] = !empty($sale->order)?$sale->order->vat:"";
+                  $postnestedData['amount'] = formatTwoDecimalCurrenty($sale->product->sum('sub_total'));
+                  $postnestedData['mode'] = !empty($sale->invoicePayment->payment)?$sale->invoicePayment->payment->type:"";
+                  $postnestedData['action'] ='<span style="display:flex">'.$printButton.$downloadButton.$emailButton.'<a href="'.route("data_entry.sales_entry.invoice.index",['invoice' => $sale->id]).'" class="btn btn-primary mr-1 btn-sm"><i class="feather icon-edit"></i></a> <a href="#" onclick="deleteinvoice('.$sale->id.')" class="btn btn-primary mr-1 btn-sm"><i class="feather icon-delete"></i></a></span>';
+				  */
+				  $postnestedData['vat'] = 'NA';
+                  $postnestedData['amount'] = 'NA';
+                  $postnestedData['mode'] = 'NA';
+                  $postnestedData['action'] = 'NA';
+                  
+				  //$postnestedData['balance'] = $sale->invoicePayment->payment->type == "None" ? formatTwoDecimalCurrenty($sale->product->sum('sub_total')) : "";
+				  //$postnestedData['cash'] = $sale->invoicePayment->payment->type == 'Cash' ? $sale->product->sum('sub_total') : "";
+				  //$postnestedData['cheque'] =  $sale->invoicePayment->payment->type == 'Cheque' ? $sale->product->sum('sub_total') : "";
+				  //$postnestedData['card'] = $sale->invoicePayment->payment->type == 'Cheque' ? $sale->product->sum('sub_total') : "";
+				  
+				  $postnestedData['balance'] = 'NA';
+				  $postnestedData['cash'] = 'NA';
+				  $postnestedData['cheque'] =  'NA';
+				  $postnestedData['card'] = 'NA';
+				  
+				 
+				$postnestedData['action'] = '
+					<div class="dropstart">
+					  <button class="btn btn-warning btn-sm dropdown-toggle" type="button" id="actionDropdown'.$sale->id.'" data-bs-toggle="dropdown" aria-expanded="false">
+						Actions
+					  </button>
+					  <ul class="dropdown-menu" style="min-width:188px;" aria-labelledby="actionDropdown'.$sale->id.'">
+						<li class="cursor-pointer pb-1">
+						  '.$printButton.'
+						</li>
+						<li class="cursor-pointer pb-1">
+						  '.$deliveryButton.'
+						</li>
+						<li class="cursor-pointer pb-1">
+						  '.$downloadButton.'
+						</li>
+						<li class="cursor-pointer pb-1">
+						  '.$emailButton.'
+						</li>
+						<li class="cursor-pointer pb-1">
+						  <span><a href="'.route("data_entry.sales_entry.invoice.index",['invoice' => $sale->id]).'" class=""><i class="btn btn-sm feather icon-edit"></i> Edit</a></span>
+						</li>
+						<li class="cursor-pointer pb-1">
+							<span><a href="#" onclick="deleteinvoice('.$sale->id.')" class=""><i class="feather icon-delete btn btn-sm"></i> Delete</a></span>
+						</li>
+					  </ul>
+					</div>';
+				  
+				  $sales[] = $postnestedData;
+                  }
+            }
+        }
+        $draw_val = $request->input('draw');
+        $allData = array(
+            "draw"            => intval($draw_val),
+            "recordsTotal"    => intval($totalDataRecord),
+            "recordsFiltered" => intval($totalFilteredRecord),
+            "data"            => $sales
+        );
+        echo json_encode($allData);
+    }
+
+    public function ajaxEditSingleInvoice(Request $request, 
+		\App\Services\SalesPurchaseValidations $salePurchaseValidation,
+		StockProducts $stockProducts,
+		\App\Services\DBCountBlocks $DBCountBlocks){
+			$showSuppliers = (bool) (\App\Models\GeneralSetting::where('setting', 'show_suppliers')->value('status') ?? 1);
+
+			$rules = [
+				'product.label' => ['required', 'string'],
+				'product.value' => ['required','integer'],
+				'quantity' => ['required','numeric'],
+				'price' => ['required','numeric'],
+				'customer_id' => ['required','numeric']
+			];
+
+			if ($showSuppliers) {
+				$rules['supplier_id'] = ['required', 'array'];
+				$rules['supplier_id.label'] = ['required', 'string'];
+				$rules['supplier_id.value.product'] = ['required','integer'];
+				$rules['supplier_id.value.supplier'] = ['required','integer'];
+				$rules['supplier_id.value.supplier_invoice'] = ['required','integer'];
+				$rules['supplier_id.value.supplier_invoice_product_id'] = ['required','integer'];
+			}
+
+			$validator = Validator::make($request->all(), $rules);
+			if ($validator->fails()) {
+				return $this->errorResponse(json_encode($validator->errors()));
+			}
+
+			// check total stock.
+			$request->product = is_array($request->product) ? $request->product['value'] : $request->product;
+			$request->invoiceproductid = is_array($request->invoiceproductid) ? $request->invoiceproductid['value'] : $request->invoiceproductid;
+
+			if ($showSuppliers && is_array($request->supplier_id)) {
+				$request->supplier_invoice_product_id = $request->supplier_id['value']['supplier_invoice_product_id'];
+				$request->invoice_id = $request->supplier_id['value']['supplier_invoice'];
+				$request->supplier_id = $request->supplier_id['value']['supplier'];
+				try {
+					$e = $salePurchaseValidation->canEditSaleEntryQtyFromInvoice($request->supplier_invoice_product_id, $request->invoiceproductid, $request->quantity);
+				} catch(\Exception $ex) {
+					return $this->errorResponse($ex->getMessage());
+				}
+			} else {
+				$request->supplier_invoice_product_id = 0;
+				$request->invoice_id = 0;
+				$request->supplier_id = 0;
+			}
+			
+			// validation: only one combination of product is allowed to add. (supplier_invoice_id, customer_invoice_id, supplier_id, product_id)
+			/**
+			 * @description: settle with the unique(index) combinations of keys in table: customer_invoice_products
+			 */
+			DB::beginTransaction();
+			try{
+				$supplier = \App\Models\SupplierInvoiceProduct::getProductSupplier($request->product,$request->supplier_id);
+				//print_r($supplier->toArray()); exit;
+				if(empty($supplier)){
+					//return $this->errorResponse("No supplier found for this product.");
+				}
+				
+				if($supplier && $request->input('quantity') > $supplier->total_quantity){
+					//return $this->errorResponse("Total stock left is ".$supplier->total_quantity. " for Product: ".$supplier->product->name.", Supplier: ".$supplier->supplier->name);
+				}
+				
+				$data= [
+					'product_id'=>$request->product,
+					'supplier_id' => $request->supplier_id,
+					'supplier_invoice_id' => $request->invoice_id,
+					'quantity'=>$request->input('quantity'),
+					'supplier_invoice_product_id' => $request->supplier_invoice_product_id,
+					'remarks'=>$request->input('remarks'),
+					'unit_price'=>$request->input('price'),
+					'sub_total'=>$request->input('totalPrice'),
+					'product_info' => json_encode(Product::where('id',$request->product)->first())
+				];
+				//print_r($data); exit;
+				CustomerInvoiceProduct::where('id',$request->invoiceproductid)->where('customer_invoice_id', $request->invoiceId)->update($data);
+
+				if ($showSuppliers && $request->supplier_invoice_product_id) {
+					$stockProducts->recordStock([
+						'supplier_invoice_product_id' => $request->supplier_invoice_product_id,
+						'supplier_invoice_id' => $request->invoice_id,
+						'customer_id' => $request->customer_id,
+						'product_id' => $request->product,
+						'stock' => $request->quantity,
+						'type' => 'customer',
+						'invoice_id' => $request->invoiceId,
+						'event' => 'stock_consumed',
+						'price' => $request->price,
+						'ref_id' => $request->invoiceproductid
+					]);
+				}
+				DB::commit();
+				return $this->successResponse([
+						'invoiceproductid' => $request->invoiceproductid,
+						'indexvalue' => $request->input('indexvalue'),
+						'stock' => $DBCountBlocks::invoiceStockCount($request->invoiceId),
+						'stock_selected_row' => $request->supplier_invoice_product_id ? $DBCountBlocks::productStockCount($request->supplier_invoice_product_id) : null
+					]
+				);
+			
+			}catch (QueryException $e) {
+				DB::rollback();
+				if ($e->getCode() == 23000) {
+					return $this->errorResponse('This combination of supplier, customer, and product already exists.');
+				}
+				return $this->exceptionResponse($e);
+			}
+	}
+	
+	public function ajaxSuppliersList($product_id){
+		//$stock = StockProduct::stock(['product_id' => 10]);
+		//print_r($stock->toArray()); exit;
+		$data = \App\Models\SupplierInvoiceProduct::getProductSuppliers($product_id);
+		return $this->successResponse($data);
+	}
+	
+	public function ajaxSuppliersListAll(){
+		$data = \App\Models\Supplier::get();
+		return $this->successResponse($data);
+	}	
+
+    public function ajaxEditPayment(Request $request){
+
+        try {
+            $getInvoicePayment = (new InvoicePayment)->where('customer_invoice_id', $request->input('customer_invoice_id'))->first();
+            if(!empty($getInvoicePayment)){
+                (new InvoicePayment)->where('customer_invoice_id', $request->input('customer_invoice_id'))->update(['payment_id'=>$request->input('payment_id')]);
+            } else{
+                InvoicePayment::create($request->all());
+            }
+                $getData = InvoicePayment::where('customer_invoice_id', $request->input('customer_invoice_id'))->with('payment')->first();
+                return $this->successResponse($getData);
+            }catch(\Exception $ex){
+                $this->exceptionResponse($ex);
+            }
+    }
+
+  public function ajaxfetchInvoiceAllDetail($id){
+	try {
+		
+        $dataget = CustomerInvoiceProduct::where('customer_invoice_id', $id)->where('is_archive',0)->with('supplier')->with(['product'])->get();
+        
+		$products=[];
+		
+        foreach ($dataget as $data)
+            {	
+				$suppliers = \App\Models\SupplierInvoiceProduct::getProductSuppliers($data['product_id']);
+				
+				$invoices = \App\Models\SupplierInvoiceProduct::getProductSupplierInvoices($data['product_id'], $data['supplier_id']);
+                
+				$postnestedData['product_id'] = $data['product_id'];
+                $postnestedData['payment'] = "";
+                //$postnestedData['product'] = $data['product_id'];
+				$postnestedData['product_id'] = $data['product_id'];
+				$postnestedData['product'] = ['label' => $data['product']['name'], 'value' => $data['product_id']];
+                $postnestedData['quantity'] = $data['quantity'];
+				$postnestedData['remarks'] = $data['remarks'];
+                $postnestedData['price'] = $data['unit_price'];
+                $postnestedData['totalPrice'] = (float)$data['sub_total'];
+                $postnestedData['fieldToggle'] = "checked";
+                $postnestedData['invoiceproductid'] = $data['id'];
+				
+				$postnestedData['supplier'] = (function() use ($suppliers){
+					if(sizeof($suppliers) <= 0){
+						return [];
+					}else{
+						$arr = [];
+						$i = 0;
+						foreach($suppliers as $sup){ 
+							//print_r($sup->supplier->invoices);  exit;
+							$arr[$i] = ['label' => $sup->supplier->name];
+							
+							foreach($sup->supplier->invoices as $invoice){;
+								//print_r($invoice->toArray()); exit;
+								//echo $invoice->invoice_title; exit;
+								$arr[$i]['options'][] = [
+									'label' => $invoice->invoice_title,
+									/*'value' => $invoice->supplier_id,
+									'supplier_invoice' => $invoice->supplier_invoice_id,
+									'product' => $invoice->product_id,*/
+									'value' => [
+										'supplier' => $invoice->supplier_id,
+										'supplier_invoice' => $invoice->supplier_invoice_id,
+										'product' => $invoice->product_id,
+										'supplier_invoice_product_id' => $invoice->id
+									]
+								];
+								
+							}
+							$i++;
+						}
+						return $arr;
+					}
+				})();
+				/*$postnestedData['invoice'] = (function() use ($invoices){
+					if(sizeof($invoices) <= 0){
+						return [];
+					}else{
+						$arr = [];
+						foreach($invoices as $sup){
+							$arr[] = ['label'=>$sup->invoice_title, 'value'=>$sup->supplier_invoice_id];
+						}
+						return $arr;
+					}
+				})();*/
+				
+				$postnestedData['supplier_id'] = (function() use ($invoices, $data){
+					if(sizeof($invoices) <= 0){
+						return [];
+					}else{
+						$arr = [];
+						//print_r($invoices->toArray()); exit;
+						foreach($invoices as $sup){
+							if($data['supplier_invoice_id'] == $sup->supplier_invoice_id && $data['supplier_invoice_product_id'] == $sup->id){
+								return [
+									//'label'=>$sup->invoice_title, 
+									//'value'=>$sup->supplier_invoice_id,
+									//'label' => $sup->supplier->name.':'.$sup->invoice_title,
+									//'value' => [
+										//"label" => $sup->invoice_title, 
+										"label" => $sup->supplier->name,
+										"value" => [
+											"product" => $sup->product_id, 
+											"supplier" => $sup->supplier_id, 
+											"supplier_invoice" => $sup->supplier_invoice_id,
+											'supplier_invoice_product_id' => $sup->id
+										]
+									//]
+									//'supplier_invoice' => $sup->supplier_invoice_id,
+									//'product' => $sup->product_id,
+								];
+							}
+						}
+					}
+				})();
+				//$postnestedData['supplier_id'] = ["label"=> $data['supplier']['name'], 'value'=>$data['supplier_id']];
+				
+				
+                $products[] = $postnestedData;
+            }
+           return json_encode($products);
+        }catch(\Exception $ex){
+            $this->exceptionResponse($ex);
+        }
+  }
+
+  public function mail($id){
+    $response = 0;
+    $dataget =  CustomerInvoice::where('id',$id)->with('customer')->first();
+    if(!empty($dataget->customer) && ($dataget->customer->email)){
+            $subtotal = 0;
+
+            $productdata = array();
+            foreach($dataget->product as $key => $product){
+                $getjson = json_decode($product->product_info);
+                $productdata[$key]['quantity'] =  $product->quantity;
+                $productdata[$key]['unit_price'] =  $product->unit_price;
+                $productdata[$key]['sub_total'] =  $product->sub_total;
+                $productdata[$key]['product_id'] = $getjson->product_id;
+                $subtotal = $subtotal + $product->sub_total;
+            }
+
+            $customer =  \App\Models\Customer::where(['id' => $dataget->customer_id])->first();
+            $data = [
+            'id' => $dataget->id,
+            'date' => $dataget->created_at,
+            'type' => "Customer",
+            'subtotal' => !empty($dataget->order)?$dataget->order->sub_total:"",
+            'porterage' => !empty($dataget->order)?$dataget->order->porterage:"",
+            'vat' => !empty($dataget->order)?$dataget->order->vat:"",
+            'total' => !empty($dataget->order)?$dataget->order->total:"",
+            'name' => $customer->name,
+            'productdata' => $productdata,
+        ];
+        Mail::to($dataget->customer->email)->send(new InvoiceMail($data));
+        $response = 1;
+    } else {
+        $response = 0;
+    }
+    return $response;
+  }
+  public function delete($id){
+
+    $customerInvoice = CustomerInvoice::find($id);
+    if($customerInvoice){
+      $customerInvoiceOrder = CustomerInvoiceOrder::where('customer_invoice_id',$customerInvoice->id)->first();
+      if($customerInvoiceOrder){
+        $customerInvoiceOrderProduct = CustomerInvoiceProduct::where('customer_invoice_id',$customerInvoiceOrder->customer_invoice_id)->delete();
+          $customerInvoiceOrder->delete();
+
+      }
+      $customerInvoice->delete();
+    }
+
+
+        \Session::flash('redirect', ['type' => 'success', 'message' => "Invoice Deleted Successfully."]);
+
+  return Redirect::to('daily_report/daily_book_sales/view/index');
+
+
+
+  }
+	public function ajaxEditInvoiceDetail(Request $request){
+		//print_r($request->all()); exit;
+		DB::beginTransaction();
+		try {
+           $custmorinvoice =   CustomerInvoice::where('id',$request->id)->first();
+			   if($custmorinvoice){
+				if($request->created_at){
+				   $custmorinvoice->created_at = $request->created_at;
+				}
+				if($request->customer_id){
+					$custmorinvoice->customer_id = $request->customer_id;
+				}
+				$custmorinvoice->update();
+				// update stock_products.
+				StockProduct::where('invoice_id', $request->id)->where('type','customer')->update(['customer_id' => $request->customer_id]);
+				// update customer_invoice_products.
+				CustomerInvoiceProduct::where('customer_invoice_id', $request->id)->update(['customer_id' => $request->customer_id]);
+				DB::commit();
+				return $this->successResponse(['id' => $request->id]);
+			}
+        }catch(\Exception $ex){
+			DB::rollback();
+            $this->exceptionResponse($ex);
+        }
+    }
+    
+	public function saveInvoiceNotes(Request $request){
+		$invoice = CustomerInvoice::where('id', $request->id)->first();
+		if (!$invoice) {
+			return $this->errorResponse('Invoice not found');
+		}
+		$invoice->notes = $request->notes ?? '';
+		$invoice->save();
+		return $this->successResponse([]);
+	}
+
+	public function fetchuser(){
+
+       $custmar = Customer::where('is_active',1)->get();
+        return $this->successResponse($custmar);
+
+     }
+
+	public function productSupplierInvoices($product_id, $supplier_id){
+		$product_id = is_array($product_id) ? $product_id['value'] : $product_id;
+		$supplier_id = is_array($supplier_id) ? $supplier_id['value'] : $supplier_id;
+		
+		$invoices = \App\Models\SupplierInvoiceProduct::getProductSupplierInvoices($product_id, $supplier_id);
+		return $this->successResponse($invoices);
+	}
+
+
+}

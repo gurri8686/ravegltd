@@ -1,0 +1,134 @@
+.form-container {
+    background: #f1f7fc;
+    padding: 0px;
+
+}
+.form-container .image-holder {
+    display: table-cell;
+    width: auto;
+    background: url(../img/right-img.jpg);
+    background-size: cover;
+    padding: 100px 81px;
+    text-align: center;
+}
+ .form-container {
+    display: table;
+    width: 100%;
+    margin: 0 auto;
+    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+    height: 100vh;
+}
+.image-holder p{
+    color: #dfdcdc;
+    text-transform: uppercase;
+    padding-top: 30px;
+    line-height: 28px;
+        width: 485px;
+    margin: 0 auto;
+
+}
+.image-holder img{padding-top: 25px;}
+.form-container form {
+    display: table-cell;
+    width: 700px;
+    background-color: #ededed;
+    padding: 40px 119px;
+    color: #505e6c
+}
+@media screen and (min-width: 1400px) and (max-width:1900px) {
+.form-container .image-holder {
+    padding: 250px 81px;
+    text-align: center;
+}
+}
+@media (max-width:767px) {
+.form-container .image-holder {
+    display: block;
+    padding: 18px 20px;
+    width: 100%;
+    background: none;
+}
+.image-holder p {
+      display: none;
+}
+.form-container form {
+    display: block;
+    width: 90%;
+    background: none;
+    padding: 26px 15px;
+    box-shadow: 0px 0px 3px 2px #0000002e;
+    margin: 15px auto 50px;
+}
+    .image-holder img {
+    padding-top: 0px;
+}
+}
+.form-container form .input-group {
+    border: 1px solid #c7c7c7;
+    height: 51px;
+    margin-bottom: 25px;
+}
+.d-flex.justify-content-between a{color: #7ab536;}
+.form-container h2 strong{
+    color: #000;
+}
+.form-container form .input-group input::placeholder{color: #000;text-transform: uppercase;}
+button.btn.btn-success.btn-block.btn-info {
+    background: #7ab536;
+    text-transform: uppercase;
+    border-color: #7ab536;
+    padding: 10px 0px;
+    font-weight: bold;
+    border-radius: 0px;
+}
+
+.form-container form .input-group span{
+    display: block;
+    padding-right: 20px;
+    padding-top: 10px;
+}
+.form-container form .input-group span i{
+    color: #78b435;
+
+}
+.form-container form .input-group input{
+    border: none;
+    padding-top: 24px;
+    padding-bottom: 24px;
+}
+.form-container form h2 {
+    font-size: 35px;
+    line-height: 1.5;
+    margin-bottom: 30px
+}
+
+.form-container form .form-control {
+    background: transparent;
+
+}
+.form-control:focus {
+     box-shadow: none;
+}
+.form-container form .form-check {
+    font-size: 13px;
+    line-height: 20px
+}
+.logo-2{
+    display: none;
+  }
+@media screen and (min-width: 200px) and (max-width:700px) {
+    .logo-1{
+        display: none;
+      }
+
+      .logo-2{
+        display: block;
+      }
+      img.logo-2 {
+        height: 6rem;
+        margin-left: 33%;
+    }
+}
+.feedback-error {
+  padding: 0px!important;
+}

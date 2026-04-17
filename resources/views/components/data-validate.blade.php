@@ -1,0 +1,1 @@
+<div class="row"><div class="col-sm-12" data-validate="{{$field}}"></div></div>

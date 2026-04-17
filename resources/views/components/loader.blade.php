@@ -1,0 +1,1 @@
+<span class="loader display-none"><img class="margin-0" src="{{ asset('img') }}/btn-loader.svg" /></span>

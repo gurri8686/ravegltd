@@ -1,0 +1,1 @@
+<button type="button" onclick="window.location.href='{{$link}}'" class="btn btn-warning"><i class="fa fa-pencil"></i> {{__('Update')}}</button>
