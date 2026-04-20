@@ -1,7 +1,7 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/fx8fdk9i85rt/public_html/
+    - export DEPLOYPATH=/home/fx8fdk9i85rt/public_html/ravegltd2/
     - /bin/cp -R app $DEPLOYPATH
     - /bin/cp bootstrap/app.php $DEPLOYPATH/bootstrap/app.php
     - /bin/cp -R config $DEPLOYPATH
@@ -12,5 +12,8 @@ deployment:
     - /bin/cp artisan $DEPLOYPATH
     - /bin/cp composer.json $DEPLOYPATH
     - /bin/cp composer.lock $DEPLOYPATH
+    - /bin/cp composer.phar $DEPLOYPATH
     - /bin/cp server.php $DEPLOYPATH
     - /bin/cp webpack.mix.js $DEPLOYPATH
+    - cd $DEPLOYPATH && php composer.phar install --no-dev --optimize-autoloader --no-interaction 2>&1
+    - /bin/rm -f $DEPLOYPATH/bootstrap/cache/packages.php $DEPLOYPATH/bootstrap/cache/services.php $DEPLOYPATH/bootstrap/cache/config.php
