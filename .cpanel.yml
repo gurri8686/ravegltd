@@ -1,0 +1,16 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/fx8fdk9i85rt/public_html/
+    - /bin/cp -R app $DEPLOYPATH
+    - /bin/cp bootstrap/app.php $DEPLOYPATH/bootstrap/app.php
+    - /bin/cp -R config $DEPLOYPATH
+    - /bin/cp -R database $DEPLOYPATH
+    - /bin/cp -R public $DEPLOYPATH
+    - /bin/cp -R resources $DEPLOYPATH
+    - /bin/cp -R routes $DEPLOYPATH
+    - /bin/cp artisan $DEPLOYPATH
+    - /bin/cp composer.json $DEPLOYPATH
+    - /bin/cp composer.lock $DEPLOYPATH
+    - /bin/cp server.php $DEPLOYPATH
+    - /bin/cp webpack.mix.js $DEPLOYPATH
