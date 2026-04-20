@@ -682,15 +682,40 @@ class SalesController extends Controller
 
 		$validator = Validator::make($request->all(), $rules);
 		if ($validator->fails()) {
-		  return $this->validationErrorResponse($validator->errors()->messages());
+		  return response('Start date and end date are required.', 422);
 		}
-		
-		$customer_id = $product_id = $start_date = $end_date = "";
-		
-		extract($request->only('product_id', 'customer_id', 'start_date', 'end_date'));
-        print_r($request->all());
+
+		$customer_id = $start_date = $end_date = "";
+		extract($request->only('customer_id', 'start_date', 'end_date'));
+		$invoiceIds = $request->input('invoices', []);
+
+		$data = (new \App\Models\CustomerInvoice())
+			->whereDate('created_at', '>=', $start_date)
+			->whereDate('created_at', '<=', $end_date);
+
+		if (!empty($customer_id)) {
+			$data->where('customer_id', $customer_id);
+		}
+		if (!empty($invoiceIds)) {
+			$data->whereIn('id', (array) $invoiceIds);
+		}
+
+		$invoices = $data->withSum(['products as total' => function ($q) {
+				$q->where('is_archive', 0);
+			}], 'sub_total')
+			->withSum(['payments as total_paid' => function ($q) {
+				$q->where('initiated', 0);
+			}], 'amount')
+			->with('customer')
+			->orderBy('created_at', 'desc')
+			->get();
+
+		$companyDetails = \App\Models\CompanyDetailModel::first();
+		$currency = env('CURRENCY_SYMBOL', '£');
+
+		return view('daily-report.sales-print', compact('invoices', 'start_date', 'end_date', 'companyDetails', 'currency'));
     }
-	
+
 	public function statementDailyBookSales(Request $request)
 	{
 		$rules = [
@@ -821,6 +846,7 @@ class SalesController extends Controller
 				$q->where('is_archive', 0);
 			}])
 			->with('customer')
+			->with('salesman')
 			->with(['payments' => function($q){
 				$q->where('initiated',0)
 					->with('paymentMode')
@@ -1008,7 +1034,8 @@ class SalesController extends Controller
 				'customer_id' => ['required','numeric']
 			];
 
-			if ($showSuppliers) {
+			$hasSupplierData = is_array($request->supplier_id) && !empty($request->supplier_id['value']) && is_array($request->supplier_id['value']) && !empty($request->supplier_id['value']['supplier']);
+			if ($hasSupplierData) {
 				$rules['supplier_id'] = ['required', 'array'];
 				$rules['supplier_id.label'] = ['required', 'string'];
 				$rules['supplier_id.value.product'] = ['required','integer'];
@@ -1026,7 +1053,7 @@ class SalesController extends Controller
 			$request->product = is_array($request->product) ? $request->product['value'] : $request->product;
 			$request->invoiceproductid = is_array($request->invoiceproductid) ? $request->invoiceproductid['value'] : $request->invoiceproductid;
 
-			if ($showSuppliers && is_array($request->supplier_id)) {
+			if ($hasSupplierData && is_array($request->supplier_id)) {
 				$request->supplier_invoice_product_id = $request->supplier_id['value']['supplier_invoice_product_id'];
 				$request->invoice_id = $request->supplier_id['value']['supplier_invoice'];
 				$request->supplier_id = $request->supplier_id['value']['supplier'];
@@ -1071,7 +1098,7 @@ class SalesController extends Controller
 				//print_r($data); exit;
 				CustomerInvoiceProduct::where('id',$request->invoiceproductid)->where('customer_invoice_id', $request->invoiceId)->update($data);
 
-				if ($showSuppliers && $request->supplier_invoice_product_id) {
+				if ($hasSupplierData && $request->supplier_invoice_product_id) {
 					$stockProducts->recordStock([
 						'supplier_invoice_product_id' => $request->supplier_invoice_product_id,
 						'supplier_invoice_id' => $request->invoice_id,

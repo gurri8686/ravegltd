@@ -587,6 +587,21 @@
         .main-menu.menu-fixed .navigation-main::-webkit-scrollbar-thumb { background: #cccccc !important; border-radius: 10px !important; }
         .main-menu.menu-fixed .navigation-main::-webkit-scrollbar-track { background: transparent !important; }
     }
+    /* ── Print: hide chrome, show only content ── */
+    @media print {
+        .header-navbar,
+        .main-menu,
+        .menu-expanded .main-menu,
+        .sidenav-overlay,
+        .drag-target,
+        .navbar-header,
+        .footer,
+        .no-print { display: none !important; }
+        .app-content,
+        .content-wrapper,
+        .main-panel { margin: 0 !important; padding: 0 !important; width: 100% !important; }
+        body { background: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
     </style>
     @stack('stylesheets')
 </head>
@@ -609,7 +624,26 @@
                       </a></li>
 
 
-                    <li id="mobile-sale-btn" class="nav-item d-md-none">
+                    <li id="mobile-sale-btn" class="nav-item d-md-none" style="gap:5px;display:flex;align-items:center;">
+                        <div style="position:relative;" id="ts-font-dropdown-wrap">
+                            <button onclick="tsFontDropdownToggle()" id="ts-font-dropdown-btn" title="Font size" style="display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 8px;border:none;background:rgba(0,0,0,0.06);border-radius:6px;cursor:pointer;color:#374151;font-weight:700;flex-shrink:0;font-size:12px;">
+                                <span style="font-size:13px;line-height:1;">A</span><span id="ts-font-pct-label" style="font-size:10px;font-weight:600;color:#64748b;"></span><i class="fa fa-caret-down" style="font-size:10px;color:#94a3b8;margin-left:1px;"></i>
+                            </button>
+                            <div id="ts-font-dropdown-menu" style="display:none;position:absolute;top:34px;right:0;background:#fff;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.15);border:1px solid #e5e7eb;padding:6px;z-index:99999;min-width:140px;">
+                                <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;margin-bottom:4px;">
+                                    <span style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Font Size</span>
+                                    <span id="ts-font-pct-display" style="font-size:11px;font-weight:700;color:#f97316;"></span>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:6px;padding:4px 8px;">
+                                    <button data-ts-font-dir="-1" onclick="tsAdjustFontSize(-1)" style="width:32px;height:32px;border:1.5px solid #e2e8f0;background:#f8fafc;border-radius:8px;cursor:pointer;color:#374151;font-weight:700;font-size:16px;display:inline-flex;align-items:center;justify-content:center;transition:all 0.15s;" onmouseover="this.style.borderColor='#f97316';this.style.color='#f97316'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#374151'">−</button>
+                                    <div style="flex:1;height:4px;background:#e5e7eb;border-radius:4px;position:relative;overflow:hidden;">
+                                        <div id="ts-font-bar" style="height:100%;background:#f97316;border-radius:4px;transition:width 0.2s;"></div>
+                                    </div>
+                                    <button data-ts-font-dir="1" onclick="tsAdjustFontSize(1)" style="width:32px;height:32px;border:1.5px solid #e2e8f0;background:#f8fafc;border-radius:8px;cursor:pointer;color:#374151;font-weight:700;font-size:16px;display:inline-flex;align-items:center;justify-content:center;transition:all 0.15s;" onmouseover="this.style.borderColor='#f97316';this.style.color='#f97316'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#374151'">+</button>
+                                </div>
+                                <button onclick="tsResetFontSize()" style="width:100%;margin-top:4px;height:28px;border:none;background:#f8fafc;border-radius:6px;cursor:pointer;color:#64748b;font-size:11px;font-weight:600;transition:all 0.15s;" onmouseover="this.style.background='#fff7ed';this.style.color='#f97316'" onmouseout="this.style.background='#f8fafc';this.style.color='#64748b'">Reset to 100%</button>
+                            </div>
+                        </div>
                         <a href="/data_entry/sales_entry/view" style="display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 11px;border-radius:10px;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;font-weight:700;font-size:11.5px;text-decoration:none;box-shadow:0 2px 8px rgba(249,115,22,0.3);white-space:nowrap;">
                             <i class="fa fa-plus" style="font-size:10px;color:#fff;"></i><span class="mobile-sale-text"> Sale Order</span><span class="mobile-sale-short">Sale</span>
                         </a>
@@ -731,6 +765,27 @@
                             </ul>
                         </li>
                         -->
+                        <li class="nav-item d-none d-md-block" style="display:flex;align-items:center;margin-right:8px;">
+                            <div style="position:relative;" id="ts-font-dropdown-wrap-dt">
+                                <button onclick="tsFontDropdownToggleDt()" id="ts-font-dropdown-btn-dt" title="Font size" style="display:inline-flex;align-items:center;gap:4px;height:34px;padding:0 10px;border:none;background:#f4f4f5;border-radius:8px;cursor:pointer;color:#374151;font-weight:700;flex-shrink:0;font-size:12px;">
+                                    <span style="font-size:13px;line-height:1;">A</span><span id="ts-font-pct-label-dt" style="font-size:10px;font-weight:600;color:#64748b;"></span><i class="fa fa-caret-down" style="font-size:10px;color:#94a3b8;margin-left:1px;"></i>
+                                </button>
+                                <div id="ts-font-dropdown-menu-dt" style="display:none;position:absolute;top:40px;right:0;background:#fff;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.15);border:1px solid #e5e7eb;padding:6px;z-index:99999;min-width:140px;">
+                                    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;margin-bottom:4px;">
+                                        <span style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Font Size</span>
+                                        <span id="ts-font-pct-display-dt" style="font-size:11px;font-weight:700;color:#f97316;"></span>
+                                    </div>
+                                    <div style="display:flex;align-items:center;gap:6px;padding:4px 8px;">
+                                        <button data-ts-font-dir="-1" onclick="tsAdjustFontSize(-1)" style="width:32px;height:32px;border:1.5px solid #e2e8f0;background:#f8fafc;border-radius:8px;cursor:pointer;color:#374151;font-weight:700;font-size:16px;display:inline-flex;align-items:center;justify-content:center;transition:all 0.15s;" onmouseover="this.style.borderColor='#f97316';this.style.color='#f97316'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#374151'">−</button>
+                                        <div style="flex:1;height:4px;background:#e5e7eb;border-radius:4px;position:relative;overflow:hidden;">
+                                            <div id="ts-font-bar-dt" style="height:100%;background:#f97316;border-radius:4px;transition:width 0.2s;"></div>
+                                        </div>
+                                        <button data-ts-font-dir="1" onclick="tsAdjustFontSize(1)" style="width:32px;height:32px;border:1.5px solid #e2e8f0;background:#f8fafc;border-radius:8px;cursor:pointer;color:#374151;font-weight:700;font-size:16px;display:inline-flex;align-items:center;justify-content:center;transition:all 0.15s;" onmouseover="this.style.borderColor='#f97316';this.style.color='#f97316'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#374151'">+</button>
+                                    </div>
+                                    <button onclick="tsResetFontSize()" style="width:100%;margin-top:4px;height:28px;border:none;background:#f8fafc;border-radius:6px;cursor:pointer;color:#64748b;font-size:11px;font-weight:600;transition:all 0.15s;" onmouseover="this.style.background='#fff7ed';this.style.color='#f97316'" onmouseout="this.style.background='#f8fafc';this.style.color='#64748b'">Reset to 100%</button>
+                                </div>
+                            </div>
+                        </li>
                         <li class="nav-item d-none d-md-block" style="display:flex;align-items:center;"><a style="display:flex;align-items:center;margin-right:14px;padding:0;" class="nav-link" href="/data_entry/sales_entry/view"><button type="button" class="btn btn-primary m-0"><i class="fa fa-plus" style="color:#fff !important;"></i> Sale Order</button></a></li>
                         {{-- Hidden logout form used by sidebar logout link --}}
                         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
@@ -1014,6 +1069,106 @@
         window.addEventListener('orientationchange', function() {
             setTimeout(function() { lastHeight = vv.height; }, 500);
         });
+    })();
+    </script>
+
+    <script>
+    (function(){
+        /* Font size levels — percentages of html base font size (16px = 100%) */
+        var LEVELS = [85, 90, 95, 100, 105, 110, 115];
+        var DEFAULT = 3; /* index of 100% */
+        var key = 'ts_font_size';
+        var idx = parseInt(localStorage.getItem(key));
+        if (isNaN(idx) || idx < 0 || idx >= LEVELS.length) idx = DEFAULT;
+
+        /* Screen-aware limits — prevent over-scaling on small screens */
+        function getLimits() {
+            var w = window.innerWidth;
+            if (w < 768)  return { min: 1, max: 5 }; /* mobile:  90%–110% */
+            if (w < 1200) return { min: 0, max: 6 }; /* tablet:  85%–115% */
+            return           { min: 0, max: 6 };      /* desktop: 85%–115% */
+        }
+
+        function updateDropdownUI(pct) {
+            var lim = getLimits();
+            var range = lim.max - lim.min;
+            var progress = range > 0 ? ((idx - lim.min) / range) * 100 : 50;
+            /* Update both mobile and desktop dropdowns */
+            ['', '-dt'].forEach(function(suffix) {
+                var lbl = document.getElementById('ts-font-pct-label' + suffix);
+                if (lbl) lbl.textContent = pct + '%';
+                var disp = document.getElementById('ts-font-pct-display' + suffix);
+                if (disp) disp.textContent = pct + '%';
+                var bar = document.getElementById('ts-font-bar' + suffix);
+                if (bar) bar.style.width = progress + '%';
+            });
+        }
+
+        function applyFontSize(i) {
+            var lim = getLimits();
+            i = Math.max(lim.min, Math.min(lim.max, i));
+            idx = i;
+            var scale = LEVELS[i] / 100;
+            /*
+             * Use CSS zoom on .content-wrapper — scales text and content
+             * proportionally without breaking layout or causing overflow.
+             * At 100% zoom is removed completely so UI is pixel-perfect.
+             */
+            var root = document.querySelector('.content-wrapper');
+            if (root) {
+                if (scale === 1) {
+                    root.style.removeProperty('zoom');
+                    root.style.removeProperty('-moz-transform');
+                    root.style.removeProperty('-moz-transform-origin');
+                } else {
+                    root.style.zoom = scale;
+                    /* Firefox fallback (no zoom support) */
+                    root.style.MozTransform = 'scale(' + scale + ')';
+                    root.style.MozTransformOrigin = 'top left';
+                }
+            }
+            localStorage.setItem(key, i);
+            updateDropdownUI(LEVELS[i]);
+            updateBtnStates();
+        }
+
+        /* Dim -/+ buttons when at min/max limit */
+        function updateBtnStates() {
+            var lim = getLimits();
+            document.querySelectorAll('[data-ts-font-dir]').forEach(function(btn) {
+                var dir = parseInt(btn.getAttribute('data-ts-font-dir'));
+                var atLimit = dir < 0 ? idx <= lim.min : idx >= lim.max;
+                btn.style.opacity = atLimit ? '0.35' : '1';
+                btn.style.cursor  = atLimit ? 'default' : 'pointer';
+            });
+        }
+
+        /* Dropdown toggles */
+        window.tsFontDropdownToggle = function() {
+            var menu = document.getElementById('ts-font-dropdown-menu');
+            if (menu) menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        };
+        window.tsFontDropdownToggleDt = function() {
+            var menu = document.getElementById('ts-font-dropdown-menu-dt');
+            if (menu) menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        };
+
+        /* Close dropdowns on outside click */
+        document.addEventListener('click', function(e) {
+            [['ts-font-dropdown-wrap','ts-font-dropdown-menu'],['ts-font-dropdown-wrap-dt','ts-font-dropdown-menu-dt']].forEach(function(pair) {
+                var wrap = document.getElementById(pair[0]);
+                var menu = document.getElementById(pair[1]);
+                if (wrap && menu && !wrap.contains(e.target)) menu.style.display = 'none';
+            });
+        });
+
+        /* Reset to 100% */
+        window.tsResetFontSize = function() { applyFontSize(DEFAULT); };
+
+        applyFontSize(idx);
+        window.addEventListener('resize', function() { applyFontSize(idx); });
+
+        window.tsAdjustFontSize = function(dir) { applyFontSize(idx + dir); };
     })();
     </script>
 

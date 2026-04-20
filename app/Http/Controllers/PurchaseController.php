@@ -674,15 +674,38 @@ class PurchaseController extends Controller
 
 		$validator = Validator::make($request->all(), $rules);
 		if ($validator->fails()) {
-		  return $this->validationErrorResponse($validator->errors()->messages());
+		  return response('Start date and end date are required.', 422);
 		}
-		
-		$supplier_id = $product_id = $start_date = $end_date = "";
-		
-		extract($request->only('product_id', 'supplier_id', 'start_date', 'end_date'));
-        print_r($request->all());
+
+		$supplier_id = $start_date = $end_date = "";
+		extract($request->only('supplier_id', 'start_date', 'end_date'));
+		$invoiceIds = $request->input('invoices', []);
+
+		$data = (new SupplierInvoice())
+			->whereDate('created_at', '>=', $start_date)
+			->whereDate('created_at', '<=', $end_date);
+
+		if (!empty($supplier_id)) {
+			$data->where('supplier_id', $supplier_id);
+		}
+		if (!empty($invoiceIds)) {
+			$data->whereIn('id', (array) $invoiceIds);
+		}
+
+		$invoices = $data->withSum(['products as total' => function ($q) {
+				$q->where('is_archive', 0);
+			}], 'sub_total')
+			->withSum('payments as total_paid', 'amount')
+			->with('supplier')
+			->orderBy('created_at', 'desc')
+			->get();
+
+		$companyDetails = CompanyDetailModel::first();
+		$currency = env('CURRENCY_SYMBOL', '£');
+
+		return view('daily-report.purchase-print', compact('invoices', 'start_date', 'end_date', 'companyDetails', 'currency'));
     }
-	
+
 	public function list(Request $request)
     {
 		$supplier_id = $product_id = $start_date = $end_date = "";
