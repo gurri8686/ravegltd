@@ -15,5 +15,3 @@ deployment:
     - /bin/cp composer.phar $DEPLOYPATH
     - /bin/cp server.php $DEPLOYPATH
     - /bin/cp webpack.mix.js $DEPLOYPATH
-    - cd $DEPLOYPATH && php composer.phar install --no-dev --optimize-autoloader --no-interaction 2>&1
-    - /bin/rm -f $DEPLOYPATH/bootstrap/cache/packages.php $DEPLOYPATH/bootstrap/cache/services.php $DEPLOYPATH/bootstrap/cache/config.php
