@@ -55,4 +55,20 @@ class LoginController extends Controller
 		//return ['email' => $request->{$this->username()}, 'password' => $request->password, 'is_active' => 1];
 		return ['email' => $getEmail->email, 'password' => $request->password, 'is_active' => 1];
     }
+
+    /**
+     * Stamp the login time so the Users list can show "Last login".
+     */
+    protected function authenticated(\Illuminate\Http\Request $request, $user)
+    {
+        try {
+            \DB::connection($user->getConnectionName())
+                ->table('users')
+                ->where('id', $user->id)
+                ->update(['last_login_at' => now()]);
+            \Log::info('LAST_LOGIN_STAMPED', ['user_id' => $user->id, 'at' => now()->toDateTimeString()]);
+        } catch (\Throwable $e) {
+            \Log::warning('LAST_LOGIN_STAMP_FAILED', ['user_id' => $user->id ?? null, 'msg' => $e->getMessage()]);
+        }
+    }
 }

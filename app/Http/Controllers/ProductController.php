@@ -74,6 +74,10 @@ class ProductController extends Controller
                 $ProductID = 'P'.(100+$insertedId);
                 $createData->product_id = $ProductID;
                 $recordUpdate = $createData->update();
+                // Bust cached products list so the new product is picked up immediately on sales/purchase pages.
+                $host = request()->getHost() ?: 'default';
+                \Cache::forget('sales_products_list_' . $host);
+                \Cache::forget('purchase_products_list_' . $host);
             }
             else
             {
@@ -157,6 +161,10 @@ class ProductController extends Controller
                 $updateData->is_active = $is_active;
                 $updateData->user_id = Auth::user()->id;
                 $record = $updateData->update();
+                // Bust cached products list so edits show immediately on sales/purchase invoice pages.
+                $host = request()->getHost() ?: 'default';
+                \Cache::forget('sales_products_list_' . $host);
+                \Cache::forget('purchase_products_list_' . $host);
             }
             if (!$record) {
                 throw new \Exception("Error to Updated");

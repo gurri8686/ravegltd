@@ -108,6 +108,63 @@ class HomeController extends Controller
         return response()->json(['success' => true, 'payload' => $data]);
     }
 
+    /**
+     * Real-time dashboard stats for a single date (or range start..end).
+     * Used by the dashboard date-filter to refresh "Today's" cards without a full page reload.
+     */
+    public function dashboardStats(Request $request)
+    {
+        $from = $request->get('from', $request->get('date', now()->toDateString()));
+        $to   = $request->get('to',   $from);
+        // Defensive: ensure $from <= $to
+        if (\Carbon\Carbon::parse($from)->gt(\Carbon\Carbon::parse($to))) {
+            [$from, $to] = [$to, $from];
+        }
+        $fromCarbon = \Carbon\Carbon::parse($from);
+        $toCarbon   = \Carbon\Carbon::parse($to);
+        $isSingleDay = $from === $to;
+
+        $salesValue = \DB::table('customer_invoice_products')
+            ->join('invoice_payments', 'invoice_payments.customer_invoice_id', '=', 'customer_invoice_products.customer_invoice_id')
+            ->join('payments', 'payments.id', '=', 'invoice_payments.payment_id')
+            ->where('payments.type', 'None')
+            ->whereDate('customer_invoice_products.updated_at', '>=', $from)
+            ->whereDate('customer_invoice_products.updated_at', '<=', $to)
+            ->sum('customer_invoice_products.sub_total');
+
+        $purchaseValue = \DB::table('supplier_invoice_products')
+            ->where('is_archive', 0)
+            ->whereDate('created_at', '>=', $from)
+            ->whereDate('created_at', '<=', $to)
+            ->sum('sub_total');
+
+        $ordersCount = \DB::table('customer_invoice_orders')
+            ->whereDate('updated_at', '>=', $from)
+            ->whereDate('updated_at', '<=', $to)
+            ->count();
+
+        // Human-friendly label for the cards (e.g. "Today's Sales", "27 Apr Sales", or "27 Apr – 03 May Sales")
+        if ($isSingleDay) {
+            $label = $fromCarbon->isToday() ? "Today" : $fromCarbon->format('d M');
+        } else {
+            $label = $fromCarbon->format('d M') . ' – ' . $toCarbon->format('d M');
+        }
+
+        return response()->json([
+            'success' => true,
+            'payload' => [
+                'from'            => $from,
+                'to'              => $to,
+                'is_single_day'   => $isSingleDay,
+                'is_today'        => $isSingleDay && $fromCarbon->isToday(),
+                'label'           => $label,
+                'sales_value'     => (float) $salesValue,
+                'purchase_value'  => (float) $purchaseValue,
+                'orders_count'    => (int)   $ordersCount,
+            ],
+        ]);
+    }
+
     public function noPermission(Request $request)
     {
         return view('error.NoPermission');

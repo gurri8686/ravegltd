@@ -69,7 +69,11 @@ class CustomerPayments{
 			->where('is_archived',0)
 			->get();
 		$invoice = CustomerInvoice::where('id',$customer_invoice_id)->withSum('orderStart','sub_total')->first();
-		
+
+		if (!$invoice) {
+			return ['total_paid' => 0, 'paid' => 0, 'total' => 0, 'type' => 'Not Found'];
+		}
+
 		$report = [];
 		
 		if(sizeof($payments) <= 0){
@@ -105,7 +109,19 @@ class CustomerPayments{
 			$report['countable'] = 'yes';
 		}*/
 		
-		return ['total_paid' => (array_sum($total_paid) + array_sum($total_credits)), 'paid' => abs($calc), 'total' => $invoice->order_start_sum_sub_total, 'type' => $calc < 0 ? 'No Payment Pending / Advance' : 'Pending'];
+		$totalPaidAmount = array_sum($total_paid) + array_sum($total_credits);
+		$invoiceTotal = $invoice->order_start_sum_sub_total ?? 0;
+		$pending = $invoiceTotal - $totalPaidAmount;
+		if ($pending < 0) {
+			$type = 'Credit / Advance';
+		} elseif ($pending == 0 && $totalPaidAmount > 0) {
+			$type = 'Fully Paid';
+		} elseif ($totalPaidAmount > 0) {
+			$type = 'Pending';
+		} else {
+			$type = 'Unpaid';
+		}
+		return ['total_paid' => $totalPaidAmount, 'paid' => $pending, 'total' => $invoiceTotal, 'type' => $type];
 	}
 	
 	public static function checkAlreadyPaid_V2($customer_invoice_id){
@@ -367,20 +383,35 @@ class CustomerPayments{
 		return $invoices;
 	} 
 	
-	public static function invoicePaymentsHistory($customer_id, $startDate, $endDate){
-		//echo $customer_id.'-'.$startDate.'-'.$endDate; exit;
+	public static function invoicePaymentsHistory($customer_id, $startDate, $endDate, $option = "", $pagination = null){
+		// Filter by the actual invoice/payment date (customer_invoices.created_at for invoice rows,
+		// customer_payments.created_at for on-account payments that have no invoice).
+		$dateScope = function ($q) use ($startDate, $endDate) {
+			if (empty($startDate) && empty($endDate)) {
+				return;
+			}
+			$q->where(function ($w) use ($startDate, $endDate) {
+				$w->whereHas('customerInvoice', function ($ci) use ($startDate, $endDate) {
+					if (!empty($startDate)) $ci->whereDate('created_at', '>=', $startDate);
+					if (!empty($endDate)) $ci->whereDate('created_at', '<=', $endDate);
+				})->orWhere(function ($p) use ($startDate, $endDate) {
+					$p->whereDoesntHave('customerInvoice');
+					if (!empty($startDate)) $p->whereDate('created_at', '>=', $startDate);
+					if (!empty($endDate)) $p->whereDate('created_at', '<=', $endDate);
+				});
+			});
+		};
+
 		$invoices = CustomerPayment::where('is_archived', 0)
-		->where(function ($q) use ($customer_id, $startDate, $endDate) {
+		->where(function ($q) use ($customer_id, $dateScope) {
 			$q->where('initiated', 1)
-			  ->where('customer_id', $customer_id)
-			  ->whereDate('created_at', '>=', $startDate)
-			  ->whereDate('created_at', '<=', $endDate);
+			  ->where('customer_id', $customer_id);
+			$dateScope($q);
 		})
-		->orWhere(function ($q) use ($customer_id, $startDate, $endDate) {
+		->orWhere(function ($q) use ($customer_id, $dateScope) {
 			$q->where('is_credited', 1)
-			  ->where('customer_id', $customer_id)
-			  ->whereDate('created_at', '>=', $startDate)
-			  ->whereDate('created_at', '<=', $endDate);
+			  ->where('customer_id', $customer_id);
+			$dateScope($q);
 		})
 		// Load childPayments ONLY if EMPTY or SUM = 0
 		->where(function ($q) {
@@ -391,6 +422,7 @@ class CustomerPayments{
 			  });
 		})
 		->withSum('orderStart', 'sub_total')
+		->with('customerInvoice')
 		->with(['payments' => function ($q) {
 			$q->where('is_paid', 1)
 			  ->with('paymentMode');
@@ -402,7 +434,7 @@ class CustomerPayments{
 		// only includes the above filtered childPayments
 		->withSum('childPayments', 'amount')
 		->get();
-		
+
 		if(sizeof($invoices) <= 0){
 			return [];
 		}
@@ -412,7 +444,7 @@ class CustomerPayments{
 		foreach($invoices as $k => $v){
 			$data[$i]['id'] =  $v->customer_invoice_id;
 			//$data[$i]['balance'] =  $v->order_start_sum_sub_total - $v->total_amount;
-			$data[$i]['created_at'] =  $v->created_at;
+			$data[$i]['created_at'] =  optional($v->customerInvoice)->created_at ?? $v->created_at;
 			$data[$i]['is_credited'] =  $v->is_credited;
 			$data[$i]['net_amount'] =  (float)$v->order_start_sum_sub_total;
 			$data[$i]['total_paid'][] = 0;
@@ -473,9 +505,86 @@ class CustomerPayments{
 			
 			$i++;
 		}
-		return $data;
+
+		// Filter by payment mode (option) — supports csv for multi-select.
+		// cash / cheque / bank transfer = invoices that had a payment of that type.
+		// credit = invoices with outstanding balance (not fully paid).
+		$optStr = strtolower(trim((string)$option));
+		if ($optStr !== '' && $optStr !== 'all') {
+			$modes = array_filter(array_map('trim', explode(',', $optStr)));
+			if (!empty($modes)) {
+				$data = array_values(array_filter($data, function ($row) use ($modes) {
+					foreach ($modes as $m) {
+						if ($m === 'cash' && (float)($row['paid_by_cash'] ?? 0) > 0) return true;
+						if ($m === 'cheque' && (float)($row['paid_by_cheque'] ?? 0) > 0) return true;
+						if ($m === 'bank transfer' && (float)($row['paid_by_bank'] ?? 0) > 0) return true;
+						if ($m === 'credit' && (float)($row['balance'] ?? 0) > 0) return true;
+					}
+					return false;
+				}));
+			}
+		}
+
+		// Existing callers (Excel/PDF/profile tab) expect the full array.
+		if ($pagination === null) {
+			return $data;
+		}
+
+		// Paginated mode for the customer-history report: search, sort, slice, plus
+		// precomputed totals + running_balance for the current page.
+		$page    = max(1, (int)($pagination['page'] ?? 1));
+		$perPage = max(1, min(200, (int)($pagination['per_page'] ?? 10)));
+		$sortBy  = $pagination['sort_by'] ?? 'created_at';
+		$sortDir = ($pagination['sort_dir'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
+		$search  = strtolower(trim($pagination['search'] ?? ''));
+
+		if ($search !== '') {
+			$data = array_values(array_filter($data, function ($row) use ($search) {
+				$blob = strtolower(($row['id'] ?? '').' '.($row['created_at'] ?? '').' '.($row['net_amount'] ?? '').' '.($row['total_paid'] ?? '').' '.($row['balance'] ?? ''));
+				return strpos($blob, $search) !== false;
+			}));
+		}
+
+		usort($data, function ($a, $b) use ($sortBy, $sortDir) {
+			$va = $a[$sortBy] ?? null;
+			$vb = $b[$sortBy] ?? null;
+			$cmp = is_numeric($va) && is_numeric($vb) ? ((float)$va <=> (float)$vb) : strcmp((string)$va, (string)$vb);
+			return $sortDir === 'desc' ? -$cmp : $cmp;
+		});
+
+		$totals = [
+			'net_amount'       => array_sum(array_column($data, 'net_amount')),
+			'credit_inv'       => array_sum(array_map(function ($r) { return ((float)$r['paid_by_cash']) > 0 ? 0 : (float)$r['net_amount']; }, $data)),
+			'cash_inv'         => array_sum(array_map(function ($r) { return ((float)$r['paid_by_cash']) > 0 ? (float)$r['net_amount'] : 0; }, $data)),
+			'total_paid'       => array_sum(array_column($data, 'total_paid')),
+			'credit_adj'       => array_sum(array_column($data, 'credit_adj')),
+			'total_discounted' => 0,
+			'balance'          => array_sum(array_column($data, 'balance')),
+		];
+
+		// Running balance must consider every row before the page slice — compute over
+		// the full sorted/filtered set, then take only the page window.
+		$pastBalance = static::pastBalance($customer_id, $startDate);
+		$running = (float)$pastBalance;
+		foreach ($data as &$row) {
+			$running += (float)$row['balance'];
+			$row['running_balance'] = $running;
+		}
+		unset($row);
+
+		$totalCount = count($data);
+		$offset = ($page - 1) * $perPage;
+		$pageData = array_slice($data, $offset, $perPage);
+
+		return [
+			'data'        => $pageData,
+			'totals'      => $totals,
+			'total_count' => $totalCount,
+			'page'        => $page,
+			'per_page'    => $perPage,
+		];
 	}
-	
+
 	public static function invoicePayments($customer_id, $startDate, $endDate){
 		$invoices = $payments = CustomerPayment::selectRaw("
 					CASE 

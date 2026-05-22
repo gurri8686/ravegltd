@@ -350,19 +350,19 @@ class SupplierPayments{
 		return array_sum($calc['net_amount']) - array_sum($calc['returns']) - array_sum($calc['paid']) - array_sum($calc['on_account']);
 	}
 	
-	public static function invoicePaymentsHistory($supplier_id, $startDate, $endDate){
+	public static function invoicePaymentsHistory($supplier_id, $startDate, $endDate, $option = ''){
 		$invoices = SupplierPayment::where('is_archived', 0)
 		->where(function ($q) use ($supplier_id, $startDate, $endDate) {
 			$q->where('initiated', 1)
-			  ->where('supplier_id', $supplier_id)
-			  ->whereDate('created_at', '>=', $startDate)
-			  ->whereDate('created_at', '<=', $endDate);
+			  ->where('supplier_id', $supplier_id);
+			if (!empty($startDate)) $q->whereDate('created_at', '>=', $startDate);
+			if (!empty($endDate)) $q->whereDate('created_at', '<=', $endDate);
 		})
 		->orWhere(function ($q) use ($supplier_id, $startDate, $endDate) {
 			$q->where('is_credited', 1)
-			  ->where('supplier_id', $supplier_id)
-			  ->whereDate('created_at', '>=', $startDate)
-			  ->whereDate('created_at', '<=', $endDate);
+			  ->where('supplier_id', $supplier_id);
+			if (!empty($startDate)) $q->whereDate('created_at', '>=', $startDate);
+			if (!empty($endDate)) $q->whereDate('created_at', '<=', $endDate);
 		})
 		// Load childPayments ONLY if EMPTY or SUM = 0
 		->where(function ($q) {
@@ -410,10 +410,15 @@ class SupplierPayments{
 			$data[$i]['paid_by_cash'][] = 0;
 			$data[$i]['paid_by_cheque'][] = 0;
 			$data[$i]['paid_by_bank'][] = 0;
-			
+
+			$data[$i]['delivery_no'] = null;
+			$data[$i]['remarks'] = null;
+
 			if(!empty($v->invoice)){
 				$data[$i]['other_invoice_id'] = $v->invoice->other_invoice_id;
 				$data[$i]['invoice_date'] = $v->invoice->created_at ? date('d M Y', strtotime($v->invoice->created_at)) : null;
+				$data[$i]['delivery_no'] = $v->invoice->delivery_no ?? null;
+				$data[$i]['remarks'] = $v->invoice->remarks ?? null;
 			}
 			// Last payment date
 			$data[$i]['payment_date'] = null;
@@ -475,6 +480,26 @@ class SupplierPayments{
 			
 			$i++;
 		}
+
+		// Filter by payment mode (option) — supports csv for multi-select.
+		// cash / cheque / bank transfer = invoices that had a payment of that type.
+		// credit = invoices with outstanding balance (not fully paid).
+		$optStr = strtolower(trim((string)$option));
+		if ($optStr !== '' && $optStr !== 'all') {
+			$modes = array_filter(array_map('trim', explode(',', $optStr)));
+			if (!empty($modes)) {
+				$data = array_values(array_filter($data, function ($row) use ($modes) {
+					foreach ($modes as $m) {
+						if ($m === 'cash' && (float)($row['paid_by_cash'] ?? 0) > 0) return true;
+						if ($m === 'cheque' && (float)($row['paid_by_cheque'] ?? 0) > 0) return true;
+						if ($m === 'bank transfer' && (float)($row['paid_by_bank'] ?? 0) > 0) return true;
+						if ($m === 'credit' && (float)($row['balance'] ?? 0) > 0) return true;
+					}
+					return false;
+				}));
+			}
+		}
+
 		return $data;
 	}
 	

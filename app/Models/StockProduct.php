@@ -172,7 +172,7 @@ class StockProduct extends Model
 			}
 
 			// Build supplier short name (before first space)
-			$supplierName = $supplier->supplier?->name ?? 'Unknown';
+			$supplierName = $supplier->supplier?->name ?? 'N/A';
 			$shortName = explode(' ', trim($supplierName))[0] ?? $supplierName;
 
 			// Final formatted label: "...|Qty:700|P:5.00|"
@@ -256,7 +256,7 @@ class StockProduct extends Model
 		->where('invoice_id', $invoice_id)
 		->where('type', 'supplier')
 		->with('customerStocks')
-		->where('supplier_id', $supplier_id);
+		->when(!empty($supplier_id), fn($q) => $q->where('supplier_id', $supplier_id));
 
 		if(!empty($ignore)){
 			$suppliers->whereNotIn('id', $ignore);
@@ -408,8 +408,14 @@ class StockProduct extends Model
 		return $records;	
 	}
 	
-	public static function getProductsWithInvoiceStockSupplier($supplier_id, $product_id = "", $date = "", $ref_id = ""){
-		$supplier_invoices = SupplierInvoice::whereDate('created_at', $date)
+	public static function getProductsWithInvoiceStockSupplier($supplier_id, $product_id = "", $date = "", $ref_id = "", $end_date = ""){
+		$q = SupplierInvoice::query();
+		if (!empty($end_date) && $end_date !== $date) {
+			$q->whereDate('created_at', '>=', $date)->whereDate('created_at', '<=', $end_date);
+		} else {
+			$q->whereDate('created_at', $date);
+		}
+		$supplier_invoices = $q
 			//->where('status', 1)
 			->whereHas('oneProduct', function ($q) use ($product_id) {
 				$q->where('product_id', $product_id);

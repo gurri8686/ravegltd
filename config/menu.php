@@ -78,7 +78,6 @@ return [
 		//'product_profit_loss' => ['view'],
     ],
 	'payment_history' => ['nolink' => true,
-        'customer_payment_history' => ['view','alias' => 'Customers'],
 		'supplier_payment_history' => ['view','alias' => 'Suppliers'],
     ],
 	'payments' => [ 'alias' => 'Make Payments',

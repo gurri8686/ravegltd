@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\SupplierInvoice;
 use App\Models\Supplier;
 use App\Models\SupplierPayment;
+use App\Models\SupplierCreditUsage;
 use App\Services\SupplierPayments;
 use App\Lib\Response as CustomResponse;
 use Validator;
@@ -21,10 +22,14 @@ class SupplierPaymentsController extends Controller
      */
     public function index($id)
     {
+        $list = SupplierPayments::list($id);
+        $list->each(function($payment) {
+            $payment->credit_used = SupplierCreditUsage::where('supplier_payment_id', $payment->id)->sum('amount');
+        });
         return $this->successResponse([
-			"list" => SupplierPayments::list($id),
-			"details" => SupplierPayments::details($id)
-		]);
+            "list"    => $list,
+            "details" => SupplierPayments::details($id),
+        ]);
     }
 	
 	public function indexOnAccount(Request $request, SupplierPayments $supplierPayments){
@@ -57,30 +62,51 @@ class SupplierPaymentsController extends Controller
      */
     public function store(Request $request, SupplierPayments $supplierPayments)
     {
-        try{
-			$rules = [
+        $creditAmount = (float)($request->creditAmount ?? 0);
+
+        try {
+            $rules = [
                 'payment_method' => 'required',
-				'amount' => 'required',
-				'id' => 'required',
-				'supplier.id' => 'required'
+                'amount'         => 'required|numeric|min:0',
+                'id'             => 'required',
             ];
-			
-			$validator = Validator::make($request->all(), $rules);
-			if ($validator->fails()) {
+            $validator = Validator::make($request->all(), $rules);
+            if ($validator->fails()) {
                 return $this->validationErrorResponse($validator->errors()->messages());
             }
-			
-			$r = SupplierPayments::partialAmountPayable($request->id, 
-				$request->amount, 
-				$request->payment_method,
-				$request->has("note") ? $request->note : ""
-			);
-			
-			return $this->successResponse($r);
-			
-		}catch(\Exception $ex){
-			return $this->exceptionResponse($ex);
-		}
+
+            // Look up supplier_id from invoice if not provided in request
+            $supplierId = $request->supplier_id ?? SupplierInvoice::where('id', $request->id)->value('supplier_id');
+
+            if ($creditAmount > 0) {
+                $available = SupplierCreditUsage::available($supplierId);
+                if ($creditAmount > $available + 0.01) {
+                    return $this->validationErrorResponse(['creditAmount' => ['Credit amount exceeds available balance of ' . $available]]);
+                }
+            }
+
+            $totalAmount = (float)$request->amount + $creditAmount;
+
+            $r = $supplierPayments::partialAmountPayable(
+                $request->id,
+                $totalAmount,
+                $request->payment_method,
+                $request->has('note') ? $request->note : ""
+            );
+
+            if ($creditAmount > 0) {
+                SupplierCreditUsage::create([
+                    'supplier_id'         => $supplierId,
+                    'supplier_payment_id' => $r->id,
+                    'amount'              => $creditAmount,
+                ]);
+            }
+
+            return $this->successResponse($r);
+
+        } catch (\Exception $ex) {
+            return $this->exceptionResponse($ex);
+        }
     }
 
     /**

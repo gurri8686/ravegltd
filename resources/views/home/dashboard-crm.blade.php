@@ -27,6 +27,91 @@
 .dc-hdr-select::-webkit-scrollbar-thumb{background:#F27420;border-radius:4px;}
 .dc-footer-btn{border:none;background:none;font-size:12px;font-weight:700;cursor:pointer;padding:6px 14px;border-radius:8px;transition:all 0.15s;}
 .dc-footer-btn:hover{transform:scale(1.03);}
+/* Date filter — preset buttons + custom range inputs */
+.dash-preset-btn {
+    height: 34px; border-radius: 9px; border: 1.5px solid #e5e7eb; background: #fff;
+    color: #475569; font-size: 12.5px; font-weight: 600; cursor: pointer; outline: none;
+    transition: border-color 0.15s, background 0.15s, color 0.15s; padding: 0 10px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.dash-preset-btn:hover { border-color: #F27420; color: #F27420; background: #fffbf5; }
+.dash-preset-btn.active { border-color: #F27420; background: #F27420; color: #fff; }
+.dash-date-input {
+    width: 100%; height: 36px; padding: 0 10px; border-radius: 9px;
+    border: 1.5px solid #e5e7eb; background: #fafbfc; font-size: 12.5px;
+    font-weight: 600; color: #0f172a; outline: none; transition: border-color 0.15s, background 0.15s;
+    font-family: inherit;
+}
+.dash-date-input:focus { border-color: #F27420; background: #fff; }
+/* Custom calendar trigger (replaces native <input type="date">) */
+.dash-cal-trigger {
+    width: 100%; height: 38px; padding: 0 12px; border-radius: 10px;
+    border: 1.5px solid #e5e7eb; background: #fafbfc;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12.5px; font-weight: 600; color: #0f172a;
+    cursor: pointer; outline: none;
+    transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    font-family: inherit; text-align: left;
+}
+.dash-cal-trigger:hover, .dash-cal-trigger.active { border-color: #F27420; background: #fff; }
+.dash-cal-trigger.active { box-shadow: 0 0 0 3px rgba(242,116,32,0.10); }
+/* Calendar navigation arrows */
+.dash-cal-nav-btn {
+    width: 28px; height: 28px; border-radius: 8px;
+    border: 1.5px solid #e5e7eb; background: #fff; color: #475569;
+    cursor: pointer; outline: none; display: inline-flex;
+    align-items: center; justify-content: center;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.dash-cal-nav-btn:hover { border-color: #F27420; color: #F27420; background: #fffbf5; }
+/* Calendar day cells */
+.dash-cal-dow {
+    height: 28px; display: flex; align-items: center; justify-content: center;
+    font-size: 10.5px; font-weight: 700; color: #94a3b8;
+    text-transform: uppercase; letter-spacing: 0.4px;
+}
+.dash-cal-day {
+    height: 34px; display: flex; align-items: center; justify-content: center;
+    font-size: 12.5px; font-weight: 600; color: #0f172a;
+    border-radius: 8px; cursor: pointer; border: none; background: transparent;
+    outline: none; transition: background 0.12s, color 0.12s;
+    font-family: inherit; padding: 0;
+}
+.dash-cal-day:hover:not(.disabled):not(.selected) { background: #fff7ed; color: #F27420; }
+.dash-cal-day.muted { color: #cbd5e1; font-weight: 500; }
+.dash-cal-day.today { color: #F27420; font-weight: 800; box-shadow: inset 0 0 0 1.5px #fed7aa; }
+.dash-cal-day.selected { background: #F27420; color: #fff; font-weight: 700; box-shadow: 0 2px 6px rgba(242,116,32,0.30); border-radius: 8px; z-index: 1; position: relative; }
+.dash-cal-day.selected:hover { background: #ea580c; }
+.dash-cal-day.disabled { color: #e2e8f0; cursor: not-allowed; pointer-events: none; }
+/* Range selection — cells between From and To get a soft peach fill */
+.dash-cal-day.in-range {
+    background: #fff7ed; color: #ea580c; border-radius: 0;
+    box-shadow: none;
+}
+.dash-cal-day.in-range.muted { color: #fed7aa; }
+.dash-cal-day.range-start { border-radius: 8px 0 0 8px; }
+.dash-cal-day.range-end   { border-radius: 0 8px 8px 0; }
+.dash-cal-day.range-start.range-end { border-radius: 8px; }
+/* Range summary pill — read-only display of the picked range */
+.dash-range-summary {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    height: 38px;
+    padding: 0 12px;
+    border-radius: 10px;
+    border: 1.5px solid #fed7aa;
+    background: #fff7ed;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #0f172a;
+    font-family: inherit;
+}
+.dash-range-label { color: #0f172a; font-weight: 700; }
+.dash-range-sep { color: #f97316; font-weight: 700; flex-shrink: 0; }
+/* Pending state — when user picked start but not yet end, dim the To label */
+.dash-range-summary.pending .dash-range-label.to-label { color: #cbd5e1; font-weight: 500; }
 .dash-card {
     background: #fff; border-radius: 16px; border: 1px solid #f0f0f0;
     box-shadow: 0 1px 4px rgba(0,0,0,0.04); padding: 22px 24px;
@@ -64,122 +149,230 @@
     .dash-bottom-grid { grid-template-columns: 1fr !important; }
 }
 
-/* ── Tablet / iPad (768px – 1024px) ── */
+/* ══════════════════════════════════════════════════
+   TABLET — shared base (both orientations)
+   768px – 1024px
+   ══════════════════════════════════════════════════ */
 @media (min-width: 768px) and (max-width: 1024px) {
-    /* Today's stats — 2 × 2 grid so all 4 cards stay even */
-    .dash-row-today {
-        grid-template-columns: 1fr 1fr !important;
+
+    /* ── Wrapper padding ── */
+    .dash-header-card {
+        padding: 16px 20px !important;
+        margin-bottom: 16px !important;
+        border-radius: 16px !important;
         gap: 12px !important;
-        margin-bottom: 14px !important;
     }
-    /* All-time — keep 3 cols but tighten gap */
-    .dash-row-alltime {
-        grid-template-columns: repeat(3, 1fr) !important;
-        gap: 12px !important;
-        margin-bottom: 14px !important;
-    }
-    /* Card padding & layout */
+    .dash-header-card h1 { font-size: 20px !important; }
+    .dash-header-card p  { font-size: 12px !important; margin: 2px 0 0 !important; }
+    .dash-header-icon { width: 44px !important; height: 44px !important; border-radius: 13px !important; }
+    .dash-header-icon i { font-size: 18px !important; }
+    /* Date filter — slightly smaller button on tablet */
+    #dashDateBtn { height: 40px !important; font-size: 12.5px !important; padding: 0 14px !important; }
+    #dashDatePopover { min-width: 280px !important; }
+
+    /* ── Stat cards ── */
     .dash-card {
         padding: 16px 14px !important;
         gap: 12px !important;
         border-radius: 14px !important;
         align-items: center !important;
+        flex-direction: row !important;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05) !important;
+        border: 1px solid #f0f2f5 !important;
+        transition: box-shadow 0.18s, transform 0.18s !important;
     }
-    /* Icon */
+    .dash-card:hover {
+        box-shadow: 0 6px 20px rgba(0,0,0,0.09) !important;
+        transform: translateY(-2px) !important;
+    }
     .dash-icon {
-        width: 44px !important; height: 44px !important;
-        border-radius: 12px !important; font-size: 17px !important;
+        width: 42px !important; height: 42px !important;
+        border-radius: 12px !important; font-size: 16px !important;
         flex-shrink: 0 !important;
     }
-    /* Label */
     .dash-label {
-        font-size: 10px !important;
-        letter-spacing: 0.3px !important;
+        font-size: 9.5px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.5px !important;
         margin-bottom: 3px !important;
-        white-space: normal !important;
-        word-break: break-word !important;
+        text-transform: uppercase !important;
+        color: #94a3b8 !important;
     }
-    /* Value — prevent overflow on large numbers */
     .dash-value {
         font-size: 20px !important;
+        font-weight: 800 !important;
         line-height: 1.15 !important;
         word-break: break-all !important;
         overflow-wrap: anywhere !important;
     }
-    /* Sub text */
     .dash-sub {
         font-size: 10px !important;
         margin-top: 2px !important;
+        color: #b0b8c4 !important;
     }
-    /* All-time row: hide icon to save space, center text */
+
+    /* ── All-time row ── */
     .dash-row-alltime .dash-icon { display: none !important; }
     .dash-row-alltime .dash-card {
         flex-direction: column !important;
         align-items: flex-start !important;
-        padding: 14px 12px !important;
-        gap: 4px !important;
+        padding: 14px 16px !important;
+        gap: 3px !important;
+        background: linear-gradient(135deg,#fafbfd,#fff) !important;
     }
-    .dash-row-alltime .dash-value { font-size: 17px !important; }
+    .dash-row-alltime .dash-value { font-size: 18px !important; }
     .dash-row-alltime .dash-label { font-size: 9px !important; }
-    /* Bottom grid — stack chart on top of products */
-    .dash-bottom-grid {
-        grid-template-columns: 1fr !important;
-        gap: 14px !important;
-    }
-    /* Header */
-    .dash-header-card {
-        padding: 14px 18px !important;
-        margin-bottom: 14px !important;
-    }
-    /* Chart panel */
+
+    /* ── Panels ── */
     .dash-panel {
-        border-radius: 14px !important;
-        border: 1px solid #f0f0f0 !important;
+        border-radius: 16px !important;
+        border: 1px solid #f0f2f5 !important;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05) !important;
+        overflow: hidden !important;
     }
     .dash-panel-header {
         padding: 14px 18px !important;
         gap: 8px !important;
+        border-bottom: 1px solid #f4f6f8 !important;
     }
-    .dash-panel-title {
-        font-size: 14px !important;
-    }
-    .dash-chart-legend {
-        padding: 8px 18px 0 !important;
-        gap: 12px !important;
-    }
+    .dash-panel-title { font-size: 14px !important; font-weight: 700 !important; }
+    .dash-chart-legend { padding: 10px 18px 0 !important; gap: 14px !important; }
     .dash-chart-area {
-        height: 200px !important;
-        padding: 10px 16px 16px !important;
+        height: 210px !important;
+        padding: 12px 16px 18px !important;
         gap: 2px !important;
     }
-    .chart-scroll-bar {
-        margin: 6px 18px 12px !important;
-    }
-    /* Products panel */
-    .dash-product-item {
-        padding: 11px 18px !important;
+    .chart-scroll-bar { margin: 6px 18px 14px !important; }
+    .dash-product-item { padding: 11px 18px !important; gap: 12px !important; }
+    .dash-product-icon { width: 36px !important; height: 36px !important; border-radius: 10px !important; }
+    .dash-product-icon i { font-size: 12px !important; }
+}
+
+/* ══════════════════════════════════════════════════
+   TABLET LANDSCAPE — 4-col today, side-by-side bottom
+   ══════════════════════════════════════════════════ */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+
+    .dash-row-today {
+        grid-template-columns: repeat(4, 1fr) !important;
         gap: 12px !important;
+        margin-bottom: 16px !important;
     }
-    .dash-product-icon {
-        width: 38px !important;
-        height: 38px !important;
-        border-radius: 10px !important;
+    .dash-row-alltime {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 12px !important;
+        margin-bottom: 16px !important;
     }
-    .dash-product-icon i {
-        font-size: 13px !important;
+    .dash-bottom-grid {
+        grid-template-columns: 1fr 300px !important;
+        gap: 14px !important;
     }
+    .dash-card { padding: 13px 12px !important; gap: 10px !important; }
+    .dash-icon { width: 38px !important; height: 38px !important; font-size: 14px !important; }
+    .dash-value { font-size: 18px !important; }
+    .dash-label { font-size: 9px !important; }
+    .dash-chart-area { height: 190px !important; }
+}
+
+/* ══════════════════════════════════════════════════
+   TABLET PORTRAIT — 2×2 today, stacked bottom
+   ══════════════════════════════════════════════════ */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+
+    .dash-row-today {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 13px !important;
+        margin-bottom: 16px !important;
+    }
+    .dash-row-alltime {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 13px !important;
+        margin-bottom: 16px !important;
+    }
+    .dash-bottom-grid {
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+    }
+    .dash-value { font-size: 22px !important; }
+    .dash-icon { width: 44px !important; height: 44px !important; font-size: 17px !important; }
+    .dash-chart-area { height: 220px !important; }
 }
 
 @media (max-width: 767px) {
-    /* Header — compact */
+    /* Header — single row: icon + title block (left) + date filter (right end).
+       flex-wrap:nowrap ensures filter stays on same line; min-width:0 lets the title block
+       shrink/ellipsis cleanly on small phones so date filter is never cut off. */
     .dash-header-card {
-        padding: 14px 16px !important; margin-bottom: 12px !important;
-        border-radius: 14px !important; gap: 10px !important;
+        padding: 12px 14px !important;
+        margin-bottom: 12px !important;
+        border-radius: 14px !important;
+        gap: 10px !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
     }
-    .dash-header-icon { width: 38px !important; height: 38px !important; border-radius: 10px !important; }
-    .dash-header-icon i { font-size: 15px !important; }
-    .dash-header-card h1 { font-size: 17px !important; }
-    .dash-header-card p { font-size: 10.5px !important; margin: 0 !important; }
+    /* Title block (icon + h1 + p) — shrinkable, takes remaining space */
+    .dash-header-card > div:first-child {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        gap: 10px !important;
+    }
+    .dash-header-icon { width: 36px !important; height: 36px !important; border-radius: 10px !important; flex-shrink: 0 !important; }
+    .dash-header-icon i { font-size: 14px !important; }
+    .dash-header-card h1 {
+        font-size: 16px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    .dash-header-card p {
+        font-size: 10px !important;
+        margin: 0 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    /* Date filter — compact pill on the right end, never cut off */
+    #dashDateFilterWrap {
+        width: auto !important;
+        flex-shrink: 0 !important;
+    }
+    #dashDateBtn {
+        width: auto !important;
+        height: 36px !important;
+        padding: 0 10px !important;
+        font-size: 11.5px !important;
+        gap: 6px !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
+    }
+    #dashDateBtnLabel {
+        max-width: 90px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+    #dashDatePopover {
+        position: fixed !important;
+        top: auto !important; bottom: 0 !important;
+        left: 0 !important; right: 0 !important;
+        border-radius: 16px 16px 0 0 !important;
+        max-width: 100% !important; min-width: 0 !important;
+        padding: 16px !important;
+        box-shadow: 0 -8px 24px rgba(15,23,42,0.18) !important;
+        z-index: 1000 !important;
+    }
+    .dash-preset-btn { height: 38px !important; font-size: 13px !important; }
+    .dash-date-input { height: 40px !important; font-size: 13px !important; }
+    /* Backdrop for the bottom-sheet popover */
+    #dashDatePopoverBackdrop {
+        position: fixed; inset: 0; background: rgba(15,23,42,0.45);
+        z-index: 999; opacity: 0; transition: opacity 0.18s;
+    }
+    #dashDatePopoverBackdrop.open { opacity: 1; }
+
+    /* Show the mobile-only Cancel / Apply footer at the bottom of the date popover */
+    #dashMobileFooter { display: flex !important; }
 
     /* Stat cards — 2x2 clean */
     .dash-row-today {
@@ -279,15 +472,79 @@
 @section('content')
 <div style="max-width:1440px;margin:0 auto;">
 
-    {{-- Header --}}
-    <div class="dash-header-card" style="margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#fff;border-radius:16px;padding:18px 24px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border:1px solid #f1f5f9;">
+    {{-- Header — exact spec UI --}}
+    <div class="dash-header-card" style="margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#ffffff;border-radius:12px;padding:18px 22px;box-shadow:0 1px 2px rgba(15,17,21,0.04),0 6px 18px -8px rgba(15,17,21,0.12);border:1px solid #e8e8ec;">
         <div style="display:flex;align-items:center;gap:14px;">
-            <div class="dash-header-icon" style="width:48px;height:48px;border-radius:14px;background:#F27420;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(242,116,32,0.25);">
-                <i class="fa fa-university" style="color:#fff;font-size:20px;"></i>
-            </div>
+            <span class="dash-header-icon" style="width:44px;height:44px;border-radius:11px;background:#ea580c;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,0.25),0 6px 14px -4px rgba(234,88,12,0.45);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14"/><path d="M9 9h.01M9 13h.01M9 17h.01M15 9h.01M15 13h.01M15 17h.01"/></svg>
+            </span>
             <div>
-                <h1 style="font-size:22px;font-weight:800;color:#0f172a;letter-spacing:-0.3px;margin:0;">Dashboard</h1>
-                <p style="font-size:12.5px;color:#94a3b8;font-weight:500;margin:2px 0 0;">Business overview at a glance</p>
+                <h2 style="margin:0;font-size:20px;font-weight:800;color:#0f1115;letter-spacing:-0.2px;">Dashboard</h2>
+                <p style="margin:2px 0 0;font-size:13px;color:#6b7280;">Business overview at a glance</p>
+            </div>
+        </div>
+
+        {{-- Date filter — real-time updates Today's Sales/Purchases/Orders without a page reload --}}
+        <div id="dashDateFilterWrap" style="position:relative;">
+            <button type="button" id="dashDateBtn" onclick="dashToggleDatePicker(event)" style="display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 16px;border-radius:99px;border:1px solid #e8e8ec;background:#ffffff;color:#0f1115;font-size:13px;font-weight:700;cursor:pointer;outline:none;box-shadow:0 1px 2px rgba(15,17,21,0.04);transition:border-color 0.15s,box-shadow 0.15s,background 0.15s;" onmouseover="this.style.borderColor='#F27420';this.style.background='#fffbf5'" onmouseout="if(!this._open){this.style.borderColor='#e8e8ec';this.style.background='#fff';}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F27420" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+                <span id="dashDateBtnLabel">{{ $selectedCarbon->isToday() ? 'Today' : $selectedCarbon->format('d M Y') }}</span>
+                <svg id="dashDateBtnCaret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;transition:transform 0.15s;"><path d="M6 9l6 6 6-6"></path></svg>
+            </button>
+            <div id="dashDatePopover" style="display:none;position:absolute;top:calc(100% + 8px);right:0;background:#fff;border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 12px 36px rgba(15,23,42,0.12), 0 2px 6px rgba(15,23,42,0.05);padding:14px;min-width:300px;z-index:100;">
+                {{-- Quick presets --}}
+                <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;">Quick select</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px;">
+                    <button type="button" onclick="dashSetPreset('today')"     class="dash-preset-btn">Today</button>
+                    <button type="button" onclick="dashSetPreset('yesterday')" class="dash-preset-btn">Yesterday</button>
+                    <button type="button" onclick="dashSetPreset('last7')"     class="dash-preset-btn">Last 7 days</button>
+                    <button type="button" onclick="dashSetPreset('last30')"    class="dash-preset-btn">Last 30 days</button>
+                    <button type="button" onclick="dashSetPreset('thisMonth')" class="dash-preset-btn">This month</button>
+                    <button type="button" onclick="dashSetPreset('lastMonth')" class="dash-preset-btn">Last month</button>
+                </div>
+                {{-- Custom range — single calendar with range selection (click start, click end) --}}
+                <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;">Custom range</div>
+                {{-- Range summary pill — read-only display of the picked From → To range --}}
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                    <input type="hidden" id="dashDateFrom" value="{{ $selectedDate }}">
+                    <input type="hidden" id="dashDateTo"   value="{{ $selectedDate }}">
+                    <div id="dashRangeSummary" class="dash-range-summary">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F27420" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        <span id="dashRangeFromLabel" class="dash-range-label from-label">{{ $selectedCarbon->format('d M Y') }}</span>
+                        <span class="dash-range-sep">→</span>
+                        <span id="dashRangeToLabel"   class="dash-range-label to-label">{{ $selectedCarbon->format('d M Y') }}</span>
+                    </div>
+                </div>
+                {{-- Calendar — always visible, supports range selection --}}
+                <div id="dashCalWrap" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;box-shadow:0 1px 3px rgba(15,23,42,0.03);">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                        <button type="button" onclick="dashCalNav(-1)" class="dash-cal-nav-btn" aria-label="Previous month">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        </button>
+                        <div id="dashCalTitle" style="font-size:14px;font-weight:700;color:#0f172a;letter-spacing:-0.1px;"></div>
+                        <button type="button" onclick="dashCalNav(1)" class="dash-cal-nav-btn" aria-label="Next month">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </button>
+                    </div>
+                    <div id="dashCalGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;"></div>
+                    <div id="dashCalHint" style="font-size:11px;color:#94a3b8;text-align:center;margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9;font-weight:500;">
+                        Pick a start date, then an end date
+                    </div>
+                    <div style="display:flex;justify-content:space-between;margin-top:6px;">
+                        <button type="button" onclick="dashCalClear()" style="background:none;border:none;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;outline:none;padding:4px 8px;border-radius:6px;">Clear</button>
+                        <button type="button" onclick="dashCalToday()" style="background:none;border:none;color:#F27420;font-size:12px;font-weight:700;cursor:pointer;outline:none;padding:4px 8px;border-radius:6px;">Today</button>
+                    </div>
+                </div>
+
+                {{-- Mobile-only Cancel / Apply footer — desktop is hidden via CSS (max-width:767px shows it) --}}
+                <div id="dashMobileFooter" style="display:none;gap:10px;margin-top:14px;">
+                    <button type="button" onclick="dashMobileCancel()" style="flex:1;height:44px;border-radius:10px;border:1.5px solid #e5e7eb;background:#ffffff;color:#475569;font-size:14px;font-weight:600;cursor:pointer;outline:none;">
+                        Cancel
+                    </button>
+                    <button type="button" onclick="dashMobileApply()" style="flex:1;height:44px;border-radius:10px;border:none;background:#F27420;color:#ffffff;font-size:14px;font-weight:700;cursor:pointer;outline:none;box-shadow:0 2px 6px rgba(242,116,32,0.30);">
+                        Apply
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -300,9 +557,9 @@
                 <i class="fa fa-shopping-cart"></i>
             </div>
             <div>
-                <div class="dash-label">{{ $selectedCarbon->isToday() ? "Today's Sales" : $selectedCarbon->format('d M') . ' Sales' }}</div>
-                <div class="dash-value" style="color:#15803d;">{{ $currency }} {{ number_format($salesToday) }}</div>
-                <div class="dash-sub">{{ $todayOrders }} orders</div>
+                <div class="dash-label" id="dashSalesLabel">{{ $selectedCarbon->isToday() ? "Today's Sales" : $selectedCarbon->format('d M') . ' Sales' }}</div>
+                <div class="dash-value" id="dashSalesValue" style="color:#15803d;">{{ $currency }} {{ number_format($salesToday) }}</div>
+                <div class="dash-sub"><span id="dashSalesOrders">{{ $todayOrders }}</span> orders</div>
             </div>
         </div>
 
@@ -311,8 +568,8 @@
                 <i class="fa fa-truck"></i>
             </div>
             <div>
-                <div class="dash-label">{{ $selectedCarbon->isToday() ? "Today's Purchases" : $selectedCarbon->format('d M') . ' Purchases' }}</div>
-                <div class="dash-value" style="color:#1d4ed8;">{{ $currency }} {{ number_format($purchaseToday) }}</div>
+                <div class="dash-label" id="dashPurchaseLabel">{{ $selectedCarbon->isToday() ? "Today's Purchases" : $selectedCarbon->format('d M') . ' Purchases' }}</div>
+                <div class="dash-value" id="dashPurchaseValue" style="color:#1d4ed8;">{{ $currency }} {{ number_format($purchaseToday) }}</div>
                 <div class="dash-sub">Stock purchased</div>
             </div>
         </div>
@@ -333,8 +590,8 @@
                 <i class="fa fa-file-text-o"></i>
             </div>
             <div>
-                <div class="dash-label">{{ $selectedCarbon->isToday() ? "Today's Orders" : $selectedCarbon->format('d M') . ' Orders' }}</div>
-                <div class="dash-value" style="color:#7c3aed;">{{ $todayOrders }}</div>
+                <div class="dash-label" id="dashOrdersLabel">{{ $selectedCarbon->isToday() ? "Today's Orders" : $selectedCarbon->format('d M') . ' Orders' }}</div>
+                <div class="dash-value" id="dashOrdersValue" style="color:#7c3aed;">{{ $todayOrders }}</div>
                 <div class="dash-sub">Invoices created</div>
             </div>
         </div>
@@ -457,6 +714,359 @@
 
 
 </div>
+
+<script>
+// ── Dashboard Date Filter — real-time AJAX updates for Today's Sales / Purchases / Orders ──
+(function(){
+    const DASH_CURRENCY = '{{ $currency }}';
+    const DASH_STATS_URL = '/dashboard/view/stats';
+    const wrap     = document.getElementById('dashDateFilterWrap');
+    const btn      = document.getElementById('dashDateBtn');
+    const btnLabel = document.getElementById('dashDateBtnLabel');
+    const caret    = document.getElementById('dashDateBtnCaret');
+    const pop      = document.getElementById('dashDatePopover');
+    const fromInp  = document.getElementById('dashDateFrom');
+    const toInp    = document.getElementById('dashDateTo');
+
+    // Backdrop only matters on mobile (CSS hides it on desktop because the popover positions normally)
+    let backdrop = null;
+    function isMobile() { return window.matchMedia('(max-width: 767px)').matches; }
+
+    function openPopover() {
+        pop.style.display = 'block';
+        btn._open = true;
+        btn.style.borderColor = '#F27420';
+        btn.style.background = '#fffbf5';
+        caret.style.transform = 'rotate(180deg)';
+        if (isMobile()) {
+            backdrop = document.createElement('div');
+            backdrop.id = 'dashDatePopoverBackdrop';
+            backdrop.addEventListener('click', closePopover);
+            document.body.appendChild(backdrop);
+            // force reflow so transition runs
+            void backdrop.offsetWidth;
+            backdrop.classList.add('open');
+        }
+        document.addEventListener('click', onOutsideClick, true);
+    }
+    function closePopover() {
+        pop.style.display = 'none';
+        btn._open = false;
+        btn.style.borderColor = '#e5e7eb';
+        btn.style.background = '#fff';
+        caret.style.transform = '';
+        if (backdrop && backdrop.parentNode) backdrop.parentNode.removeChild(backdrop);
+        backdrop = null;
+        document.removeEventListener('click', onOutsideClick, true);
+    }
+    function onOutsideClick(e) {
+        if (wrap.contains(e.target)) return;
+        if (backdrop && backdrop.contains(e.target)) return;
+        closePopover();
+    }
+    window.dashToggleDatePicker = function(e) { e && e.stopPropagation(); btn._open ? closePopover() : openPopover(); };
+    window.dashCloseDatePicker  = closePopover;
+
+    function todayISO() { return new Date().toISOString().slice(0,10); }
+    function isoDaysAgo(n) { const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().slice(0,10); }
+    function isoMonthStart(offset) { const d = new Date(); d.setMonth(d.getMonth() + offset, 1); return d.toISOString().slice(0,10); }
+    function isoMonthEnd(offset) { const d = new Date(); d.setMonth(d.getMonth() + offset + 1, 0); return d.toISOString().slice(0,10); }
+
+    window.dashSetPreset = function(key) {
+        let from, to;
+        const t = todayISO();
+        switch (key) {
+            case 'today':     from = t;            to = t;            break;
+            case 'yesterday': from = isoDaysAgo(1); to = from;        break;
+            case 'last7':     from = isoDaysAgo(6); to = t;           break;
+            case 'last30':    from = isoDaysAgo(29);to = t;           break;
+            case 'thisMonth': from = isoMonthStart(0); to = t;        break;
+            case 'lastMonth': from = isoMonthStart(-1); to = isoMonthEnd(-1); break;
+            default: return;
+        }
+        fromInp.value = from; toInp.value = to;
+        applyRange(from, to);
+        closePopover();
+    };
+
+    window.dashApplyCustomRange = function() {
+        let from = fromInp.value, to = toInp.value;
+        if (!from && !to) return;
+        if (!from) from = to; if (!to) to = from;
+        if (from > to) { const tmp = from; from = to; to = tmp; fromInp.value = from; toInp.value = to; }
+        applyRange(from, to);
+        closePopover();
+    };
+
+    function fmt(n) { return Number(n || 0).toLocaleString(); }
+    function setBusy(on) {
+        ['dashSalesValue','dashPurchaseValue','dashOrdersValue','dashSalesOrders'].forEach(id => {
+            const el = document.getElementById(id); if (el) el.style.opacity = on ? '0.5' : '1';
+        });
+        btn.disabled = on; btn.style.cursor = on ? 'wait' : 'pointer';
+    }
+
+    function applyRange(from, to) {
+        setBusy(true);
+        fetch(DASH_STATS_URL + '?from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to), { headers: { 'Accept': 'application/json' } })
+            .then(r => r.json())
+            .then(res => {
+                if (!res.success) throw new Error('bad response');
+                const p = res.payload;
+                document.getElementById('dashSalesValue').textContent    = DASH_CURRENCY + ' ' + fmt(p.sales_value);
+                document.getElementById('dashPurchaseValue').textContent = DASH_CURRENCY + ' ' + fmt(p.purchase_value);
+                document.getElementById('dashOrdersValue').textContent   = fmt(p.orders_count);
+                document.getElementById('dashSalesOrders').textContent   = fmt(p.orders_count);
+                if (p.is_today) {
+                    document.getElementById('dashSalesLabel').textContent    = "Today's Sales";
+                    document.getElementById('dashPurchaseLabel').textContent = "Today's Purchases";
+                    document.getElementById('dashOrdersLabel').textContent   = "Today's Orders";
+                } else {
+                    document.getElementById('dashSalesLabel').textContent    = p.label + ' Sales';
+                    document.getElementById('dashPurchaseLabel').textContent = p.label + ' Purchases';
+                    document.getElementById('dashOrdersLabel').textContent   = p.label + ' Orders';
+                }
+                btnLabel.textContent = p.is_today ? 'Today'
+                    : (p.is_single_day ? (new Date(p.from).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}))
+                    : (new Date(p.from).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}) + ' – ' + new Date(p.to).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})));
+            })
+            .catch(err => { console.error('Dashboard stats fetch failed', err); })
+            .finally(() => setBusy(false));
+    }
+
+    // ── Custom range calendar — single picker, two-click range selection ──
+    const calTitle    = document.getElementById('dashCalTitle');
+    const calGrid     = document.getElementById('dashCalGrid');
+    const calHint     = document.getElementById('dashCalHint');
+    const rangeSum    = document.getElementById('dashRangeSummary');
+    const rangeFromEl = document.getElementById('dashRangeFromLabel');
+    const rangeToEl   = document.getElementById('dashRangeToLabel');
+
+    let dashCalViewYear, dashCalViewMonth; // currently displayed month (0-indexed)
+    // Range selection state:
+    //   pendingStart = ISO string when user has clicked the first date but not yet the second
+    //   null = next click starts a new range
+    let pendingStart = null;
+    const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const DOW_LABELS  = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+    function parseISO(s) {
+        if (!s) return null;
+        const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+        if (!m) return null;
+        return new Date(+m[1], +m[2] - 1, +m[3]);
+    }
+    function toISO(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return y + '-' + m + '-' + dd;
+    }
+    function fmtDisplay(iso) {
+        const d = parseISO(iso); if (!d) return '—';
+        return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+    function syncSummary() {
+        if (pendingStart) {
+            // Mid-selection: From shows the pending start, To shows a placeholder
+            rangeFromEl.textContent = fmtDisplay(pendingStart);
+            rangeToEl.textContent   = 'Pick end date';
+            rangeSum.classList.add('pending');
+            calHint.textContent     = 'Click the end date to complete the range';
+        } else {
+            rangeFromEl.textContent = fmtDisplay(fromInp.value);
+            rangeToEl.textContent   = fmtDisplay(toInp.value);
+            rangeSum.classList.remove('pending');
+            calHint.textContent     = 'Pick a start date, then an end date';
+        }
+    }
+
+    window.dashCalNav = function(delta) {
+        dashCalViewMonth += delta;
+        if (dashCalViewMonth < 0)  { dashCalViewMonth = 11; dashCalViewYear--; }
+        if (dashCalViewMonth > 11) { dashCalViewMonth = 0;  dashCalViewYear++; }
+        renderCal();
+    };
+
+    window.dashCalClear = function() {
+        fromInp.value = '';
+        toInp.value   = '';
+        pendingStart  = null;
+        syncSummary();
+        renderCal();
+    };
+
+    window.dashCalToday = function() {
+        const t = new Date();
+        dashCalViewYear  = t.getFullYear();
+        dashCalViewMonth = t.getMonth();
+        // Today preset: from=today, to=today (single day range)
+        const iso = toISO(t);
+        fromInp.value = iso;
+        toInp.value   = iso;
+        pendingStart  = null;
+        syncSummary();
+        renderCal();
+        applyRange(iso, iso);
+    };
+
+    // Mobile detection (re-checked at each pick — handles resize)
+    function _isMobileViewport() { return window.matchMedia('(max-width: 767px)').matches; }
+
+    // Two-click range picker:
+    //   - 1st click  → set pendingStart, summary shows "Pick end date"
+    //   - 2nd click  → set range (auto-orders if user clicks an earlier date), then:
+    //                    • Desktop: auto-apply (fetch stats + close popover) — same as before
+    //                    • Mobile : update From/To only; user must press "Apply" to commit
+    //                               (gives the user a final chance to review before fetch)
+    function pickDate(d) {
+        const iso = toISO(d);
+        if (!pendingStart) {
+            // First click — start a new range
+            pendingStart = iso;
+            syncSummary();
+            renderCal();
+        } else {
+            // Second click — complete the range
+            let from = pendingStart, to = iso;
+            if (from > to) { const tmp = from; from = to; to = tmp; }
+            fromInp.value = from;
+            toInp.value   = to;
+            pendingStart  = null;
+            syncSummary();
+            renderCal();
+            if (_isMobileViewport()) {
+                // Mobile: wait for explicit Apply tap — don't auto-commit/close
+                return;
+            }
+            applyRange(from, to);
+            // Auto-close the popover so user sees the result
+            setTimeout(function() { if (typeof closePopover === 'function') closePopover(); }, 220);
+        }
+    }
+
+    // Mobile-only footer buttons
+    window.dashMobileApply = function() {
+        let from = fromInp.value, to = toInp.value;
+        if (!from && !to) {
+            // Nothing picked yet — just close
+            closePopover();
+            return;
+        }
+        if (!from) from = to;
+        if (!to) to = from;
+        if (from > to) { const tmp = from; from = to; to = tmp; fromInp.value = from; toInp.value = to; }
+        pendingStart = null;
+        syncSummary();
+        applyRange(from, to);
+        closePopover();
+    };
+    window.dashMobileCancel = function() {
+        // Discard any in-progress range selection; revert summary to last committed state
+        pendingStart = null;
+        syncSummary();
+        renderCal();
+        closePopover();
+    };
+
+    function renderCal() {
+        calTitle.textContent = MONTH_NAMES[dashCalViewMonth] + ' ' + dashCalViewYear;
+        const today = new Date(); today.setHours(0,0,0,0);
+
+        // Determine current selection for highlighting
+        let rangeFrom = null, rangeTo = null;
+        if (pendingStart) {
+            rangeFrom = pendingStart;
+            rangeTo   = pendingStart;
+        } else {
+            rangeFrom = fromInp.value || null;
+            rangeTo   = toInp.value   || null;
+        }
+
+        // Build grid: leading muted days from previous month, current month days, trailing muted days
+        const firstOfMonth = new Date(dashCalViewYear, dashCalViewMonth, 1);
+        const startDow = firstOfMonth.getDay(); // 0=Sun
+        const daysInMonth = new Date(dashCalViewYear, dashCalViewMonth + 1, 0).getDate();
+        const prevMonthDays = new Date(dashCalViewYear, dashCalViewMonth, 0).getDate();
+
+        let html = '';
+        DOW_LABELS.forEach(function(d) { html += '<div class="dash-cal-dow">' + d + '</div>'; });
+        for (let i = startDow - 1; i >= 0; i--) {
+            const day = prevMonthDays - i;
+            const cellDate = new Date(dashCalViewYear, dashCalViewMonth - 1, day);
+            html += renderCell(cellDate, true, today, rangeFrom, rangeTo);
+        }
+        for (let d = 1; d <= daysInMonth; d++) {
+            const cellDate = new Date(dashCalViewYear, dashCalViewMonth, d);
+            html += renderCell(cellDate, false, today, rangeFrom, rangeTo);
+        }
+        const used = 7 + startDow + daysInMonth;
+        const trailing = 49 - used;
+        for (let d = 1; d <= trailing; d++) {
+            const cellDate = new Date(dashCalViewYear, dashCalViewMonth + 1, d);
+            html += renderCell(cellDate, true, today, rangeFrom, rangeTo);
+        }
+        calGrid.innerHTML = html;
+
+        calGrid.querySelectorAll('.dash-cal-day:not(.disabled)').forEach(function(b) {
+            b.addEventListener('click', function() {
+                const iso = b.getAttribute('data-iso');
+                const d = parseISO(iso);
+                if (d) {
+                    dashCalViewYear = d.getFullYear();
+                    dashCalViewMonth = d.getMonth();
+                    pickDate(d);
+                }
+            });
+        });
+    }
+
+    function renderCell(cellDate, isMuted, today, rangeFrom, rangeTo) {
+        const iso = toISO(cellDate);
+        const isToday = cellDate.getTime() === today.getTime();
+        const isFuture = cellDate.getTime() > today.getTime();
+        const cls = ['dash-cal-day'];
+        if (isMuted)   cls.push('muted');
+        if (isToday)   cls.push('today');
+        if (isFuture)  cls.push('disabled');
+        // Range highlighting
+        if (rangeFrom && rangeTo) {
+            const isStart = iso === rangeFrom;
+            const isEnd   = iso === rangeTo;
+            if (isStart && isEnd) {
+                cls.push('selected');
+            } else if (isStart) {
+                cls.push('selected', 'range-start');
+            } else if (isEnd) {
+                cls.push('selected', 'range-end');
+            } else if (iso > rangeFrom && iso < rangeTo) {
+                cls.push('in-range');
+            }
+        }
+        return '<button type="button" class="' + cls.join(' ') + '" data-iso="' + iso + '">' + cellDate.getDate() + '</button>';
+    }
+
+    // Initial seed — show the month of the currently selected From date
+    (function initCal() {
+        const seedISO = fromInp.value || toISO(new Date());
+        const seed    = parseISO(seedISO) || new Date();
+        dashCalViewYear  = seed.getFullYear();
+        dashCalViewMonth = seed.getMonth();
+        syncSummary();
+        renderCal();
+    })();
+
+    // Esc closes the popover and discards any pending start
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && btn._open) {
+            pendingStart = null;
+            syncSummary();
+            renderCal();
+            closePopover();
+        }
+    });
+})();
+</script>
 
 <script>
 // ── Sales/Purchases Chart ──

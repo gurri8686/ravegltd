@@ -17,6 +17,7 @@
 		data-supplier-list-api="{{route('daily_report.daily_book_purchase.view.suppliers')}}"
 		data-list-api="{{route('daily_report.daily_book_purchase.view.list')}}"
 		data-print-api="{{route('daily_report.daily_book_purchase.view.print')}}"
+		data-statement-api="{{route('daily_report.daily_book_purchase.view.statement')}}"
 	></div>
 </section>
 @endsection

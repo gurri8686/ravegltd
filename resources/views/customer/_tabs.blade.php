@@ -2,7 +2,7 @@
 $currentRoute = Route::currentRouteName();
 $customerTabs = [
     ['route' => 'management.customers.view.index', 'label' => 'All Customers', 'icon' => 'fa fa-th-list', 'matches' => ['management.customers.view.index']],
-    ['route' => 'payments.customer_payment.view.index', 'label' => 'Payments', 'icon' => 'fa fa-credit-card', 'matches' => ['payments.customer_payment.view.index','management.customers.on_account_payment.view.index','customer_payment_history.view.index']],
+    ['route' => 'payments.customer_payment.view.index', 'label' => 'Payments', 'icon' => 'fa fa-credit-card', 'matches' => ['payments.customer_payment.view.index','management.customers.on_account_payment.view.index']],
     ['route' => 'customer_return.view.index', 'label' => 'Returns', 'icon' => 'fa fa-undo', 'matches' => ['customer_return.view.index']],
     ['route' => 'customer_history.view.index', 'label' => 'History', 'icon' => 'fa fa-history', 'matches' => ['customer_history.view.index']],
 ];

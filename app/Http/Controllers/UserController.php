@@ -54,9 +54,36 @@ class UserController extends Controller
 	public function list(Request $request){
 		$users = User::with('roles')->where('id','!=',1)->get()->map(function ($user) {
 			$user->roles_list = $user->roles->pluck('name')->join(', ');
+			$user->last_login_label = $this->formatLastLogin($user->last_login_at);
 			return $user;
 		});
 		return $this->successResponse($users);
+	}
+
+	/**
+	 * Human-friendly "last login" text: Today / Yesterday / N days ago / date.
+	 */
+	private function formatLastLogin($value)
+	{
+		if (empty($value)) {
+			return 'Not logged in yet';
+		}
+		try {
+			$dt = \Carbon\Carbon::parse($value);
+		} catch (\Throwable $e) {
+			return 'Not logged in yet';
+		}
+		if ($dt->isToday()) {
+			return 'Today, ' . $dt->format('H:i');
+		}
+		if ($dt->isYesterday()) {
+			return 'Yesterday, ' . $dt->format('H:i');
+		}
+		$days = $dt->diffInDays(\Carbon\Carbon::now());
+		if ($days <= 7) {
+			return $days . ' days ago';
+		}
+		return $dt->format('d M Y');
 	}
 
     /**
@@ -325,10 +352,15 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $ID = user::find($id);
-        $ID->delete();
+        if ($ID) {
+            $ID->delete();
+        }
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'User deleted successfully.']);
+        }
         \Session::flash('redirect', ['type' => 'success', 'message' => "Record successfully removed."]);
         return redirect()->route('management.users.view.index');
     }

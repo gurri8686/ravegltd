@@ -47,55 +47,65 @@ function group($array,$permissionsExist,$childClass=null)
 .content-header { display: none !important; }
 
 /* Sub-module tree */
-.perm-sub-ul { list-style:none; padding:0 0 0 20px; margin:4px 0 0; }
+.perm-sub-ul { list-style:none; padding:0 0 0 22px; margin:4px 0 0; }
 .perm-sub-item { padding:4px 0; }
 .perm-check-label {
-    display:inline-flex; align-items:center; gap:8px; cursor:pointer;
-    font-size:13px; font-weight:500; color:#374151; user-select:none;
+    display:inline-flex; align-items:center; gap:10px; cursor:pointer;
+    font-size:12px; font-weight:800; color:#374151; user-select:none;
+    letter-spacing:0.7px; text-transform:uppercase;
 }
 .perm-check-label input[type=checkbox] { display:none; }
 .perm-checkmark {
-    width:17px; height:17px; border-radius:5px; border:2px solid #d1d5db;
+    width:20px; height:20px; border-radius:5px; border:1.5px solid #c9cdd3;
     background:#fff; flex-shrink:0; display:inline-flex; align-items:center;
-    justify-content:center; transition:all 0.15s;
+    justify-content:center; transition:all 0.12s;
 }
 .perm-check-label input[type=checkbox]:checked ~ .perm-checkmark {
-    background:#f97316; border-color:#f97316;
+    background:#ea580c; border-color:#ea580c;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.2);
 }
 .perm-check-label input[type=checkbox]:checked ~ .perm-checkmark::after {
-    content:''; width:4px; height:8px; border:2px solid #fff;
+    content:''; width:5px; height:9px; border:2.5px solid #fff;
     border-top:none; border-left:none; transform:rotate(45deg); display:block; margin-bottom:2px;
 }
 .perm-check-text { white-space:nowrap; }
 
 /* Module row */
 .perm-module-row {
-    display:grid; grid-template-columns:44px 1fr 2fr;
-    align-items:start; padding:14px 20px;
-    border-bottom:1px solid #f1f5f9; transition:background 0.15s;
+    display:grid; grid-template-columns:1.1fr 1.4fr;
+    align-items:start; gap:14px; padding:14px 6px;
+    border-top:1px solid #f0f0f2; transition:background 0.15s;
 }
-.perm-module-row:last-child { border-bottom:none; }
-.perm-module-row:hover { background:#fafafa; }
-.perm-module-name { font-size:14px; font-weight:700; color:#1e293b; padding-top:1px; }
+.perm-module-row:first-child { border-top:none; }
+.perm-module-name {
+    font-size:14px; font-weight:800; color:#0f1115;
+    display:flex; align-items:center; gap:12px;
+}
 
 /* Section card */
 .perm-section {
-    background:#fff; border-radius:16px; border:1px solid #e5e7eb;
-    box-shadow:0 2px 10px rgba(0,0,0,0.05); margin-bottom:16px; overflow:hidden;
+    background:#ffffff; border-radius:12px; border:1px solid #e8e8ec;
+    box-shadow:0 1px 2px rgba(15,17,21,0.04),0 6px 18px -8px rgba(15,17,21,0.12);
+    margin-bottom:14px; overflow:hidden;
 }
 .perm-section-header {
-    padding:14px 20px; background:#f8fafc; border-bottom:1px solid #f1f5f9;
-    display:flex; align-items:center; justify-content:space-between; cursor:pointer;
+    width:100%; padding:14px 18px; background:#fafafb; border:none;
+    border-bottom:1px solid #eeeeef;
+    display:flex; align-items:center; gap:12px; cursor:pointer;
 }
 .perm-section-title {
-    font-size:14px; font-weight:700; color:#0f172a;
-    display:flex; align-items:center; gap:8px;
+    flex:1 1 0%; text-align:left; font-size:15px; font-weight:800;
+    color:#0f1115; letter-spacing:-0.1px;
+    display:flex; align-items:center; gap:12px;
 }
 .perm-section-icon {
-    width:28px; height:28px; border-radius:7px;
-    background:linear-gradient(135deg,#f97316,#fb923c);
+    width:32px; height:32px; border-radius:9px;
+    background:#ea580c; color:#fff;
     display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.25),0 4px 10px -3px rgba(234,88,12,0.45);
 }
+#collapseModules, #collapseCrud, #collapseWorkTime { padding:0 22px; }
+#collapseModules { padding-top:4px; padding-bottom:14px; }
 
 /* CRUD badges */
 .crud-grid { display:flex; gap:10px; flex-wrap:wrap; padding:16px 20px; }
@@ -300,16 +310,16 @@ window.is_twentyFour_Hour = function(checkBox, startTime, endTime) {
 @section('content')
 <section>
 
-    {{-- Page heading --}}
-    <div style="margin-bottom:20px;display:flex;align-items:center;gap:14px;">
-        <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#f97316,#fb923c);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(249,115,22,0.3);">
-            <i class="fa fa-key" style="font-size:17px;color:#fff;"></i>
-        </div>
-        <div>
-            <h1 style="font-size:20px;font-weight:800;color:#0f172a;margin:0 0 2px;">
-                Edit Permissions — <span style="color:#f97316;">{{ $roleName }}</span>
-            </h1>
-            <p style="font-size:12px;color:#94a3b8;margin:0;">Assign module access and work time for this role</p>
+    {{-- Page heading — exact spec UI: white card, 42px orange icon tile, count badge --}}
+    <div style="background:#ffffff;border-radius:12px;border:1px solid #e8e8ec;box-shadow:0 1px 2px rgba(15,17,21,0.04),0 6px 18px -8px rgba(15,17,21,0.12);padding:18px 22px;display:flex;align-items:center;gap:14px;margin-bottom:14px;">
+        <span style="width:42px;height:42px;border-radius:11px;background:#ea580c;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,0.25),0 6px 14px -4px rgba(234,88,12,0.45);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4.5 4.5 0 0 0-6 6L3 18l3 3 5.7-5.7a4.5 4.5 0 0 0 6-6L15 12l-3-3 2.7-2.7z"/></svg>
+        </span>
+        <div style="flex:1 1 0%;">
+            <h2 style="margin:0;font-size:18px;font-weight:800;color:#0f1115;letter-spacing:-0.2px;">
+                Edit Permissions — <span style="color:#F27420;">{{ $roleName }}</span>
+            </h2>
+            <p style="margin:2px 0 0;font-size:13px;color:#6b7280;">Assign module access and work time for this role</p>
         </div>
     </div>
 
@@ -329,8 +339,8 @@ window.is_twentyFour_Hour = function(checkBox, startTime, endTime) {
         <div id="collapseModules" class="collapse show">
             @foreach($module as $allModule)
             <div class="perm-module-row">
-                {{-- Master checkbox --}}
-                <div>
+                {{-- Master checkbox + module name --}}
+                <div class="perm-module-name">
                     <label class="perm-check-label" style="margin:0;">
                         <input class="parent{{ $allModule }}" id="{{ $allModule }}"
                             value="{{ $allModule.'.*' }}"
@@ -339,9 +349,8 @@ window.is_twentyFour_Hour = function(checkBox, startTime, endTime) {
                             name="checkbox[]" type="checkbox">
                         <span class="perm-checkmark"></span>
                     </label>
+                    <span>{{ nameFormat($allModule) }}</span>
                 </div>
-                {{-- Module name --}}
-                <div class="perm-module-name">{{ nameFormat($allModule) }}</div>
                 {{-- Sub modules --}}
                 <div style="font-size:13px;">
                     <?php echo group($leftMenuData[$allModule], $permissionsExist, $allModule); ?>
@@ -417,14 +426,14 @@ window.is_twentyFour_Hour = function(checkBox, startTime, endTime) {
                 }
             ?>
             <style>
-            .wt-picker{display:flex;align-items:center;gap:6px;background:#fff;border:1.5px solid #fed7aa;border-radius:12px;padding:0 12px;height:44px;box-sizing:border-box;transition:all 0.2s;box-shadow:0 1px 4px rgba(249,115,22,0.07);}
-            .wt-picker.open{border-color:#f97316;box-shadow:0 0 0 3px rgba(249,115,22,0.13);}
-            .wt-colon{font-size:16px;font-weight:700;color:#cbd5e1;line-height:1;flex-shrink:0;}
+            .wt-picker{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #f6c9a8;border-radius:10px;padding:0 12px;height:46px;box-sizing:border-box;transition:all 0.2s;}
+            .wt-picker.open{border-color:#ea580c;box-shadow:0 0 0 3px rgba(234,88,12,0.12);}
+            .wt-colon{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:18px;font-weight:800;color:#9ca3af;line-height:1;flex-shrink:0;}
             /* custom dropdown segments */
             .wt-dd{position:relative;display:inline-block;}
-            .wt-dd-trigger{height:28px;min-width:34px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#1e293b;cursor:pointer;border-radius:7px;padding:0 4px;transition:all 0.15s;user-select:none;}
-            .wt-dd-trigger:hover{background:#fff7ed;color:#f97316;}
-            .wt-dd.active .wt-dd-trigger{background:#fff7ed;color:#f97316;}
+            .wt-dd-trigger{height:32px;min-width:34px;display:flex;align-items:center;justify-content:center;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:18px;font-weight:800;color:#0f1115;cursor:pointer;border-radius:7px;padding:0 4px;transition:all 0.15s;user-select:none;}
+            .wt-dd-trigger:hover{background:#fff7ed;color:#ea580c;}
+            .wt-dd.active .wt-dd-trigger{background:#fff7ed;color:#ea580c;}
             .wt-dd-menu{display:none;position:fixed;background:#fff;border:1.5px solid #fed7aa;border-radius:10px;box-shadow:0 8px 24px rgba(249,115,22,0.13);z-index:99999;min-width:52px;max-height:160px;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:#f97316 #fff7ed;}
             .wt-dd-menu::-webkit-scrollbar{width:4px;}
             .wt-dd-menu::-webkit-scrollbar-track{background:#fff7ed;border-radius:4px;}
@@ -433,16 +442,16 @@ window.is_twentyFour_Hour = function(checkBox, startTime, endTime) {
             .wt-dd-opt{padding:7px 10px;font-size:13px;font-weight:600;color:#374151;cursor:pointer;text-align:center;transition:background 0.1s;}
             .wt-dd-opt:hover{background:#fff7ed;color:#f97316;}
             .wt-dd-opt.sel{background:#fff7ed;color:#f97316;font-weight:700;}
-            /* AM/PM toggle */
-            .wt-ampm-toggle{display:flex;border-radius:8px;overflow:hidden;border:1.5px solid #fed7aa;height:28px;flex-shrink:0;}
-            .wt-ampm-btn{padding:0 8px;font-size:11px;font-weight:700;cursor:pointer;color:#9ca3af;background:#f8fafc;transition:all 0.15s;display:flex;align-items:center;line-height:1;}
-            .wt-ampm-btn.sel{background:#f97316;color:#fff;}
+            /* AM/PM toggle — grey segmented look (spec) */
+            .wt-ampm-toggle{display:flex;gap:0;border-radius:7px;overflow:hidden;background:#f4f4f6;border:1px solid #eeeeef;padding:2px;height:32px;flex-shrink:0;}
+            .wt-ampm-btn{padding:0 10px;font-size:11.5px;font-weight:800;cursor:pointer;color:#6b7280;background:transparent;border-radius:5px;letter-spacing:0.3px;transition:all 0.15s;display:flex;align-items:center;line-height:1;}
+            .wt-ampm-btn.sel{background:#ea580c;color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,0.25),0 2px 6px rgba(234,88,12,0.35);}
             /* ── Mobile layout ── */
             @media (max-width: 767px) {
                 /* Outer wrapper: reduce side padding */
                 .wt-outer-wrap { padding: 12px 12px 16px !important; }
-                /* Inner tinted card: column layout, tighter padding */
-                .wt-inner-card { flex-direction: column !important; gap: 0 !important; padding: 14px 14px !important; }
+                /* Inner tinted card: single-column layout, tighter padding */
+                .wt-inner-card { grid-template-columns: 1fr !important; gap: 0 !important; padding: 14px 14px !important; }
                 /* Time blocks: full width, spaced by border */
                 .wt-time-block { min-width: unset !important; width: 100% !important; flex: unset !important; padding-bottom: 14px !important; }
                 /* Divider between start and end time */
@@ -465,18 +474,18 @@ window.is_twentyFour_Hour = function(checkBox, startTime, endTime) {
                 .wt-picker { width: 100% !important; }
             }
             </style>
-            <div class="wt-outer-wrap" style="padding:20px 24px 24px;">
-                {{-- Tinted inner card --}}
-                <div class="wt-inner-card" style="background:linear-gradient(135deg,#fff7ed 0%,#f8fafc 100%);border:1.5px solid #fed7aa;border-radius:14px;padding:20px 24px;display:flex;align-items:flex-end;gap:0;flex-wrap:wrap;">
+            <div class="wt-outer-wrap" style="padding:12px 22px 18px;">
+                {{-- Tinted inner card — spec: peach bg, grid 1fr 32px 1fr 130px --}}
+                <div class="wt-inner-card" style="background:#fff7f0;border:1px solid #f6c9a8;border-radius:12px;padding:16px 18px;display:grid;grid-template-columns:1fr 32px 1fr 130px;gap:14px;align-items:flex-start;">
 
                     {{-- Hidden native inputs for form submission --}}
                     <input type="hidden" id="start_time" name="start_time" value="{{ $startTime }}">
                     <input type="hidden" id="end_time"   name="end_time"   value="{{ $endTime }}">
 
                     {{-- Start Time --}}
-                    <div class="wt-time-block" style="flex:1;min-width:180px;">
-                        <label style="font-size:10px;font-weight:700;color:#f97316;letter-spacing:0.7px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:5px;">
-                            <i class="fa fa-play-circle" style="font-size:10px;"></i> Start Time <span style="color:#ef4444;">*</span>
+                    <div class="wt-time-block" style="min-width:0;">
+                        <label style="font-size:10.5px;font-weight:800;color:#F27420;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+                            <i class="fa fa-play-circle" style="font-size:11px;"></i> Start Time <span style="color:#ef4444;">*</span>
                         </label>
                         <div class="wt-picker" id="wtp_start">
                             <i class="fa fa-clock-o" style="color:#f97316;font-size:13px;opacity:0.5;flex-shrink:0;"></i>
@@ -509,17 +518,15 @@ window.is_twentyFour_Hour = function(checkBox, startTime, endTime) {
                         </div>
                     </div>
 
-                    {{-- Arrow separator --}}
-                    <div class="wt-arrow-sep" style="flex-shrink:0;padding:0 14px 12px;display:flex;align-items:center;">
-                        <div style="width:28px;height:2px;background:linear-gradient(90deg,#f97316,#fb923c);border-radius:2px;position:relative;">
-                            <div style="position:absolute;right:-6px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:6px solid #fb923c;border-top:4px solid transparent;border-bottom:4px solid transparent;"></div>
-                        </div>
+                    {{-- Arrow separator — spec: orange right-arrow --}}
+                    <div class="wt-arrow-sep" style="display:flex;align-items:center;justify-content:center;padding-top:32px;color:#F27420;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
                     </div>
 
                     {{-- End Time --}}
-                    <div class="wt-time-block" style="flex:1;min-width:180px;">
-                        <label style="font-size:10px;font-weight:700;color:#f97316;letter-spacing:0.7px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:5px;">
-                            <i class="fa fa-stop-circle" style="font-size:10px;"></i> End Time <span style="color:#ef4444;">*</span>
+                    <div class="wt-time-block" style="min-width:0;">
+                        <label style="font-size:10.5px;font-weight:800;color:#F27420;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+                            <i class="fa fa-stop-circle" style="font-size:11px;"></i> End Time <span style="color:#ef4444;">*</span>
                         </label>
                         <div class="wt-picker" id="wtp_end">
                             <i class="fa fa-clock-o" style="color:#f97316;font-size:13px;opacity:0.5;flex-shrink:0;"></i>
@@ -553,9 +560,9 @@ window.is_twentyFour_Hour = function(checkBox, startTime, endTime) {
                     </div>
 
                     {{-- Spacer + All Day toggle --}}
-                    <div class="wt-allday-block" style="flex-shrink:0;padding-left:20px;padding-bottom:0;">
-                        <label style="font-size:10px;font-weight:700;color:#f97316;letter-spacing:0.7px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:5px;">
-                            <i class="fa fa-sun-o" style="font-size:10px;"></i> All Day
+                    <div class="wt-allday-block" style="min-width:0;">
+                        <label style="font-size:10.5px;font-weight:800;color:#F27420;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+                            <i class="fa fa-sun-o" style="font-size:11px;"></i> All Day
                         </label>
                         <label id="allDayLabel" onclick="is_twentyFour_Hour('is_24_hours','{{ $startTime }}','{{ $endTime }}')"
                             style="display:inline-flex;align-items:center;gap:0;cursor:pointer;height:44px;border-radius:10px;border:1.5px solid {{ $is24 ? '#f97316' : '#e2e8f0' }};background:{{ $is24 ? 'linear-gradient(135deg,#f97316,#ea580c)' : '#fff' }};padding:0 6px 0 6px;transition:all 0.25s;box-shadow:{{ $is24 ? '0 3px 10px rgba(249,115,22,0.3)' : 'none' }};min-width:64px;justify-content:center;">
@@ -575,18 +582,18 @@ window.is_twentyFour_Hour = function(checkBox, startTime, endTime) {
         </div>
     </div>
 
-    {{-- ── Action buttons ───────────────────────────────────────── --}}
-    <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:8px;">
+    {{-- ── Action buttons — exact spec UI ──────────────────────── --}}
+    <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:0 0 8px;">
         <a href="{{ route('management.settings.index') }}"
-            style="display:inline-flex;align-items:center;gap:6px;height:42px;padding:0 24px;border-radius:10px;border:2px solid #e2e8f0;background:#fff;color:#64748b;font-weight:600;font-size:14px;text-decoration:none;"
-            onmouseover="this.style.borderColor='#f97316';this.style.color='#f97316';"
-            onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b';">
-            <i class="fa fa-times" style="font-size:11px;color:#000;margin-right:4px;"></i> Cancel
+            style="height:42px;padding:0 16px;border-radius:10px;background:#ffffff;color:#0f1115;border:1px solid #e8e8ec;font-weight:700;font-size:13.5px;letter-spacing:-0.1px;display:inline-flex;align-items:center;justify-content:center;gap:7px;box-shadow:0 1px 2px rgba(15,17,21,0.04);text-decoration:none;">
+            <svg width="15.5" height="15.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            Cancel
         </a>
-        <button type="submit" style="display:inline-flex;align-items:center;gap:6px;height:42px;padding:0 28px;border-radius:10px;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;font-weight:700;font-size:14px;border:none;box-shadow:0 3px 10px rgba(249,115,22,0.3);cursor:pointer;outline:none !important;">
-            <i class="fa fa-check"></i> Save Permissions
+        <button type="submit"
+            style="height:42px;padding:0 16px;border-radius:10px;background:#ea580c;color:#fff;border:1px solid transparent;font-weight:700;font-size:13.5px;letter-spacing:-0.1px;display:inline-flex;align-items:center;justify-content:center;gap:7px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.3),0 1px 2px rgba(234,88,12,0.4),0 6px 16px -4px rgba(234,88,12,0.45);cursor:pointer;outline:none !important;">
+            <svg width="15.5" height="15.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+            Save Permissions
         </button>
-
     </div>
 
     </form>

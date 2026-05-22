@@ -10,7 +10,7 @@ class SupplierInvoice extends Model
     use \App\Models\Traits\LogsActivityTrait;
     use HasFactory;
 	
-	protected $fillable  = ['supplier_id','invoice_type','salesman_id','other_invoice_id'];
+	protected $fillable  = ['supplier_id','invoice_type','salesman_id','other_invoice_id','delivery_no','supplier_invoice_no','awb','remarks'];
 
     public function supplier(){
         return $this->hasOne('App\Models\Supplier','id','supplier_id');

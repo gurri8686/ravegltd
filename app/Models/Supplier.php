@@ -12,7 +12,12 @@ class Supplier extends Model
 	
 	public function getCreatedAtAttribute($value)
     {
-        return \Carbon\Carbon::parse($value)->format('d M Y'); // Example: 09 Oct 2025
+        if (empty($value)) return null;
+        try {
+            return \Carbon\Carbon::parse($value)->format('d M Y');
+        } catch (\Exception $e) {
+            return $value;
+        }
     }
 	
 	public function invoices(){

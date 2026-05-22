@@ -7,6 +7,7 @@ use Validator;
 use App\Lib\Response as CustomResponse;
 use App\Models\CustomerInvoiceProduct;
 use App\Models\StockProduct;
+use App\Models\CustomerCreditUsage;
 use App\Events\CustomerReturnEvent;
 use DB;
 
@@ -21,6 +22,11 @@ class CustomerReturnController extends Controller
     public function index()
     {
         return view('return.customer');
+    }
+
+    public function history()
+    {
+        return view('return.customer-history');
     }
 	
 	public function customers()
@@ -82,6 +88,61 @@ class CustomerReturnController extends Controller
 		}
     }
 	
+	/**
+	 * Get all products purchased by a customer (grouped by product)
+	 */
+	public function customerProducts(Request $request){
+		try{
+			$query = CustomerInvoiceProduct::where('is_archive', 0)
+				->with('product')
+				->with('customer')
+				->select('id','customer_id','customer_invoice_id','supplier_invoice_product_id','supplier_invoice_id','supplier_id','product_id','quantity','unit_price','sub_total','remarks','created_at');
+
+			if ($request->filled('customer_id')) {
+				$query->where('customer_id', $request->customer_id);
+			}
+			if ($request->filled('from_date')) $query->whereDate('created_at', '>=', $request->from_date);
+			if ($request->filled('to_date')) $query->whereDate('created_at', '<=', $request->to_date);
+
+			$items = $query->orderBy('id','desc')->get();
+
+			// Check how much already returned per item
+			$data = $items->map(function($item) {
+				$returned = \App\Models\StockProduct::where('event','customer_return')
+					->where('type','customer')
+					->where('is_archived',0)
+					->where('invoice_id', $item->customer_invoice_id)
+					->where('product_id', $item->product_id)
+					->where('ref_id', $item->id)
+					->sum('stock');
+				$available = $item->quantity - abs($returned);
+				$date = '';
+				try { $date = \Carbon\Carbon::parse($item->getRawOriginal('created_at'))->format('d M Y'); } catch(\Exception $e) {}
+				return [
+					'id' => $item->id,
+					'customer_id' => $item->customer_id,
+					'customer_name' => $item->customer ? $item->customer->name : '',
+					'product_id' => $item->product_id,
+					'product_name' => $item->product ? $item->product->name : 'Unknown',
+					'invoice_id' => $item->customer_invoice_id,
+					'supplier_invoice_product_id' => $item->supplier_invoice_product_id,
+					'supplier_invoice_id' => $item->supplier_invoice_id,
+					'supplier_id' => $item->supplier_id,
+					'quantity' => $item->quantity,
+					'unit_price' => $item->unit_price,
+					'remarks' => $item->remarks,
+					'returned' => abs($returned),
+					'available' => max(0, $available),
+					'date' => $date,
+				];
+			})->filter(fn($i) => $i['available'] > 0)->values();
+
+			return $this->successResponse($data);
+		}catch(\Exception $ex){
+			return $this->exceptionResponse($ex);
+		}
+	}
+
 	public function invoices(Request $request){
 
 		try{
@@ -133,10 +194,10 @@ class CustomerReturnController extends Controller
 				->where('type','customer');
 
 			if($request->filled('date') && $request->date !== ''){
-				$query->whereDate('updated_at', '>=', $request->date);
+				$query->whereDate('created_at', '>=', $request->date);
 			}
 			if($request->filled('to_date') && $request->to_date !== ''){
-				$query->whereDate('updated_at', '<=', $request->to_date);
+				$query->whereDate('created_at', '<=', $request->to_date);
 			}
 
 			$query = $query
@@ -155,20 +216,20 @@ class CustomerReturnController extends Controller
 			
 			$data = [];
 			foreach($returns as $return){
+				$customer = optional(optional($return->customerInvoice)->customer);
 				$data[] = [
 					'id' => $return->id,
 					'editable' => false,
-					'product_id' => $return->product->name,
-					'quantity' => $return->stock,
-					'price' => $return->price,
+					'product_id' => optional($return->product)->name ?? '',
+					'quantity' => abs($return->stock),
+					'price' => abs($return->price),
 					'invoice_id' => $return->invoice_id,
-					//'note' => $return->invoice_id,
-					'customer_id' => $return->customerInvoice->customer->id,
-					'date' => $return->updated_at,
+					'note' => $return->remarks ?? '',
+					'customer_id' => $customer->id ?? '',
+					'date' => \Carbon\Carbon::parse($return->getRawOriginal('created_at'))->format('Y-m-d H:i:s'),
 					'invoices' => '',
-					'total' => $return->stock * $return->price,
-					'customer' => $return->customerInvoice->customer->name,
-					'date' => $return->updated_at
+					'total' => abs($return->stock) * abs($return->price),
+					'customer' => $customer->name ?? '',
 				];
 			}
 			
@@ -179,6 +240,46 @@ class CustomerReturnController extends Controller
 		}
 	}
 	
+	public function creditBalance(Request $request, $customer_id)
+	{
+		try {
+			$tableExists = \Illuminate\Support\Facades\Schema::hasTable('customer_credit_usages');
+			$earned    = CustomerCreditUsage::totalEarned($customer_id);
+			$used      = $tableExists ? CustomerCreditUsage::totalUsed($customer_id) : 0;
+			$available = max(0, round($earned - $used, 2));
+			return $this->successResponse([
+				'total_earned' => round($earned, 2),
+				'total_used'   => round($used, 2),
+				'available'    => $available,
+			]);
+		} catch (\Exception $ex) {
+			return $this->exceptionResponse($ex);
+		}
+	}
+
+	public function creditBalanceAll()
+	{
+		try {
+			$earned = StockProduct::where('event', 'customer_return')
+				->where('is_archived', 0)
+				->where('type', 'customer')
+				->get()
+				->sum(fn($r) => abs($r->stock) * $r->price);
+			$used = 0;
+			if (\Illuminate\Support\Facades\Schema::hasTable('customer_credit_usages')) {
+				$used = CustomerCreditUsage::sum('amount');
+			}
+			$available = max(0, round($earned - $used, 2));
+			return $this->successResponse([
+				'total_earned' => round($earned, 2),
+				'total_used'   => round($used, 2),
+				'available'    => $available,
+			]);
+		} catch (\Exception $ex) {
+			return $this->exceptionResponse($ex);
+		}
+	}
+
     /**
      * Show the form for creating a new resource.
      *
@@ -186,46 +287,44 @@ class CustomerReturnController extends Controller
      */
     public function returnCreate(Request $request)
     {
-		//print_r($request->all()); exit;
-	
+		$productId = is_array($request->product_id) ? $request->product_id['value'] : $request->product_id;
+
 		$detail = CustomerInvoiceProduct::where('customer_invoice_id', $request->invoice_id['invoice_id'])
 			->where('id', $request->invoice_id['id'])->first();
-		
-		// validation later.
+
 		DB::beginTransaction();
 		try{
 			if(empty($detail)){
 				throw new \Exception("Invalid Invoice!");
 			}
-			$dateParam = $request->filled('date') ? $request->date : '2000-01-01';
-			$stock = StockProduct::getProductsWithInvoiceStockCustomer(
-				$request->customer_id,
-				$request->product_id,
-				$dateParam,
-				$request->invoice_id['ref_id']
-			);
-			
-			if(empty($stock)){
-				throw new \Exception("Invalid Invoice Stock!");
+
+			// Check available using same logic as GET endpoint (quantity - already returned)
+			$returned = StockProduct::where('product_id', $productId)
+				->where('invoice_id', $request->invoice_id['invoice_id'])
+				->where('ref_id', $detail->id)
+				->where('event', 'customer_return')
+				->where('is_archived', 0)
+				->sum('stock');
+
+			$netStock = $detail->quantity - abs($returned);
+
+			if($netStock <= 0){
+				throw new \Exception("No stock available to return.");
 			}
-			
+
 			if($request->quantity <= 0){
 				throw new \Exception("Min 1 quantity is required.");
 			}
-			
-			if($stock->net_stock <= 0){
-				throw new \Exception("Max quantity alredy returned.");
+
+			if($request->quantity > $netStock){
+				throw new \Exception("Max quantity ".$netStock. " is allowed to return.");
 			}
-			
-			if($request->quantity > $stock->net_stock){
-				throw new \Exception("Max quantity ".$stock->net_stock. " is allowed to return.");
-			}
-			
+
 			$results = event(new CustomerReturnEvent([
 				'supplier_invoice_product_id' => $detail->supplier_invoice_product_id,
 				'supplier_invoice_id' => $detail->supplier_invoice_id,
 				'customer_id' => $request->customer_id,
-				'product_id' => $request->product_id['value'],
+				'product_id' => $productId,
 				'customer_invoice_id' => $request->invoice_id['invoice_id'],
 				'customer_invoice_product_id' => $request->invoice_id['id'],
 				'quantity' => $request->quantity,

@@ -7,8 +7,10 @@ use Validator;
 use App\Lib\Response as CustomResponse;
 use App\Models\SupplierInvoiceProduct;
 use App\Models\StockProduct;
+use App\Models\SupplierCreditUsage;
 use App\Events\SupplierReturnEvent;
 use DB;
+use Carbon\Carbon;
 
 class SupplierReturnController extends Controller
 {
@@ -22,10 +24,19 @@ class SupplierReturnController extends Controller
     {
         return view('return.supplier');
     }
+
+    public function history()
+    {
+        return view('return.supplier-history');
+    }
 	
 	public function suppliers()
     {
-        return $this->successResponse(\App\Models\Supplier::getActive());
+        try {
+            return $this->successResponse(\App\Models\Supplier::getActive());
+        } catch (\Exception $ex) {
+            return $this->exceptionResponse($ex);
+        }
     }
 
     public function products()
@@ -86,6 +97,76 @@ class SupplierReturnController extends Controller
 		}
     }
 	
+	/**
+	 * Get all products purchased from a supplier (with available returnable qty)
+	 */
+	public function supplierProducts(Request $request){
+		try{
+			$query = SupplierInvoiceProduct::where('is_archive', 0)
+				->with('product')
+				->with('supplier')
+				->with('invoice')
+				->select('id','supplier_invoice_id','product_id','supplier_id','quantity','unit_price','sub_total','remarks','created_at');
+
+			if ($request->filled('supplier_id')) {
+				$query->where('supplier_id', $request->supplier_id);
+			}
+			if ($request->filled('from_date')) $query->whereDate('created_at', '>=', $request->from_date);
+			if ($request->filled('to_date')) $query->whereDate('created_at', '<=', $request->to_date);
+
+			$items = $query->orderBy('id','desc')->get();
+
+			$data = $items->map(function($item) {
+				// Supplier-side reductions (returns + dumps)
+				$supplierUsed = StockProduct::where('type','supplier')
+					->where('is_archived',0)
+					->where('invoice_id', $item->supplier_invoice_id)
+					->where('product_id', $item->product_id)
+					->whereIn('event', ['supplier_return', 'dump'])
+					->sum('stock');
+
+				// Customer net consumption (sales - customer returns) linked to this invoice line
+				$customerConsumed = StockProduct::where('is_archived', 0)
+					->where('type', 'customer')
+					->where('event', 'stock_consumed')
+					->where('supplier_invoice_product_id', $item->id)
+					->where('supplier_invoice_id', $item->supplier_invoice_id)
+					->sum('stock');
+
+				$customerReturned = StockProduct::where('is_archived', 0)
+					->where('type', 'customer')
+					->where('event', 'customer_return')
+					->where('supplier_invoice_product_id', $item->id)
+					->where('supplier_invoice_id', $item->supplier_invoice_id)
+					->sum('stock');
+
+				$available = $item->quantity - abs($supplierUsed) - (abs($customerConsumed) - abs($customerReturned));
+
+				$date = '';
+				try { $date = Carbon::parse($item->getRawOriginal('created_at'))->format('d M Y'); } catch(\Exception $e) {}
+				$supplierId = $item->supplier_id ?: ($item->invoice ? $item->invoice->supplier_id : null);
+				return [
+					'id' => $item->id,
+					'supplier_id' => $supplierId,
+					'supplier_name' => $item->supplier ? $item->supplier->name : ($item->invoice && $item->invoice->supplier ? $item->invoice->supplier->name : 'N/A'),
+					'product_id' => $item->product_id,
+					'product_name' => $item->product ? $item->product->name : 'Unknown',
+					'invoice_id' => $item->supplier_invoice_id,
+					'quantity' => $item->quantity,
+					'unit_price' => $item->unit_price,
+					'remarks' => $item->remarks,
+					'returned' => abs($supplierUsed),
+					'available' => max(0, $available),
+					'date' => $date,
+				];
+			})->filter(fn($i) => $i['available'] > 0)->values();
+
+			return $this->successResponse($data);
+		}catch(\Exception $ex){
+			return $this->exceptionResponse($ex);
+		}
+	}
+
 	public function invoices(Request $request){
 		try{
 			$rules = [
@@ -102,8 +183,9 @@ class SupplierReturnController extends Controller
 			
 			$stocks = StockProduct::getProductsWithInvoiceStockSupplier(
 				$request->supplier_id,
-				$request->product_id, 
-				$request->date, ""
+				$request->product_id,
+				$request->date, "",
+				$request->end_date ?? ""
 			); 
 			return $this->successResponse($stocks);
 			//print_r($stocks);
@@ -134,62 +216,50 @@ class SupplierReturnController extends Controller
 	
 	public function returns(Request $request){
 		try{
-			$rules = [
-				'date' => 'required',
-            ];
-			
-			$validator = Validator::make($request->all(), $rules);
-			
-			if ($validator->fails()) {
-                return $this->validationErrorResponse($validator->errors()->messages());
-            }
-			
 			$query = StockProduct
 				::where('is_archived',0)
 				->where('event','supplier_return')
 				->where('type','supplier')
-				->whereDate('updated_at', '>=', $request->date)
-				->when($request->end_date, function($q) use ($request) {
-					$q->whereDate('updated_at', '<=', $request->end_date);
-				})
 				->with('product')
-				->with('supplier')
-				;
-				
-			if ($request->has('supplier_id') && !empty($request->supplier_id)) {
-				$query->where('supplier_id',$request->supplier_id);
+				->with('supplier');
+
+			if ($request->filled('date')) {
+				$query->whereDate('created_at', '>=', $request->date);
 			}
-			
-			/*if ($request->has('supplier_id') && !empty($request->supplier_id)) {
-				$query->whereHas('customerInvoice.customer', function ($q) use ($request) {
-					$q->where('id', $request->supplier_id);
-				});
-			}*/
-			
+			if ($request->filled('end_date')) {
+				$query->whereDate('created_at', '<=', $request->end_date);
+			}
+			if ($request->filled('supplier_id')) {
+				$query->where('supplier_id', $request->supplier_id);
+			}
+
 			$returns = $query->get();
-			
+
 			$data = [];
 			foreach($returns as $return){
+				$supplier = optional($return->supplier);
+				$date = '';
+				try { $date = \Carbon\Carbon::parse($return->getRawOriginal('created_at'))->format('Y-m-d H:i:s'); } catch(\Exception $e) {}
 				$data[] = [
 					'id' => $return->id,
 					'editable' => false,
-					'product_id' => $return->product->name,
-					'quantity' => $return->stock,
-					'price' => $return->price,
+					'product_id' => optional($return->product)->name ?? '',
+					'quantity' => abs($return->stock),
+					'price' => abs($return->price),
 					'invoice_id' => $return->invoice_id,
-					//'note' => $return->invoice_id,
-					'supplier_id' => $return->supplier->id,
-					'date' => $return->updated_at,
+					'note' => $return->remarks ?? '',
+					'supplier_id' => $supplier->id ?? '',
+					'date' => $date,
 					'invoices' => '',
-					'total' => $return->stock * $return->price,
-					'supplier' => $return->supplier->name,
-					'date' => $return->updated_at
+					'total' => abs($return->stock) * abs($return->price),
+					'supplier' => $supplier->name ?? '',
 				];
 			}
-			
+
 			return $this->successResponse($data);
-			
+
 		}catch(\Exception $ex){
+			\Log::error('SupplierReturn returns error: '.$ex->getMessage().' at '.$ex->getFile().':'.$ex->getLine());
 			return $this->exceptionResponse($ex);
 		}
 	}
@@ -201,44 +271,41 @@ class SupplierReturnController extends Controller
      */
     public function returnCreate(Request $request)
     {
-		// validation later.
+		$productId = is_array($request->product_id) ? $request->product_id['value'] : $request->product_id;
 		DB::beginTransaction();
 		try{
-			/*$detail = SupplierInvoiceProduct::where('supplier_invoice_id', $request->invoice_id['invoice_id'])
-			->where('id', $request->invoice_id['id'])
-			->where('is_archive', 0)
-			->first();
-					
-			if(empty($detail)){
-				throw new \Exception("Invalid Invoice!");
+			// Direct stock check
+			$baseQuery = StockProduct::where('product_id', $productId)
+				->where('invoice_id', $request->invoice_id['invoice_id'])
+				->where('is_archived', 0)
+				->where('type', 'supplier');
+
+			$added = (clone $baseQuery)->where('ref_id', $request->invoice_id['ref_id'])
+				->where('event', 'stock_added')->sum('stock');
+
+			if ($added == 0) {
+				$added = (clone $baseQuery)->where('event', 'stock_added')->sum('stock');
+				$returned = (clone $baseQuery)->where('event', 'supplier_return')->sum('stock');
+			} else {
+				$returned = (clone $baseQuery)->where('ref_id', $request->invoice_id['ref_id'])
+					->where('event', 'supplier_return')->sum('stock');
 			}
-			*/
-			$stock = StockProduct::_productsWithInvoiceStockSupplier(
-				$request->invoice_id['invoice_id'],
-				$request->supplier_id,
-				$request->product_id['value'],
-				$request->invoice_id['id']
-			);
-			
-			if(empty($stock)){
-				throw new \Exception("Invalid Invoice Stock!");
+
+			$netStock = abs($added) - abs($returned);
+
+			if($netStock <= 0){
+				throw new \Exception("No stock available to return.");
 			}
-			
 			if($request->quantity <= 0){
 				throw new \Exception("Min 1 quantity is required.");
 			}
-			
-			if($stock['net_stock'] <= 0){
-				throw new \Exception("Max quantity alredy returned.");
+			if($request->quantity > $netStock){
+				throw new \Exception("Max quantity ".$netStock. " is allowed to return.");
 			}
-			
-			if($request->quantity > $stock['net_stock']){
-				throw new \Exception("Max quantity ".$stock['net_stock']. " is allowed to return.");
-			}
-			
+
 			$results = event(new SupplierReturnEvent([
 				'supplier_id' => $request->supplier_id,
-				'product_id' => $request->product_id['value'],
+				'product_id' => $productId,
 				'supplier_invoice_id' => $request->invoice_id['invoice_id'],
 				'supplier_invoice_product_id' => $request->invoice_id['id'],
 				'quantity' => $request->quantity,
@@ -384,5 +451,45 @@ class SupplierReturnController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function creditBalance(Request $request, $supplier_id)
+    {
+        try {
+            $tableExists = \Illuminate\Support\Facades\Schema::hasTable('supplier_credit_usages');
+            $earned    = SupplierCreditUsage::totalEarned($supplier_id);
+            $used      = $tableExists ? SupplierCreditUsage::totalUsed($supplier_id) : 0;
+            $available = max(0, round($earned - $used, 2));
+            return $this->successResponse([
+                'total_earned' => round($earned, 2),
+                'total_used'   => round($used, 2),
+                'available'    => $available,
+            ]);
+        } catch (\Exception $ex) {
+            return $this->exceptionResponse($ex);
+        }
+    }
+
+    public function creditBalanceAll()
+    {
+        try {
+            $earned = StockProduct::where('event', 'supplier_return')
+                ->where('is_archived', 0)
+                ->where('type', 'supplier')
+                ->get()
+                ->sum(fn($r) => abs($r->stock) * $r->price);
+            $used = 0;
+            if (\Illuminate\Support\Facades\Schema::hasTable('supplier_credit_usages')) {
+                $used = SupplierCreditUsage::sum('amount');
+            }
+            $available = max(0, round($earned - $used, 2));
+            return $this->successResponse([
+                'total_earned' => round($earned, 2),
+                'total_used'   => round($used, 2),
+                'available'    => $available,
+            ]);
+        } catch (\Exception $ex) {
+            return $this->exceptionResponse($ex);
+        }
     }
 }

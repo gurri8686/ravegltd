@@ -24,6 +24,11 @@ class DumpController extends Controller
         return view('return.dump');
     }
 
+    public function history()
+    {
+        return view('return.dump-history');
+    }
+
     public function suppliers()
     {
         return $this->successResponse(\App\Models\Supplier::getActive());
@@ -32,6 +37,106 @@ class DumpController extends Controller
     public function products()
     {
         return $this->successResponse(\App\Models\Product::getActive());
+    }
+
+    public function supplierProducts(Request $request)
+    {
+        try {
+            $supplierId = $request->supplier_id;
+
+            $fromDate = $request->from_date ?? null;
+            $toDate   = $request->to_date   ?? null;
+
+            // Get per-invoice products from this supplier (filtered by date if provided)
+            $query = \App\Models\SupplierInvoiceProduct::where('is_archive', 0)
+                ->with('product')
+                ->with('supplier')
+                ->with('invoice')
+                ->orderBy('id', 'desc');
+
+            if ($supplierId) $query->where('supplier_id', $supplierId);
+            if ($fromDate) $query->whereDate('created_at', '>=', $fromDate);
+            if ($toDate)   $query->whereDate('created_at', '<=', $toDate);
+
+            $items = $query->get();
+
+            $result = [];
+            foreach ($items as $item) {
+                if (!$item->product) continue;
+
+                $itemSupplierId = $item->supplier_id ?: ($item->invoice ? $item->invoice->supplier_id : null);
+                // Stock added by supplier for this invoice-product line
+                $added = \App\Models\StockProduct::where('product_id', $item->product_id)
+                    ->where('supplier_id', $itemSupplierId)
+                    ->where('invoice_id', $item->supplier_invoice_id)
+                    ->where('ref_id', $item->id)
+                    ->where('is_archived', 0)
+                    ->where('type', 'supplier')
+                    ->where('event', 'stock_added')
+                    ->sum('stock');
+
+                if ($added == 0) {
+                    // fallback without ref_id
+                    $added = \App\Models\StockProduct::where('product_id', $item->product_id)
+                        ->where('supplier_id', $itemSupplierId)
+                        ->where('invoice_id', $item->supplier_invoice_id)
+                        ->where('is_archived', 0)
+                        ->where('type', 'supplier')
+                        ->where('event', 'stock_added')
+                        ->sum('stock');
+                }
+
+                if ($added == 0) continue;
+
+                // Supplier-side reductions (returns + dumps)
+                $supplierUsed = \App\Models\StockProduct::where('product_id', $item->product_id)
+                    ->where('supplier_id', $itemSupplierId)
+                    ->where('invoice_id', $item->supplier_invoice_id)
+                    ->where('is_archived', 0)
+                    ->where('type', 'supplier')
+                    ->whereIn('event', ['supplier_return', 'dump'])
+                    ->sum('stock');
+
+                // Customer-side net consumption (sales - customer returns) linked to this invoice line
+                $customerConsumed = \App\Models\StockProduct::where('is_archived', 0)
+                    ->where('type', 'customer')
+                    ->where('event', 'stock_consumed')
+                    ->where('supplier_invoice_product_id', $item->id)
+                    ->where('supplier_invoice_id', $item->supplier_invoice_id)
+                    ->sum('stock');
+
+                $customerReturned = \App\Models\StockProduct::where('is_archived', 0)
+                    ->where('type', 'customer')
+                    ->where('event', 'customer_return')
+                    ->where('supplier_invoice_product_id', $item->id)
+                    ->where('supplier_invoice_id', $item->supplier_invoice_id)
+                    ->sum('stock');
+
+                $netStock = abs($added) - abs($supplierUsed) - (abs($customerConsumed) - abs($customerReturned));
+
+                if ($netStock > 0) {
+                    $itemDate = '';
+                    try { $itemDate = \Carbon\Carbon::parse($item->getRawOriginal('created_at'))->format('d M Y'); } catch(\Exception $e) {}
+                    $result[] = [
+                        'id'            => $item->id,
+                        'supplier_id'   => $itemSupplierId,
+                        'supplier_name' => $item->supplier ? $item->supplier->name : 'N/A',
+                        'product_id'    => $item->product_id,
+                        'product_name'  => $item->product->name,
+                        'invoice_id'    => $item->supplier_invoice_id,
+                        'quantity'      => $item->quantity,
+                        'unit_price'    => $item->unit_price,
+                        'remarks'       => $item->remarks,
+                        'stock'         => $netStock,
+                        'date'          => $itemDate,
+                    ];
+                }
+            }
+
+            return $this->successResponse($result);
+        } catch (\Exception $e) {
+            return $this->exceptionResponse($e);
+        }
     }
 	
 	public function product(Request $request)
@@ -101,8 +206,9 @@ class DumpController extends Controller
 			
 			$stocks = StockProduct::getProductsWithInvoiceStockSupplier(
 				$request->supplier_id,
-				$request->product_id, 
-				$request->date, ""
+				$request->product_id,
+				$request->date, "",
+				$request->end_date ?? ""
 			); 
 			return $this->successResponse($stocks);
 			
@@ -131,62 +237,48 @@ class DumpController extends Controller
 	
 	public function returns(Request $request){
 		try{
-			$rules = [
-				'date' => 'required',
-            ];
-			
-			$validator = Validator::make($request->all(), $rules);
-			
-			if ($validator->fails()) {
-                return $this->validationErrorResponse($validator->errors()->messages());
-            }
-			
 			$query = StockProduct
 				::where('is_archived',0)
 				->where('event','dump')
 				->where('type','supplier')
-				->whereDate('updated_at', '>=', $request->date)
-				->when($request->end_date, function($q) use ($request) {
-					$q->whereDate('updated_at', '<=', $request->end_date);
-				})
 				->with('product')
-				->with('supplier')
-				;
-				
-			if ($request->has('supplier_id') && !empty($request->supplier_id)) {
-				$query->where('supplier_id',$request->supplier_id);
+				->with('supplier');
+
+			if ($request->filled('date')) {
+				$query->whereDate('created_at', '>=', $request->date);
 			}
-			
-			/*if ($request->has('supplier_id') && !empty($request->supplier_id)) {
-				$query->whereHas('customerInvoice.customer', function ($q) use ($request) {
-					$q->where('id', $request->supplier_id);
-				});
-			}*/
-			
+			if ($request->filled('end_date')) {
+				$query->whereDate('created_at', '<=', $request->end_date);
+			}
+			if ($request->filled('supplier_id')) {
+				$query->where('supplier_id', $request->supplier_id);
+			}
+
 			$returns = $query->get();
-			
+
 			$data = [];
 			foreach($returns as $return){
+				$supplier = optional($return->supplier);
+				$date = '';
+				try { $date = \Carbon\Carbon::parse($return->getRawOriginal('created_at'))->format('Y-m-d H:i:s'); } catch(\Exception $e) {}
 				$data[] = [
 					'id' => $return->id,
 					'editable' => false,
-					'product_id' => $return->product->name,
+					'product_id' => optional($return->product)->name ?? '',
 					'quantity' => $return->stock,
 					'price' => $return->price,
 					'invoice_id' => $return->invoice_id,
-					//'note' => $return->invoice_id,
-					'supplier_id' => $return->supplier->id,
-					'date' => $return->updated_at,
+					'supplier_id' => $supplier->id ?? '',
+					'date' => $date,
 					'invoices' => '',
 					'total' => $return->stock * $return->price,
-					'supplier' => $return->supplier->name,
-					'date' => $return->updated_at,
-					'note' => $return->remarks
+					'supplier' => $supplier->name ?? '',
+					'note' => $return->remarks ?? '',
 				];
 			}
-			
+
 			return $this->successResponse($data);
-			
+
 		}catch(\Exception $ex){
 			return $this->exceptionResponse($ex);
 		}
@@ -203,33 +295,36 @@ class DumpController extends Controller
 		// validation later.
 		DB::beginTransaction();
 		try{
-			$stock = StockProduct::_productsWithInvoiceStockSupplier(
-				$request->invoice_id['invoice_id'],
-				$request->supplier_id,
-				$request->product_id['value'],
-				$request->invoice_id['id']
-			);
-			
-			if(empty($stock)){
+			$productId = $request->product_id['value'];
+			$invoiceId = $request->invoice_id['invoice_id'];
+			$refId    = $request->invoice_id['id'];
+
+			$baseQuery = StockProduct::where('product_id', $productId)
+				->where('invoice_id', $invoiceId)
+				->where('ref_id', $refId)
+				->where('is_archived', 0)
+				->where('type', 'supplier');
+
+			$added   = (clone $baseQuery)->where('event', 'stock_added')->sum('stock');
+			$dumped  = (clone $baseQuery)->where('event', 'dump')->sum('stock');
+			$netStock = abs($added) - abs($dumped);
+
+			if($added == 0){
 				throw new \Exception("Invalid Invoice Stock!");
 			}
-			
 			if($request->quantity <= 0){
 				throw new \Exception("Min 1 quantity is required.");
 			}
-			
-			if($stock['net_stock'] <= 0){
-				throw new \Exception("Max quantity alredy returned.");
+			if($netStock <= 0){
+				throw new \Exception("Max quantity already dumped.");
 			}
-			
-			if($request->quantity > $stock['net_stock']){
-				throw new \Exception("Max quantity ".$stock['net_stock']. " is allowed to return.");
+			if($request->quantity > $netStock){
+				throw new \Exception("Max quantity ".$netStock. " is allowed to dump.");
 			}
-			
 			//print_r($stock); exit;
 			
 			$results = event(new SupplierReturnEvent([
-				'supplier_id' => $request->supplier_id,
+				'supplier_id' => !empty($request->supplier_id) ? $request->supplier_id : null,
 				'product_id' => $request->product_id['value'],
 				'supplier_invoice_id' => $request->invoice_id['invoice_id'],
 				'supplier_invoice_product_id' => $request->invoice_id['id'],

@@ -10,22 +10,25 @@ use App\Models\CustomerInvoice;
  */
 class AmountCoversInvoices implements Rule
 {
-	
+
 	protected $customer_id;
-	
+
 	protected $amount;
-	
+
+	protected $creditAmount;
+
 	protected $negativeInvoiceAllowed = 1;
-	
+
     /**
      * Create a new rule instance.
      *
      * @return void
      */
-    public function __construct($customer_id, $amount)
+    public function __construct($customer_id, $amount, $creditAmount = 0)
     {
         $this->customer_id = $customer_id;
 		$this->amount = $amount;
+		$this->creditAmount = (float)($creditAmount ?? 0);
     }
 
     /**
@@ -36,16 +39,17 @@ class AmountCoversInvoices implements Rule
      * @return bool
      */
     public function passes($attribute, $value)
-    {	
+    {
 		$payments = CustomerInvoice::unpaidInvoices($this->customer_id,$value)->toArray();
 		usort($payments, function ($a, $b) {
 			return $a['balance_due'] <=> $b['balance_due']; // ascending order
 		});
         $invoices = $value;
-		$amount = $this->amount;
+		$effectiveAmount = $this->amount + $this->creditAmount;
+		$amount = $effectiveAmount;
 		$negative_counts = [];
 		$total = [];
-		
+
 		foreach($payments as $p){
 			$amount -= $p['balance_due'];
 			$total[] = $p['balance_due'];
@@ -53,15 +57,12 @@ class AmountCoversInvoices implements Rule
 				$negative_counts[] = $p['id'];
 			}
 		}
-		
-		//print_r(array_sum($total));print_r($payments);print_r($invoices);print_r($this->amount); exit;
-		//var_dump($this->amount > array_sum($total)); exit;
-		
+
 		// allow to spend full amount.
-		if($this->amount > array_sum($total)){
+		if($effectiveAmount > array_sum($total)){
 			return false;
 		}
-		
+
 		if(sizeof($negative_counts) > $this->negativeInvoiceAllowed){
 			return false;
 		}

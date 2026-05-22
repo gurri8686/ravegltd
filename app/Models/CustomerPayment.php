@@ -61,6 +61,11 @@ class CustomerPayment extends Model
     {
         return $this->hasOne('App\Models\Customer', 'id','customer_id');
     }
+
+	public function customerInvoice()
+    {
+        return $this->belongsTo('App\Models\CustomerInvoice', 'customer_invoice_id', 'id');
+    }
 	
 	public static function creditedPayments($customer_id, $id = ""){
 		$query = CustomerPayment::select(

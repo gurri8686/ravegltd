@@ -22,7 +22,7 @@
 <section class="users-list-wrapper">
 <div class="cr-header" style="margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#fff;border-radius:16px;padding:18px 24px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border:1px solid #f1f5f9;">
 	<div style="display:flex;align-items:center;gap:14px;">
-		<a href="{{route('management.customers.view.index')}}" class="cr-back" style="width:40px;height:40px;border-radius:10px;border:1px solid #e2e8f0;background:#fff;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:#64748b;transition:all 0.15s;" title="Back to Customers"
+		<a href="{{route('stock_check.view.index')}}" class="cr-back" style="width:40px;height:40px;border-radius:10px;border:1px solid #e2e8f0;background:#fff;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:#64748b;transition:all 0.15s;" title="Back to Stock Check"
 		   onmouseover="this.style.borderColor='#F27420';this.style.color='#F27420';this.style.background='#fff7ed';"
 		   onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b';this.style.background='#fff';">
 		    <i class="fa fa-arrow-left"></i>
@@ -35,6 +35,9 @@
 			<p style="font-size:12.5px;color:#94a3b8;font-weight:500;margin:2px 0 0;">Manage and track your product return records</p>
 		</div>
 	</div>
+	<a href="{{route('customer_return.view.history')}}" style="height:38px;padding:0 18px;border-radius:10px;border:none;background:#f97316;color:#fff;font-size:13px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(249,115,22,0.3);flex-shrink:0;">
+		<i class="fa fa-history" style="font-size:12px;"></i> View Return History
+	</a>
 </div>
 	<div id="customers-return-app"
 		data-currency="{{env('CURRENCY_SYMBOL', '£')}}"
@@ -43,6 +46,7 @@
 		data-products-list-api="/customer_return/view/products"
 		data-invoices-returns-api="/customer_return/view/returns"
 		data-invoices-list-api="/customer_return/view/invoices"
+		data-customer-products-api="/customer_return/view/customer-products"
 		data-invoices-product-api="/customer_return/view/product"
 		data-invoices-return-create-api="/customer_return/view/return/create"
 		data-invoices-return-update-api="/customer_return/view/return/update"

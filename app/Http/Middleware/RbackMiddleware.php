@@ -37,6 +37,9 @@ class RbackMiddleware
             return $next($request);
         }
           // return $next($request);
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json(['success' => false, 'message' => 'No permission'], 403);
+        }
         return redirect('noPermission');
     }
 

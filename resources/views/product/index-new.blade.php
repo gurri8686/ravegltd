@@ -29,10 +29,10 @@
 		flex-shrink: 0 !important;
 		align-self: center !important;
 	}
-	.products-header-card > div > div[style*="width:48px"] {
+	.products-header-card > div > div[style*="width:40px"] {
 		width: 38px !important; height: 38px !important; border-radius: 10px !important;
 	}
-	.products-header-card > div > div[style*="width:48px"] i { font-size: 16px !important; }
+	.products-header-card > div > div[style*="width:40px"] i { font-size: 16px !important; }
 	.products-header-card h1 { font-size: 17px !important; }
 	.products-header-card p { font-size: 10.5px !important; }
 	.products-create-btn { height: 34px !important; padding: 0 14px !important; font-size: 12px !important; border-radius: 9px !important; }
@@ -86,13 +86,13 @@
 
 @section('content')
 <section class="users-list-wrapper">
-<div class="products-header-card" style="margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#fff;border-radius:16px;padding:18px 24px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border:1px solid #f1f5f9;">
+<div class="products-header-card" style="margin-bottom:0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#fff;border-radius:16px 16px 0 0;padding:18px 24px;box-shadow:none;border:1px solid #eaecf2;border-bottom:none;">
 	<div style="display:flex;align-items:center;gap:14px;">
-		<div style="width:48px;height:48px;border-radius:14px;background:#F27420;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(242,116,32,0.25);">
-			<i class="fa fa-shopping-bag" style="color:#fff;font-size:20px;"></i>
+		<div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#f97316 0%,#ea580c 100%);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(249,115,22,0.3);flex-shrink:0;">
+			<i class="fa fa-shopping-bag" style="color:#fff;font-size:18px;"></i>
 		</div>
 		<div>
-			<h1 style="font-size:22px;font-weight:800;color:#0f172a;letter-spacing:-0.3px;margin:0;">Products</h1>
+			<h1 style="font-size:18px;font-weight:800;color:#0f172a;line-height:1.2;letter-spacing:-0.3px;margin:0;font-family:inherit;">Products</h1>
 			<p style="font-size:12.5px;color:#94a3b8;font-weight:500;margin:2px 0 0;">Manage your product catalog</p>
 		</div>
 	</div>
@@ -104,6 +104,8 @@
 		data-currency="{{env('CURRENCY_SYMBOL', '£')}}"
 		data-list-api="{{route('management.products.view.list')}}"
 		data-profit-loss-api="{{route('product_profit_loss.view.profit_loss')}}"
+		data-print-url="{{route('print.products')}}"
+		data-excel-url="{{route('excel.products')}}"
 	></div>
 	<script>
 	if (window.innerWidth <= 767) {

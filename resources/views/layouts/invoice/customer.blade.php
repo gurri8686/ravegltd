@@ -9,110 +9,252 @@ if( isset($customer_id) && !empty($customer_id) ){
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Document</title>
+	<title>{{ $companyDetails->company_name ?: 'R & A Veg Ltd' }} - Customer History</title>
 	<style>
-	a,hr{color:inherit}progress,sub,sup{vertical-align:baseline}blockquote,body,dd,dl,fieldset,figure,h1,h2,h3,h4,h5,h6,hr,menu,ol,p,pre,ul{margin:0}dialog,fieldset,legend,menu,ol,ul{padding:0}.border-collapse,table{border-collapse:collapse}*,::after,::before{box-sizing:border-box;border:0 solid #e5e7eb;--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: }::after,::before{--tw-content:''}html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal}body{line-height:inherit}hr{height:0;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}[type=button],[type=reset],[type=submit],button{-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}menu,ol,ul{list-style:none}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]{display:none}::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: }.fixed{position:fixed}.bottom-0{bottom:0}.left-0{left:0}.table{display:table}.h-12{height:3rem}.w-1\/2{width:50%}.w-full{width:100%}.border-spacing-0{--tw-border-spacing-x:0px;--tw-border-spacing-y:0px;border-spacing:var(--tw-border-spacing-x) var(--tw-border-spacing-y)}.whitespace-nowrap{white-space:nowrap}.border-b{border-bottom-width:1px}.border-b-2{border-bottom-width:2px}.border-r{border-right-width:1px}.border-main{border-color:#5c6ac4}.bg-main{background-color:#5c6ac4}.bg-slate-100{background-color:#f1f5f9}.p-3{padding:.75rem}.px-14{padding-left:3.5rem;padding-right:3.5rem}.pl-2,.px-2{padding-left:.5rem}.px-2{padding-right:.5rem}.py-10{padding-top:2.5rem;padding-bottom:2.5rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.py-4{padding-top:1rem;padding-bottom:1rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.pb-3{padding-bottom:.75rem}.pl-3{padding-left:.75rem}.pl-4{padding-left:1rem}.pr-3{padding-right:.75rem}.pr-4{padding-right:1rem}.text-center{text-align:center}.text-right{text-align:right}.align-top{vertical-align:top}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xs{font-size:.75rem;line-height:1rem}.font-bold{font-weight:700}.italic{font-style:italic}.text-main{color:#5c6ac4}.text-neutral-600{color:#525252}.text-neutral-700{color:#404040}.text-slate-300{color:#cbd5e1}.text-slate-400{color:#94a3b8}.text-white{color:#fff}@page{margin:0}@media print{body{-webkit-print-color-adjust:exact}}
-	.mt-20{
-		margin-top:20px;
-	}
-	.mb-20{
-		margin-bottom:20px;
-	}
-	.font-16{
-		font-size:16px;font-weight:bold;
-	}
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		body {
+			font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+			background: #f3f4f6;
+			color: #0f1115;
+			-webkit-font-smoothing: antialiased;
+			-moz-osx-font-smoothing: grayscale;
+			line-height: 1.5;
+		}
+		.page {
+			max-width: 1280px;
+			margin: 24px auto;
+			background: #ffffff;
+			border-radius: 16px;
+			box-shadow: 0 1px 3px rgba(15, 17, 21, 0.04), 0 1px 2px rgba(15, 17, 21, 0.03);
+			overflow: hidden;
+		}
+
+		/* HEADER */
+		.header {
+			display: flex;
+			justify-content: space-between;
+			align-items: flex-start;
+			padding: 32px 40px 28px;
+		}
+		.brand-name {
+			font-size: 30px;
+			font-weight: 800;
+			color: #f97316;
+			letter-spacing: -0.5px;
+			line-height: 1.1;
+		}
+		.brand-tagline {
+			margin-top: 4px;
+			font-size: 11px;
+			font-weight: 600;
+			color: #9ca3af;
+			letter-spacing: 1.5px;
+			text-transform: uppercase;
+		}
+		.meta-block {
+			display: flex;
+			gap: 56px;
+			text-align: right;
+		}
+		.meta-item .meta-label {
+			font-size: 11px;
+			font-weight: 800;
+			color: #f97316;
+			letter-spacing: 1.2px;
+			text-transform: uppercase;
+			margin-bottom: 6px;
+		}
+		.meta-item .meta-value {
+			font-size: 14px;
+			font-weight: 400;
+			color: #0f1115;
+		}
+
+		/* CONTACT BAR */
+		.contact-bar {
+			background: #f3f4f6;
+			padding: 20px 40px;
+			display: flex;
+			justify-content: space-between;
+			align-items: flex-start;
+			font-size: 13px;
+			color: #4b5563;
+		}
+		.contact-left p, .contact-right p {
+			margin: 2px 0;
+			line-height: 1.6;
+		}
+		.contact-left strong, .contact-right strong {
+			font-weight: 700;
+			color: #0f1115;
+		}
+		.contact-left a, .contact-right a {
+			color: #f97316;
+			text-decoration: none;
+			font-weight: 500;
+		}
+		.contact-right {
+			text-align: right;
+		}
+		.contact-right .name {
+			font-weight: 700;
+			color: #0f1115;
+			font-size: 14px;
+			margin-bottom: 4px;
+		}
+
+		/* CONTENT */
+		.content {
+			padding: 28px 40px 40px;
+		}
+
+		/* TABLE */
+		.data-table {
+			width: 100%;
+			border-collapse: collapse;
+		}
+		.data-table thead th {
+			font-size: 13px;
+			font-weight: 700;
+			color: #f97316;
+			text-align: left;
+			padding: 12px 14px;
+			border-bottom: 1.5px solid #fde6d3;
+			white-space: nowrap;
+		}
+		.data-table thead th.num { width: 50px; }
+		.data-table thead th.right { text-align: right; }
+		.data-table tbody td {
+			padding: 14px;
+			font-size: 13.5px;
+			color: #0f1115;
+			border-bottom: 1px solid #f3f4f6;
+			vertical-align: middle;
+		}
+		.data-table tbody tr:last-child td {
+			border-bottom: none;
+		}
+		.data-table .row-num { color: #9ca3af; font-weight: 500; }
+		.data-table .row-date { color: #4b5563; }
+		.data-table .row-invoice { color: #f97316; font-weight: 600; }
+		.data-table .row-amount { font-weight: 700; }
+		.data-table .row-zero { color: #d1d5db; }
+		.data-table .right { text-align: right; }
+		.data-table .past-balance-row td {
+			border-bottom: 1.5px solid #fde6d3;
+			padding: 14px;
+			font-weight: 700;
+			color: #f97316;
+			text-align: right;
+		}
+		.data-table .past-balance-row .value {
+			color: #0f1115;
+			margin-left: 8px;
+		}
+		.data-table .total-row td {
+			border-top: 2px solid #fde6d3;
+			border-bottom: none;
+			padding: 18px 14px;
+			font-weight: 800;
+			color: #f97316;
+			font-size: 14px;
+		}
+		.data-table .total-row .total-label {
+			color: #f97316;
+			font-size: 14px;
+			font-weight: 800;
+			letter-spacing: 0.3px;
+			text-transform: uppercase;
+		}
+		.data-table .total-row .currency {
+			color: #f97316;
+			font-weight: 700;
+			margin-right: 4px;
+		}
+
+		/* NOTES */
+		.notes-section {
+			margin: 24px 40px 32px;
+			padding: 20px 24px;
+			background: #fffaf5;
+			border: 1px solid #fde6d3;
+			border-left: 4px solid #f97316;
+			border-radius: 12px;
+		}
+		.notes-section .notes-label {
+			color: #f97316;
+			font-weight: 700;
+			font-size: 11px;
+			text-transform: uppercase;
+			letter-spacing: 1.2px;
+			margin-bottom: 8px;
+		}
+		.notes-section .notes-text {
+			color: #4b5563;
+			font-size: 13px;
+			line-height: 1.6;
+			font-style: italic;
+		}
+
+		@media print {
+			body { background: #ffffff; }
+			.page { box-shadow: none; margin: 0; border-radius: 0; max-width: 100%; }
+			@page { margin: 16mm 12mm; }
+		}
 	</style>
 </head>
 
 <body>
-  <div>
-    <div class="py-4">
-      <div class="px-14 py-6">
-        <table class="w-full border-collapse border-spacing-0" border=1>
-          <tbody>
-            <tr>
-              <td class="w-full align-top">
-                <div>
-					@isset($companyDetails->invoice_logo)
-					<img class="brand-logo h-12" style="" alt="stack admin logo" src="{{config('filesystems.disks.public.url')}}/{{$companyDetails->invoice_logo}}" weight="40px" height='80px'/>
-					@else
-					<img class="brand-logo h-12" style="" alt="stack admin logo" src="{{asset('loginDesign/img/dashboard-logo.png')}}" weight="40px" height='80px'/>
-					@endisset
-                </div>
-              </td>
+	<div class="page">
+		<!-- HEADER -->
+		<div class="header">
+			<div>
+				<div class="brand-name">{{ $companyDetails->company_name ?: 'R & A Veg Ltd' }}</div>
+				<div class="brand-tagline">Fruit and Veg is Power</div>
+			</div>
+			<div class="meta-block">
+				@hasSection('top')
+					@yield('top')
+				@endif
+			</div>
+		</div>
 
-              <td class="align-top">
-                <div class="text-sm">
-                  <table class="border-collapse border-spacing-0">
-                    <!--
-					<tbody>
-                      <tr>
-                        <td class="border-r pr-4">
-                          <div>
-                            <p class="whitespace-nowrap text-slate-400 text-right">Date</p>
-                            <p class="whitespace-nowrap font-bold text-main text-right">April 26, 2023</p>
-                          </div>
-                        </td>
-                        <td class="pl-4">
-                          <div>
-                            <p class="whitespace-nowrap text-slate-400 text-right">Invoice #</p>
-                            <p class="whitespace-nowrap font-bold text-main text-right">BRA-00335</p>
-                          </div>
-                        </td>
-                      </tr>
-                    </tbody>
-					-->
-					@hasSection('top')
-						@yield('top')
-					@endif
-                  </table>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+		<!-- CONTACT BAR -->
+		<div class="contact-bar">
+			<div class="contact-left">
+				<p>Phone: <strong>{{ $companyDetails->telephone ?: '—' }}</strong></p>
+				<p>VAT: <strong>{{ $companyDetails->vat_no ?: '23456789' }}</strong></p>
+				<p>Email: <a href="mailto:{{ $companyDetails->email ?? '' }}">{{ $companyDetails->email ?: '—' }}</a></p>
+				@if(!empty($companyDetails->address1))
+				<p>{{ $companyDetails->address1 }}{{ !empty($companyDetails->zipcode) ? ', ' . $companyDetails->zipcode : '' }}</p>
+				@endif
+			</div>
+			@if(isset($customer_id) && !empty($customer_id))
+			<div class="contact-right">
+				<div class="name">{{ $customerDetails->name ?? '' }}</div>
+				<p>Phone: <strong>{{ $customerDetails->mobile ?: '—' }}</strong></p>
+				<p>Email: <strong>{{ $customerDetails->email ?: '—' }}</strong></p>
+				@if(!empty($customerDetails->address1))
+				<p>{{ $customerDetails->address1 }}</p>
+				@endif
+			</div>
+			@endif
+		</div>
 
-      <div class="bg-slate-100 px-14 py-6 text-sm">
-        <table class="w-full border-collapse border-spacing-0">
-          <tbody>
-            <tr>
-              <td class="w-1/2 align-top">
-                <div class="text-sm text-neutral-600">
-                  <p class="font-bold">{{$companyDetails->company_name ?? ''}}</p>
-                  <p>Phone: {{$companyDetails->telephone ?? ''}}</p>
-                  <p>VAT: 23456789</p>
-                  <p>Email: {{$companyDetails->email ?? ''}}</p>
-                  <p>{{$companyDetails->address1 ?? ''}}, {{$companyDetails->zipcode ?? ''}}</p>
-                  <p>{{$companyDetails->country ?? ''}}</p>
-                </div>
-              </td>
-			  @if(isset($customer_id) && ! empty($customer_id) )
-              <td class="w-1/2 align-top text-right">
-                <div class="text-sm text-neutral-600">
-                  <p class="font-bold">{{$customerDetails->name}}</p>
-                  <p>Phone: {{$customerDetails->mobile}}</p>
-                  <p>Email: {{$customerDetails->email}}</p>
-                  <p>{{$customerDetails->address1}}</p>
-                  <p>{{$customerDetails->state}}, {{$customerDetails->city}}, {{$customerDetails->zipcode}}</p>
-                  <p>{{$customerDetails->country}}</p>
-                </div>
-              </td>
-			  @endif
-            </tr>
-          </tbody>
-        </table>
-      </div>
-		@hasSection('content')
-			@yield('content')
-		@endif
-      <div class="px-14 text-sm text-neutral-700 pt-0">
-        <p class="text-main font-bold">Notes</p>
-        <p class="italic">Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries
-          for previewing layouts and visual mockups.</p>
-        </div>
-      </div>
-    </div>
+		<!-- CONTENT -->
+		<div class="content">
+			@hasSection('content')
+				@yield('content')
+			@endif
+		</div>
+
+		<!-- NOTES -->
+		<div class="notes-section">
+			<div class="notes-label">Notes</div>
+			<div class="notes-text">This statement reflects the transactions and balances as of the date shown. Please review and contact us for any discrepancies.</div>
+		</div>
+	</div>
+
 	@if(isset($print) && $print == 1)
 	<script>
 		window.onload = function() {

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Services\CustomerPayments;
 use App\Lib\Response as CustomResponse;
 use App\Models\CustomerPayment;
+use App\Models\CustomerCreditUsage;
 use Validator;
 use App\Models\CustomerInvoice;
 use Carbon\Carbon;
@@ -18,25 +19,26 @@ use DB;
 class CustomerPaymentsController extends Controller
 {
 	use CustomResponse;
-	
+
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($id)
+    public function index(Request $request, CustomerPayments $customerPayments, $id = null)
     {
-        return $this->successResponse([
-			"list" => CustomerPayments::list($id),
-			"details" => CustomerPayments::details($id)
-		]);
+        try {
+            $list    = $customerPayments::list($id);
+            $list->each(function($payment) {
+                $payment->credit_used = CustomerCreditUsage::where('customer_payment_id', $payment->id)->sum('amount');
+            });
+            $details = $customerPayments::details($id);
+            return $this->successResponse(['list' => $list, 'details' => $details]);
+        } catch (\Exception $ex) {
+            return $this->exceptionResponse($ex);
+        }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
         return view('customer_payments.create');
@@ -50,56 +52,97 @@ class CustomerPaymentsController extends Controller
      */
     public function store(Request $request, CustomerPayments $customerPayments)
     {
-        try{
-			$rules = [
-                'payment_method' => 'required',
-				'amount' => 'required',
-				'id' => 'required',
-				'customer.id' => 'required'
-            ];
-			
-			$validator = Validator::make($request->all(), $rules);
-			if ($validator->fails()) {
-                return $this->validationErrorResponse($validator->errors()->messages());
+        $cashAmount   = (float)($request->amount ?? 0);
+        $creditAmount = (float)($request->creditAmount ?? 0);
+
+        if ($cashAmount <= 0 && $creditAmount <= 0) {
+            return $this->validationErrorResponse(['amount' => ['Please enter an amount or apply credit.']]);
+        }
+
+        try {
+            // Validate credit doesn't exceed available balance
+            if ($creditAmount > 0) {
+                $available = CustomerCreditUsage::available($request->customer);
+                if ($creditAmount > $available + 0.01) {
+                    return $this->validationErrorResponse(['creditAmount' => ['Credit amount exceeds available balance of ' . $available]]);
+                }
             }
-			
-			$r = $customerPayments::partialAmountPayable($request->id, 
-				$request->amount, 
-				$request->payment_method,
-				$request->has("note") ? $request->note : ""
-			);
-			
-			return $this->successResponse($r);
-			
-		}catch(\Exception $ex){
-			return $this->exceptionResponse($ex);
-		}
+
+            DB::beginTransaction();
+
+            $lastPayment = null;
+
+            // 1. Cash/Card/Bank/Cheque payment entry (only if cash > 0)
+            if ($cashAmount > 0) {
+                $lastPayment = $customerPayments::partialAmountPayable(
+                    $request->id,
+                    $cashAmount,
+                    $request->payment_method,
+                    $request->note ?? ""
+                );
+            }
+
+            // 2. Credit payment entry (only if credit applied)
+            if ($creditAmount > 0) {
+                // Payment mode id 6 = Credit (Cash=2, Cheque=3, Card=4, Bank Transfer=5, Credit=6)
+                $creditPayment = $customerPayments::partialAmountPayable(
+                    $request->id,
+                    $creditAmount,
+                    6, // Credit payment mode
+                    $request->note ?? ""
+                );
+
+                // Record credit usage linked to this credit payment
+                CustomerCreditUsage::create([
+                    'customer_id'         => $request->customer,
+                    'customer_payment_id' => $creditPayment->id,
+                    'amount'              => $creditAmount,
+                ]);
+
+                $lastPayment = $creditPayment;
+            }
+
+            DB::commit();
+
+            return $this->successResponse($lastPayment);
+        } catch (\Exception $ex) {
+            DB::rollback();
+            return $this->exceptionResponse($ex);
+        }
     }
-	
+
 	public function save(Request $request, CustomerPayments $customerPayments, $customer_id){
-		//print_r($request->all()); exit;
+		$creditAmount = (float)($request->creditAmount ?? 0);
+
 		$rules = [
-			'customer_id' => ['required', 'integer',new ValidCustomer],
-			'amount' => ['required','integer'],
+			'customer_id' => ['required', 'integer', new ValidCustomer],
+			'amount'      => ['required', 'numeric', 'min:0'],
 			'paymentMode' => ['required'],
-			'date' => ['required', 'date'],
-			'invoices' => [
-				'required', 'array', 
+			'date'        => ['required', 'date'],
+			'invoices'    => [
+				'required', 'array',
 				new InvoicesBelongToCustomer($request->customer_id),
-				new AmountCoversInvoices($request->customer_id, $request->amount)
-				],
+				new AmountCoversInvoices($request->customer_id, $request->amount, $creditAmount),
+			],
 		];
-		
+
 		$validator = Validator::make($request->all(), $rules);
-		
 		if ($validator->fails()) {
 			return $this->validationErrorResponse($validator->errors()->messages());
 		}
-		
+
+		// Validate credit amount doesn't exceed available balance
+		if ($creditAmount > 0) {
+			$available = CustomerCreditUsage::available($request->customer_id);
+			if ($creditAmount > $available + 0.01) { // small tolerance for float rounding
+				return $this->validationErrorResponse(['creditAmount' => ['Credit amount exceeds available balance of ' . $available]]);
+			}
+		}
+
 		DB::beginTransaction();
-		
+
 		try{
-			if($request->paymentMode == 'on-account'){
+			if ($request->paymentMode == 'on-account') {
 				$rules = [
 					'onAccount.value.id' => ['required', 'integer', new OnAccountCheck($request->customer_id)]
 				];
@@ -107,45 +150,54 @@ class CustomerPaymentsController extends Controller
 				if ($validator->fails()) {
 					return $this->validationErrorResponse($validator->errors()->messages());
 				}
-
-				// on account payment mode.
 				$r = $customerPayments::saveOnAccountPayment(
-					$request->customer_id, 
-					$request->onAccount['value']['id'], 
+					$request->customer_id,
+					$request->onAccount['value']['id'],
 					$request->has('note') ? $request->note : "",
 					$request->date,
 					$request->paymentMode,
 					$request->invoices
 				);
-			}else{
-				// normal payment mode.
+			} else {
+				$cashAmount  = (float)$request->amount;
+				$totalAmount = $cashAmount + $creditAmount;
+
+				// Distribute total (cash + credit) across selected invoices
 				$r = $customerPayments::saveRunTimePaymentNormal(
-					$request->customer_id, 
-					$request->amount, 
+					$request->customer_id,
+					$totalAmount,
 					$request->has('note') ? $request->note : "",
 					$request->date,
 					$request->paymentMode,
 					$request->invoices
 				);
+
+				// Record credit usage so balance stays accurate
+				if ($creditAmount > 0) {
+					CustomerCreditUsage::create([
+						'customer_id'         => $request->customer_id,
+						'customer_payment_id' => $r->id,
+						'amount'              => $creditAmount,
+					]);
+				}
 			}
-			
+
 			DB::commit();
-			
 			return $this->successResponse($request->invoices);
-			
-		}catch(\Exception $ex){
+
+		} catch (\Exception $ex) {
 			DB::rollback();
 			return $this->exceptionResponse($ex);
 		}
 	}
-	
+
 	public function onAccountPayments(Request $request, CustomerPayments $customerPayments, $customer_id){
 		return $this->successResponse(
 			CustomerPayment::creditedPayments($customer_id)
 		);
 	}
-	
-	
+
+
 
     /**
      * Display the specified resource.
@@ -189,120 +241,35 @@ class CustomerPaymentsController extends Controller
      */
     public function destroy(Request $request)
     {
-		$rules = [
-            'customer_id' => 'required',
-			'customer_invoice_id' => 'required',
-			'id' => 'required'
-		];
-		$validator = Validator::make($request->all(), $rules);
-		
-		if ($validator->fails()) {
-			return $this->validationErrorResponse($validator->errors()->messages());
-		}
-		
-		CustomerPayment::where('id', $request->id)
-			->where('customer_id',$request->customer_id)
-			->where('customer_invoice_id', $request->customer_invoice_id)
-			->whereDate('created_at', Carbon::today())
-			->update(['is_archived' => 1]);
-        
-		return $this->successResponse([]);
-    }
-	
-	public function statements(
-			\App\Services\SalesPurchaseValidations $validations, 
-			\App\Services\CustomerPayments $customerPayments,
-			Request $request
-		)
-		{
-		$error = 0;
-		$customer = $request->has('customer') ? $request->customer : "";
-		$start_date = $request->has('start_date') ? $request->start_date : "";
-		$end_date = $request->has('end_date') ? $request->end_date : "";
-		
-		if(empty($customer) || empty($start_date) || empty($end_date)){
-			$error = 1;
-		}
-		
-		//$payments = $customerPayments::invoicePayments($customer,$start_date,$end_date);
-		$payments = $customerPayments::invoicePaymentsHistory($customer,$start_date,$end_date);
-		
-		/*echo '<pre>';
-		print_r($payments->toArray()); exit;*/
-		
-		$balance = $customerPayments::runningBalance($customer, $start_date);
-		$customers = \App\Models\Customer::all();
+        try {
+            DB::beginTransaction();
 
-        return view('customer_payments.statements2',compact('error','payments','balance','customers','customer','start_date','end_date'));
+            $payment = \App\Models\CustomerPayment::findOrFail($request->id);
+
+            // 1. Revert credit usage if this payment used return credit.
+            //    Deleting the customer_credit_usages row restores the customer's
+            //    available balance (available = totalEarned - totalUsed).
+            CustomerCreditUsage::where('customer_payment_id', $payment->id)->delete();
+
+            // 2. Delete linked parent payment row (the master "partial" entry
+            //    that was created alongside this invoice-linked row).
+            if (!empty($payment->customer_payment_id)) {
+                \App\Models\CustomerPayment::where('id', $payment->customer_payment_id)->delete();
+            }
+
+            // 3. Delete the invoice-linked payment row itself.
+            $payment->delete();
+
+            DB::commit();
+            return $this->successResponse([]);
+        } catch (\Exception $ex) {
+            DB::rollback();
+            return $this->exceptionResponse($ex);
+        }
     }
-	
-	public function unpaidInvoices(
-			\App\Services\SalesPurchaseValidations $validations, 
-			\App\Services\CustomerPayments $customerPayments,
-			Request $request, $customer_id){
-			
-		$search = $request->get('search', '');
-        $sortField = $request->get('sortField', 'id');
-        $sortOrder = $request->get('sortOrder', 'desc');
-        $perPage = $request->get('perPage', 1000);
-		
-		$query = CustomerInvoice::query();
-		
-		$query
-			->select('customer_invoices.*')
-			->selectSub(function ($query) {
-				$query->from('customer_invoice_products')
-					->selectRaw('COALESCE(SUM(sub_total), 0)')
-					->whereColumn('customer_invoices.id', 'customer_invoice_products.customer_invoice_id')
-					->where('is_archive', 0)
-					;
-			}, 'total_products')
-			->selectSub(function ($query) {
-				$query->from('customer_payments')
-					->selectRaw('COALESCE(SUM(amount), 0)')
-					->whereColumn('customer_invoices.id', 'customer_payments.customer_invoice_id')
-					->where('is_archived', 0)
-					//->where('is_discounted', 0)
-					//->where('is_refunded', 0)
-					//->where('is_credited', 0)
-					;
-			}, 'total_payments')
-			->selectRaw('(COALESCE((
-					select SUM(sub_total)
-					from customer_invoice_products
-					where customer_invoice_products.customer_invoice_id = customer_invoices.id
-					and is_archive = 0
-				), 0)
-				- COALESCE((
-					select SUM(amount)
-					from customer_payments
-					where customer_payments.customer_invoice_id = customer_invoices.id
-					and is_archived = 0
-				), 0)
-			) as balance_due')
-			->having('balance_due', '>', 0)
-			->where('customer_id', $customer_id);
-			
-		// search.
-		/*if ($search) {
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-            });
-        }*/
-		// sort by.
-		//$query->orderBy($sortField, $sortOrder);
-			
-		$payments = $query->paginate($perPage);
-		
-		//$r = $customerPayments::unpaidInvoices($customer_id);
-		
-		return $this->successResponse([
-            'data' => $payments->items(),
-            'total' => $payments->total(),
-            'per_page' => $payments->perPage(),
-            'current_page' => $payments->currentPage(),
-        ]);
-		
-	}
+
+    public function unpaidInvoices(Request $request, CustomerPayments $customerPayments, $customer_id){
+        $data = CustomerInvoice::unpaidInvoices($customer_id)->toArray();
+        return $this->successResponse(['data' => $data]);
+    }
 }

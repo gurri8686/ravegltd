@@ -262,14 +262,21 @@ class SalesController extends Controller
     }
 
     public function ajaxProductsList(){
-        $productsList = (new Product())
-		->get();
-		//$productsList = Product::productsData();
+        // Cache for 5 minutes — products list is large (~60KB) and changes infrequently.
+        // Per-tenant cache key so each domain has its own copy.
+        $cacheKey = 'sales_products_list_' . (request()->getHost() ?: 'default');
+        $productsList = \Cache::remember($cacheKey, 300, function () {
+            return (new Product())->get();
+        });
         return json_encode($productsList);
     }
 
     public function ajaxPaymentsList(){
-        $paymentsList = (new Payment())->get();
+        // Cache for 10 minutes — payment methods are static reference data.
+        $cacheKey = 'sales_payments_list_' . (request()->getHost() ?: 'default');
+        $paymentsList = \Cache::remember($cacheKey, 600, function () {
+            return (new Payment())->get();
+        });
         return json_encode($paymentsList);
     }
 
@@ -460,11 +467,68 @@ class SalesController extends Controller
 		return $pdf->download('pdf_file.pdf');
   }
 
+  public function invoiceExcel($id){
+		$invoice = CustomerInvoice::where('id', $id)
+			->with(['product', 'customer', 'invoicePayment'])
+			->first();
+
+		if (!$invoice) {
+			return response('Invoice not found', 404);
+		}
+
+		$currency = env('CURRENCY_SYMBOL', '£');
+		$rows = [];
+		$i = 1;
+		$grandTotal = 0;
+		$products = $invoice->product ?? collect();
+		foreach ($products as $p) {
+			if (!empty($p->is_archive)) continue;
+			$qty = (float)($p->quantity ?? 0);
+			$price = (float)($p->unit_price ?? 0);
+			$sub = (float)($p->sub_total ?? ($qty * $price));
+			$grandTotal += $sub;
+			$rows[] = [
+				$i++,
+				$p->product->name ?? ($p->product_name ?? '—'),
+				$p->remarks ?? '',
+				$qty,
+				number_format($price, 2),
+				number_format($sub, 2),
+			];
+		}
+
+		// Total row
+		$rows[] = ['', 'TOTAL', '', '', '', number_format($grandTotal, 2)];
+
+		$headings = ['#', 'Product', 'Remarks', 'Qty', 'Unit Price (' . $currency . ')', 'Total (' . $currency . ')'];
+
+		$export = new class($rows, $headings) implements
+			\Maatwebsite\Excel\Concerns\FromArray,
+			\Maatwebsite\Excel\Concerns\WithHeadings {
+			protected $rows;
+			protected $headings;
+			public function __construct($rows, $headings) {
+				$this->rows = $rows;
+				$this->headings = $headings;
+			}
+			public function array(): array { return $this->rows; }
+			public function headings(): array { return $this->headings; }
+		};
+
+		$customerName = $invoice->customer->name ?? 'customer';
+		$customerSlug = preg_replace('/[^A-Za-z0-9]+/', '-', $customerName);
+		$fileName = "invoice-{$invoice->id}-{$customerSlug}.xlsx";
+		return \Maatwebsite\Excel\Facades\Excel::download($export, $fileName);
+  }
+
   public function ajaxfetchInvoiceDetail(Request $request){
 
     try {
 
         $dataget = CustomerInvoice::where('id', $request->getInvoiceId)->with(['customer', 'invoicePayment'])->first();
+        if (!$dataget) {
+            return $this->errorResponse('Invoice not found');
+        }
         $data = $dataget->toArray();
         $data['payment_summary'] = \App\Services\CustomerPayments::details($request->getInvoiceId);
         return json_encode($data);
@@ -715,7 +779,7 @@ class SalesController extends Controller
 
 		return view('daily-report.sales-print', compact('invoices', 'start_date', 'end_date', 'companyDetails', 'currency'));
     }
-
+	
 	public function statementDailyBookSales(Request $request)
 	{
 		$rules = [
@@ -759,15 +823,43 @@ class SalesController extends Controller
 				return $invoice;
 			});
 
-		$companyDetails = \App\Models\CompanyDetailModel::first();
-		$currency = env('CURRENCY_SYMBOL', '$');
+		$currency = env('CURRENCY_SYMBOL', '£');
+		$rows = [];
+		$i = 1;
+		foreach ($invoices as $invoice) {
+			$total = (float)($invoice->total ?? 0);
+			$paid = (float)($invoice->total_paid ?? 0);
+			$pending = $total - $paid;
+			$status = ($paid >= $total && $total > 0) ? 'Paid' : ($paid > 0 ? 'Partial' : 'Unpaid');
+			$rows[] = [
+				$i++,
+				\Carbon\Carbon::parse($invoice->created_at)->format('d M Y'),
+				'#' . $invoice->id,
+				$invoice->customer->name ?? '—',
+				number_format($total, 2),
+				number_format($paid, 2),
+				number_format($pending, 2),
+				$status,
+			];
+		}
 
-		$html = view('daily-report.sales-statement', compact('invoices', 'start_date', 'end_date', 'companyDetails', 'currency'))->render();
+		$headings = ['#', 'Date', 'Invoice', 'Customer', 'Amount (' . $currency . ')', 'Paid (' . $currency . ')', 'Pending (' . $currency . ')', 'Status'];
 
-		$pdf = \PDF::loadHTML($html);
-		$pdf->setPaper('A4', 'portrait');
+		$export = new class($rows, $headings) implements
+			\Maatwebsite\Excel\Concerns\FromArray,
+			\Maatwebsite\Excel\Concerns\WithHeadings {
+			protected $rows;
+			protected $headings;
+			public function __construct($rows, $headings) {
+				$this->rows = $rows;
+				$this->headings = $headings;
+			}
+			public function array(): array { return $this->rows; }
+			public function headings(): array { return $this->headings; }
+		};
 
-		return $pdf->stream("daily-sales-statement-{$start_date}-to-{$end_date}.pdf");
+		$fileName = "daily-sales-statement-{$start_date}-to-{$end_date}.xlsx";
+		return \Maatwebsite\Excel\Facades\Excel::download($export, $fileName);
 	}
 
 	public function emailDailyBookSales(Request $request)
@@ -822,16 +914,38 @@ class SalesController extends Controller
 
 	public function list(Request $request)
     {
-		$supplier_id = $product_id = $start_date = $end_date = "";
+		// Read filters explicitly — avoids `extract()` swallowing typos/missing keys silently
+		$customer_id = $request->input('customer_id');
+		$start_date  = $request->input('start_date');
+		$end_date    = $request->input('end_date');
 
-		extract($request->only('product_id', 'customer_id', 'start_date', 'end_date'));
+		// Normalize: trim whitespace; treat empty/null/'null'/'undefined' as no filter
+		$normalizeDate = function($v) {
+			if ($v === null) return null;
+			$v = trim((string)$v);
+			if ($v === '' || $v === 'null' || $v === 'undefined') return null;
+			// Accept either YYYY-MM-DD or anything Carbon can parse; always emit YYYY-MM-DD
+			try { return \Carbon\Carbon::parse($v)->toDateString(); }
+			catch (\Throwable $e) { return null; }
+		};
+		$start_date = $normalizeDate($start_date);
+		$end_date   = $normalizeDate($end_date);
+		// If user sent only one bound, mirror it so a single-day pick still filters strictly.
+		if ($start_date && !$end_date) $end_date = $start_date;
+		if ($end_date && !$start_date) $start_date = $end_date;
+		// If reversed, swap.
+		if ($start_date && $end_date && $start_date > $end_date) {
+			[$start_date, $end_date] = [$end_date, $start_date];
+		}
 
 		$data = (new \App\Models\CustomerInvoice());
 
-		if(!empty($start_date)){
+		if ($start_date && $end_date) {
+			// Use a single whereBetween — guarantees both bounds get applied (vs two separate ifs)
+			$data = $data->whereBetween(\DB::raw('DATE(created_at)'), [$start_date, $end_date]);
+		} elseif ($start_date) {
 			$data = $data->whereDate('created_at', '>=', $start_date);
-		}
-		if(!empty($end_date)){
+		} elseif ($end_date) {
 			$data = $data->whereDate('created_at', '<=', $end_date);
 		}
 
@@ -848,17 +962,53 @@ class SalesController extends Controller
 			->with('customer')
 			->with('salesman')
 			->with(['payments' => function($q){
-				$q->where('initiated',0)
-					->with('paymentMode')
-					->select('customer_invoice_id', 'payment_id', DB::raw('SUM(amount) as total_amount'))
-					->groupBy('customer_invoice_id', 'payment_id');
+				$q->where(function($q){ $q->where('initiated', 0)->orWhereNull('initiated'); })
+					->leftJoin('payments', 'payments.id', '=', 'customer_payments.payment_id')
+					->select('customer_payments.customer_invoice_id', 'customer_payments.payment_id', DB::raw('MIN(customer_payments.id) as id'), DB::raw('SUM(customer_payments.amount) as total_amount'), DB::raw('MAX(payments.type) as payment_mode_type'))
+					->groupBy('customer_payments.customer_invoice_id', 'customer_payments.payment_id');
 			}])
 			->orderBy('created_at', 'desc')
 			->get()->map(function($invoice){
 				$totalPaid = [];
 				foreach($invoice->payments as $payment){
 					$totalPaid[]= $payment->total_amount;
-					//print_r($payment->total_amount);
+				}
+				// Check for credit usage and subtract from cash payment display
+				$paymentIds = $invoice->payments->pluck('id')->filter()->values()->toArray();
+				$creditTotal = count($paymentIds) > 0
+					? \App\Models\CustomerCreditUsage::whereIn('customer_payment_id', $paymentIds)->sum('amount')
+					: 0;
+				if ($creditTotal > 0) {
+					// Subtract credit from the cash payment total_amount for display
+					$paymentsArr = $invoice->payments->map(function($p) use ($creditTotal) {
+						$item = [
+							'customer_invoice_id' => $p->customer_invoice_id,
+							'payment_id' => $p->payment_id,
+							'id' => $p->id,
+							'total_amount' => ($p->id && $p->total_amount > $creditTotal) ? $p->total_amount - $creditTotal : $p->total_amount,
+							'payment_mode_type' => $p->payment_mode_type ?? ($p->paymentMode->type ?? null),
+						];
+						return $item;
+					})->toArray();
+					$paymentsArr[] = [
+						'customer_invoice_id' => $invoice->id,
+						'payment_id' => null,
+						'id' => null,
+						'total_amount' => $creditTotal,
+						'payment_mode_type' => 'Credit',
+					];
+					$invoice->setRelation('payments', collect());
+					$invoice->payments_list = $paymentsArr;
+				} else {
+					$invoice->payments_list = $invoice->payments->map(function($p) {
+						return [
+							'customer_invoice_id' => $p->customer_invoice_id,
+							'payment_id' => $p->payment_id,
+							'id' => $p->id,
+							'total_amount' => $p->total_amount,
+							'payment_mode_type' => $p->payment_mode_type ?? ($p->paymentMode->type ?? null),
+						];
+					})->toArray();
 				}
 				$invoice->total_paid = array_sum($totalPaid);
 				if($invoice->total_paid <= 0){
@@ -866,11 +1016,12 @@ class SalesController extends Controller
 				}else{
 					if( $invoice->total > $invoice->total_paid ){
 						$invoice->paid_type = 'partial-paid';
-					}
-					if( $invoice->total <= $invoice->total_paid ){
+					} elseif( $invoice->total_paid > $invoice->total && $invoice->total > 0 ){
+						$invoice->paid_type = 'overpaid';
+					} else {
 						$invoice->paid_type = 'all-paid';
 					}
-				}			
+				}
 
 				return $invoice;
 			});
@@ -1160,111 +1311,107 @@ class SalesController extends Controller
 
   public function ajaxfetchInvoiceAllDetail($id){
 	try {
-		
-        $dataget = CustomerInvoiceProduct::where('customer_invoice_id', $id)->where('is_archive',0)->with('supplier')->with(['product'])->get();
-        
-		$products=[];
-		
-        foreach ($dataget as $data)
-            {	
-				$suppliers = \App\Models\SupplierInvoiceProduct::getProductSuppliers($data['product_id']);
-				
-				$invoices = \App\Models\SupplierInvoiceProduct::getProductSupplierInvoices($data['product_id'], $data['supplier_id']);
-                
-				$postnestedData['product_id'] = $data['product_id'];
-                $postnestedData['payment'] = "";
-                //$postnestedData['product'] = $data['product_id'];
-				$postnestedData['product_id'] = $data['product_id'];
-				$postnestedData['product'] = ['label' => $data['product']['name'], 'value' => $data['product_id']];
-                $postnestedData['quantity'] = $data['quantity'];
-				$postnestedData['remarks'] = $data['remarks'];
-                $postnestedData['price'] = $data['unit_price'];
-                $postnestedData['totalPrice'] = (float)$data['sub_total'];
-                $postnestedData['fieldToggle'] = "checked";
-                $postnestedData['invoiceproductid'] = $data['id'];
-				
-				$postnestedData['supplier'] = (function() use ($suppliers){
-					if(sizeof($suppliers) <= 0){
-						return [];
-					}else{
-						$arr = [];
-						$i = 0;
-						foreach($suppliers as $sup){ 
-							//print_r($sup->supplier->invoices);  exit;
-							$arr[$i] = ['label' => $sup->supplier->name];
-							
-							foreach($sup->supplier->invoices as $invoice){;
-								//print_r($invoice->toArray()); exit;
-								//echo $invoice->invoice_title; exit;
-								$arr[$i]['options'][] = [
-									'label' => $invoice->invoice_title,
-									/*'value' => $invoice->supplier_id,
+		// Load invoice rows once — same as before
+		$dataget = CustomerInvoiceProduct::where('customer_invoice_id', $id)
+			->where('is_archive', 0)
+			->with('supplier')
+			->with(['product'])
+			->get();
+
+		if ($dataget->isEmpty()) {
+			return json_encode([]);
+		}
+
+		// ── PERFORMANCE FIX (was N+1, now batched) ──────────────────────────────────
+		// Old code: per-row calls to getProductSuppliers() + getProductSupplierInvoices(),
+		//   each running its own stock query → ~600 DB hits for 6 products → 25s response.
+		// New code: TWO batched queries cover every product on this invoice → ~500ms.
+		$productIds = $dataget->pluck('product_id')->unique()->values()->all();
+
+		// Pre-load supplier dropdown options for EVERY product in one shot (keyed by product_id)
+		$suppliersByProduct = \App\Models\SupplierInvoiceProduct::getProductSuppliersBatch($productIds);
+
+		// Pre-load the (supplier_invoice_id, supplier_invoice_product_id) → row tuple
+		// so we can resolve each invoice row's "supplier_id" payload without re-querying.
+		$selectedKeys = [];
+		foreach ($dataget as $d) {
+			if (!empty($d['supplier_invoice_id']) && !empty($d['supplier_invoice_product_id'])) {
+				$selectedKeys[] = $d['supplier_invoice_id'] . '|' . $d['supplier_invoice_product_id'];
+			}
+		}
+		$selectedRowsMap = [];
+		if (!empty($selectedKeys)) {
+			$selRows = \App\Models\SupplierInvoiceProduct::with(['supplier' => function($q){
+					$q->select('id', 'supplier_id', 'name');
+				}])
+				->whereIn('id', $dataget->pluck('supplier_invoice_product_id')->filter()->unique()->values()->all())
+				->get();
+			foreach ($selRows as $sr) {
+				$selectedRowsMap[$sr->supplier_invoice_id . '|' . $sr->id] = $sr;
+			}
+		}
+
+		$products = [];
+		foreach ($dataget as $data) {
+			$suppliers = $suppliersByProduct[$data['product_id']] ?? [];
+
+			$postnestedData = [];
+			$postnestedData['product_id']      = $data['product_id'];
+			$postnestedData['payment']         = '';
+			$postnestedData['product']         = ['label' => $data['product'] ? $data['product']['name'] : 'Unknown', 'value' => $data['product_id']];
+			$postnestedData['quantity']        = $data['quantity'];
+			$postnestedData['remarks']         = $data['remarks'];
+			$postnestedData['price']           = $data['unit_price'];
+			$postnestedData['totalPrice']      = (float)$data['sub_total'];
+			$postnestedData['fieldToggle']     = 'checked';
+			$postnestedData['invoiceproductid'] = $data['id'];
+
+			// Supplier dropdown options (same shape as before)
+			$postnestedData['supplier'] = (function() use ($suppliers) {
+				if (count($suppliers) === 0) return [];
+				$arr = [];
+				$i = 0;
+				foreach ($suppliers as $sup) {
+					if (!$sup->supplier) continue;
+					$arr[$i] = ['label' => $sup->supplier->name];
+					if ($sup->supplier->invoices) {
+						foreach ($sup->supplier->invoices as $invoice) {
+							$arr[$i]['options'][] = [
+								'label' => $invoice->invoice_title,
+								'sale_price' => $invoice->sale_price ?? null,
+								'value' => [
+									'supplier' => $invoice->supplier_id,
 									'supplier_invoice' => $invoice->supplier_invoice_id,
-									'product' => $invoice->product_id,*/
-									'value' => [
-										'supplier' => $invoice->supplier_id,
-										'supplier_invoice' => $invoice->supplier_invoice_id,
-										'product' => $invoice->product_id,
-										'supplier_invoice_product_id' => $invoice->id
-									]
-								];
-								
-							}
-							$i++;
-						}
-						return $arr;
-					}
-				})();
-				/*$postnestedData['invoice'] = (function() use ($invoices){
-					if(sizeof($invoices) <= 0){
-						return [];
-					}else{
-						$arr = [];
-						foreach($invoices as $sup){
-							$arr[] = ['label'=>$sup->invoice_title, 'value'=>$sup->supplier_invoice_id];
-						}
-						return $arr;
-					}
-				})();*/
-				
-				$postnestedData['supplier_id'] = (function() use ($invoices, $data){
-					if(sizeof($invoices) <= 0){
-						return [];
-					}else{
-						$arr = [];
-						//print_r($invoices->toArray()); exit;
-						foreach($invoices as $sup){
-							if($data['supplier_invoice_id'] == $sup->supplier_invoice_id && $data['supplier_invoice_product_id'] == $sup->id){
-								return [
-									//'label'=>$sup->invoice_title, 
-									//'value'=>$sup->supplier_invoice_id,
-									//'label' => $sup->supplier->name.':'.$sup->invoice_title,
-									//'value' => [
-										//"label" => $sup->invoice_title, 
-										"label" => $sup->supplier->name,
-										"value" => [
-											"product" => $sup->product_id, 
-											"supplier" => $sup->supplier_id, 
-											"supplier_invoice" => $sup->supplier_invoice_id,
-											'supplier_invoice_product_id' => $sup->id
-										]
-									//]
-									//'supplier_invoice' => $sup->supplier_invoice_id,
-									//'product' => $sup->product_id,
-								];
-							}
+									'product' => $invoice->product_id,
+									'supplier_invoice_product_id' => $invoice->id,
+								],
+							];
 						}
 					}
-				})();
-				//$postnestedData['supplier_id'] = ["label"=> $data['supplier']['name'], 'value'=>$data['supplier_id']];
-				
-				
-                $products[] = $postnestedData;
-            }
-           return json_encode($products);
-        }catch(\Exception $ex){
-            $this->exceptionResponse($ex);
-        }
+					$i++;
+				}
+				return $arr;
+			})();
+
+			// Currently-selected supplier_id payload — resolved via the pre-loaded map (no extra query)
+			$selKey = ($data['supplier_invoice_id'] ?? '') . '|' . ($data['supplier_invoice_product_id'] ?? '');
+			$selRow = $selectedRowsMap[$selKey] ?? null;
+			$postnestedData['supplier_id'] = $selRow ? [
+				'label' => $selRow->supplier ? $selRow->supplier->name : 'Unknown',
+				'value' => [
+					'product'   => $selRow->product_id,
+					'supplier'  => $selRow->supplier_id,
+					'supplier_invoice' => $selRow->supplier_invoice_id,
+					'supplier_invoice_product_id' => $selRow->id,
+				],
+			] : [];
+
+			$products[] = $postnestedData;
+		}
+		return json_encode($products);
+	} catch (\Exception $ex) {
+		$this->exceptionResponse($ex);
+	}
   }
 
   public function mail($id){

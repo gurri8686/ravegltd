@@ -82,25 +82,29 @@
         color: #374151 !important;
         padding: 8px !important;
     }
+    /* ── Font size toggle buttons ── */
+    .ts-font-btn { display:flex !important; align-items:center !important; justify-content:center !important; flex-direction:row !important; padding:0 !important; line-height:1 !important; box-sizing:border-box !important; }
     /* ── Hide hamburger menu icon — shown on mobile via media query ── */
     .nav-item.mobile-menu { display: none !important; }
-    @media (max-width: 767.98px) {
+    @media (max-width: 430px) {
         .header-navbar .navbar-header .navbar-brand { left: unset !important; position: static !important; }
     }
-    @media (max-width: 767px) {
+    @media (max-width: 430px) {
         /* Hide ellipsis toggle li entirely */
         .nav-item .open-navbar-container { display: none !important; }
         .navbar-header .navbar-nav.flex-row > li:last-child { display: none !important; }
         /* 3-column grid: hamburger | brand (center) | sale btn */
         .navbar-header .navbar-nav.flex-row {
             display: grid !important;
-            grid-template-columns: 1fr auto 1fr !important;
+            grid-template-columns: auto 1fr auto !important;
             align-items: center !important;
             width: 100% !important;
-            padding: 0 10px !important;
+            padding: 0 8px !important;
+            column-gap: 10px !important;
         }
         /* Hamburger: column 1, left-aligned */
         .nav-item.mobile-menu { display: flex !important; align-items: center !important; justify-self: start !important; margin: 0 !important; grid-column: 1 !important; }
+        .nav-item.mobile-menu a.nav-link { padding: 6px 4px !important; line-height: 1 !important; }
         .nav-item.mobile-menu .feather { color: black !important; }
         /* Brand: column 2, centered */
         #navbar-brand-li { display: flex !important; align-items: center !important; justify-content: center !important; justify-self: center !important; grid-column: 2 !important; position: static !important; transform: none !important; margin: 0 !important; padding: 0 !important; }
@@ -108,22 +112,89 @@
         /* Force brand-text visible — kill theme fadeout */
         #navbar-brand-li .brand-text,
         body.menu-collapsed #navbar-brand-li .brand-text,
-        body.menu-expanded #navbar-brand-li .brand-text { display: block !important; visibility: visible !important; opacity: 1 !important; animation: none !important; -webkit-animation: none !important; white-space: nowrap !important; font-size: 13px !important; margin: 0 !important; }
+        body.menu-expanded #navbar-brand-li .brand-text { display: block !important; visibility: visible !important; opacity: 1 !important; animation: none !important; -webkit-animation: none !important; white-space: nowrap !important; font-size: 13px !important; margin: -37px !important; }
         #navbar-brand-li .brand-text-mini { display: none !important; }
         #navbar-brand-li img { max-width: 100% !important; height: auto !important; }
         /* Sale btn: column 3, right-aligned */
-        #mobile-sale-btn { display: flex !important; align-items: center !important; justify-self: end !important; grid-column: 3 !important; margin: 0 !important; }
-        #mobile-sale-btn a { height: 30px !important; padding: 0 12px !important; gap: 5px !important; display: flex !important; align-items: center !important; justify-content: center !important; white-space: nowrap !important; }
-        #mobile-sale-btn a i { margin: 0 !important; padding: 0 !important; line-height: 1 !important; font-size: 11px !important; }
-        #mobile-sale-btn .mobile-sale-text { display: inline !important; font-size: 11px !important; font-weight: 700 !important; color: #fff !important; }
-        .mobile-sale-short { display: none !important; }
+        #mobile-sale-btn { display: flex !important; align-items: center !important; align-self: center !important; justify-self: end !important; grid-column: 3 !important; margin: 0 !important; }
+        #mobile-sale-btn a { display: inline-flex !important; align-items: center !important; justify-content: center !important; }
+        #mobile-sale-btn a i { margin: 0 !important; padding: 0 !important; line-height: 1 !important; }
     }
+    /* ── Tablet (431px–1399px): Sale button — show "Sale" only, mobile pill style ── */
+    @media (min-width: 431px) and (max-width: 1399.98px) {
+        .ts-order-text { display: none !important; }
+        #tablet-sale-order-fix .btn-primary,
+        #tablet-sale-order-fix .btn-primary:hover,
+        #tablet-sale-order-fix .btn-primary:focus {
+            height: 37px !important; padding: 0 14px !important; border-radius: 8px !important;
+            font-size: 12px !important; font-weight: 700 !important;
+            background: linear-gradient(135deg,#f97316,#ea580c) !important;
+            box-shadow: 0 2px 8px rgba(249,115,22,0.3) !important;
+        }
+        #tablet-sale-order-fix { margin-top: 10px !important; }
+    }
+    /* ── Tablet portrait (431px+): force desktop navbar layout ── */
+    @media (min-width: 431px) and (max-width: 767.98px) {
+        /* Hide all mobile-only elements */
+        #mobile-sale-btn, #mobile-sale-btn * { display: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; overflow: hidden !important; padding: 0 !important; margin: 0 !important; }
+        .navbar-header .navbar-nav.flex-row > li.d-md-none { display: none !important; }
+        /* Force navbar-collapse visible like desktop */
+        #navbar-mobile { display: flex !important; flex-basis: auto !important; }
+        /* Show desktop nav items */
+        #tablet-sale-order-fix { display: flex !important; }
+        #tablet-font-fix { display: flex !important; }
+        .navbar-container .nav .nav-item.d-none.d-md-block { display: flex !important; }
+        /* Fix navbar header — don't use mobile grid */
+        .navbar-header { float: left !important; }
+        .navbar-header .navbar-nav.flex-row { display: flex !important; align-items: center !important; }
+    }
+    /* ── Print: hide chrome, show only content ── */
+    @media print {
+        .header-navbar,
+        .main-menu,
+        .menu-expanded .main-menu,
+        .sidenav-overlay,
+        .drag-target,
+        .navbar-header,
+        .footer,
+        .no-print { display: none !important; }
+        .app-content,
+        .content-wrapper,
+        .main-panel { margin: 0 !important; padding: 0 !important; width: 100% !important; }
+        body { background: #fff !important; }
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    /* ── Toast notifications: always above navbar ── */
+    .Toastify__toast-container { z-index: 999999 !important; }
+    .Toastify__toast-container--top-right { top: 68px !important; right: 16px !important; }
+    .Toastify__toast { border-radius: 10px !important; font-size: 13px !important; font-weight: 500 !important; box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important; position: relative !important; }
+    .Toastify__close-button { position: absolute !important; top: 8px !important; right: 10px !important; background: none !important; border: none !important; cursor: pointer !important; opacity: 0.5 !important; font-size: 16px !important; color: #333 !important; padding: 4px !important; line-height: 1 !important; }
+    .Toastify__close-button:hover { opacity: 1 !important; }
     /* ── Mobile z-index: sidebar drawer above navbar ── */
     @media (max-width: 767px) {
         .header-navbar { z-index: 1000 !important; }
+        .Toastify__toast-container--top-right { top: 56px !important; right: 8px !important; }
         .ph-table-wrap { overflow-x: scroll !important; -webkit-overflow-scrolling: touch !important; }
         .rdt_TableCell, .rdt_TableCol { padding: 0 8px !important; }
         .rdt_TableCell { font-size: 12px !important; }
+        /* ── Mobile sidebar: scrollable with fixed logout at bottom ── */
+        .main-menu {
+            display: flex !important;
+            flex-direction: column !important;
+            height: 100vh !important;
+            height: 100dvh !important;
+        }
+        .main-menu .main-menu-content {
+            flex: 1 !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            -webkit-overflow-scrolling: touch !important;
+        }
+        .main-menu .sidebar-logout {
+            flex-shrink: 0 !important;
+            border-top: 1px solid #f1f5f9 !important;
+        }
     }
     /* ══════════════════════════════════════════════
        Tablet Sidebar — Professional Slim Bar + Tooltips
@@ -321,7 +392,7 @@
 
         /* ── Active: left orange bar ── */
         body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li.active:not(.navigation-header) > a {
-            background: #fff3e6 !important;
+            background: linear-gradient(135deg, rgb(254,252,232), rgb(254,249,195)) !important;
             box-shadow: inset 3px 0 0 #f97316 !important;
         }
         body.vertical-layout.vertical-menu.menu-collapsed .main-menu .navigation > li.active:not(.navigation-header) > a > i {
@@ -361,16 +432,21 @@
 
         /* ══ EXPANDED: nav link — icon + label ══ */
         body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li:not(.navigation-header) > a {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+            font-size: 13.5px !important;
+            font-weight: 500 !important;
+            color: #374151 !important;
+            min-height: 44px !important;
             display: flex !important;
             align-items: center !important;
-            min-height: 44px !important;
             padding: 0 14px !important;
             border-radius: 10px !important;
-            color: #374151 !important;
-            font-size: 13px !important;
-            font-weight: 500 !important;
-            background: transparent !important;
             transition: all 0.2s ease !important;
+            position: relative !important;
+            letter-spacing: 0.1px !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
             text-decoration: none !important;
         }
         body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li:not(.navigation-header) > a > i {
@@ -391,9 +467,11 @@
             opacity: 1 !important;
             width: auto !important;
             max-width: none !important;
-            font-size: 13px !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+            font-size: 13.5px !important;
             font-weight: 500 !important;
             color: #374151 !important;
+            letter-spacing: 0.1px !important;
             white-space: nowrap !important;
             overflow: hidden !important;
             text-overflow: ellipsis !important;
@@ -410,10 +488,10 @@
 
         /* ══ EXPANDED: active state ══ */
         body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li.active:not(.navigation-header) > a {
-            background: #fff7ed !important;
+            background: linear-gradient(135deg, rgb(254,252,232), rgb(254,249,195)) !important;
             box-shadow: inset 3px 0 0 #f97316 !important;
             color: #f97316 !important;
-            font-weight: 600 !important;
+            font-weight: 700 !important;
         }
         body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li.active:not(.navigation-header) > a > i { color: #f97316 !important; }
         body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li.active:not(.navigation-header) > a > span.menu-title { color: #f97316 !important; }
@@ -574,6 +652,8 @@
     <link rel="stylesheet" type="text/css" href="{{asset('/assets/css/style.css')}}">
     <!-- END: Custom CSS-->
     <style>
+    /* ── Hide breadcrumb header globally ── */
+    .content-header { display: none !important; }
     /* ── Equal spacing: content-wrapper padding matches header card margin ── */
     html body .content .content-wrapper { padding-top: 18px !important; padding-bottom: 18px !important; }
     @media (max-width: 767.98px) { html body .content .content-wrapper { padding-top: 14px !important; padding-bottom: 14px !important; } }
@@ -587,23 +667,25 @@
         .main-menu.menu-fixed .navigation-main::-webkit-scrollbar-thumb { background: #cccccc !important; border-radius: 10px !important; }
         .main-menu.menu-fixed .navigation-main::-webkit-scrollbar-track { background: transparent !important; }
     }
-    /* ── Print: hide chrome, show only content ── */
-    @media print {
-        .header-navbar,
-        .main-menu,
-        .menu-expanded .main-menu,
-        .sidenav-overlay,
-        .drag-target,
-        .navbar-header,
-        .footer,
-        .no-print { display: none !important; }
-        .app-content,
-        .content-wrapper,
-        .main-panel { margin: 0 !important; padding: 0 !important; width: 100% !important; }
-        body { background: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    }
+
     </style>
     @stack('stylesheets')
+    <link rel="stylesheet" type="text/css" href="{{env('CDN_DOMAIN')}}/css/app.css?v={{time()}}">
+    <style>
+    /* ── Sidebar font override — loaded AFTER CDN to win cascade ── */
+    body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li:not(.navigation-header) > a,
+    body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li:not(.navigation-header) > a > span.menu-title,
+    body .main-menu .navigation > li:not(.navigation-header) > a,
+    body .main-menu .navigation > li:not(.navigation-header) > a > span.menu-title,
+    body .main-menu.menu-dark .navigation > li:not(.navigation-header) > a,
+    body .main-menu.menu-dark .navigation > li:not(.navigation-header) > a > span.menu-title {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        font-size: 13.5px !important;
+        font-weight: 500 !important;
+        color: #374151 !important;
+        letter-spacing: 0.1px !important;
+    }
+    </style>
 </head>
 <!-- END: Head-->
 
@@ -644,8 +726,9 @@
                                 <button onclick="tsResetFontSize()" style="width:100%;margin-top:4px;height:28px;border:none;background:#f8fafc;border-radius:6px;cursor:pointer;color:#64748b;font-size:11px;font-weight:600;transition:all 0.15s;" onmouseover="this.style.background='#fff7ed';this.style.color='#f97316'" onmouseout="this.style.background='#f8fafc';this.style.color='#64748b'">Reset to 100%</button>
                             </div>
                         </div>
-                        <a href="/data_entry/sales_entry/view" style="display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 11px;border-radius:10px;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;font-weight:700;font-size:11.5px;text-decoration:none;box-shadow:0 2px 8px rgba(249,115,22,0.3);white-space:nowrap;">
-                            <i class="fa fa-plus" style="font-size:10px;color:#fff;"></i><span class="mobile-sale-text"> Sale Order</span><span class="mobile-sale-short">Sale</span>
+                        <a href="/data_entry/sales_entry/view" style="display:inline-flex;align-items:center;justify-content:center;gap:4px;height:30px;padding:0 9px;border-radius:20px;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;text-decoration:none;box-shadow:0 2px 8px rgba(249,115,22,0.3);flex-shrink:0;white-space:nowrap;">
+                            <i class="fa fa-plus" style="font-size:10px;color:#fff;"></i>
+                            <span style="font-size:11px;font-weight:700;color:#fff;">Sale</span>
                         </a>
                     </li>
                     <li class="nav-item d-md-none"><a class="nav-link open-navbar-container" data-toggle="collapse" data-target="#navbar-mobile"><i class="fa fa-ellipsis-v"></i></a></li>
@@ -765,9 +848,9 @@
                             </ul>
                         </li>
                         -->
-                        <li class="nav-item d-none d-md-block" style="display:flex;align-items:center;margin-right:8px;">
+                        <li id="tablet-font-fix" class="nav-item d-none d-md-block" style="display:flex;align-items:center;margin-right:8px;margin-top:10px;">
                             <div style="position:relative;" id="ts-font-dropdown-wrap-dt">
-                                <button onclick="tsFontDropdownToggleDt()" id="ts-font-dropdown-btn-dt" title="Font size" style="display:inline-flex;align-items:center;gap:4px;height:34px;padding:0 10px;border:none;background:#f4f4f5;border-radius:8px;cursor:pointer;color:#374151;font-weight:700;flex-shrink:0;font-size:12px;">
+                                <button onclick="tsFontDropdownToggleDt()" id="ts-font-dropdown-btn-dt" title="Font size" style="display:inline-flex;align-items:center;gap:6px;height:39px;padding:0 10px;border:none;background:#f4f4f5;border-radius:8px;cursor:pointer;color:#374151;font-weight:700;flex-shrink:0;font-size:12px;">
                                     <span style="font-size:13px;line-height:1;">A</span><span id="ts-font-pct-label-dt" style="font-size:10px;font-weight:600;color:#64748b;"></span><i class="fa fa-caret-down" style="font-size:10px;color:#94a3b8;margin-left:1px;"></i>
                                 </button>
                                 <div id="ts-font-dropdown-menu-dt" style="display:none;position:absolute;top:40px;right:0;background:#fff;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.15);border:1px solid #e5e7eb;padding:6px;z-index:99999;min-width:140px;">
@@ -786,7 +869,7 @@
                                 </div>
                             </div>
                         </li>
-                        <li class="nav-item d-none d-md-block" style="display:flex;align-items:center;"><a style="display:flex;align-items:center;margin-right:14px;padding:0;" class="nav-link" href="/data_entry/sales_entry/view"><button type="button" class="btn btn-primary m-0"><i class="fa fa-plus" style="color:#fff !important;"></i> Sale Order</button></a></li>
+                        <li id="tablet-sale-order-fix" class="nav-item d-none d-md-block" style="display:flex;align-items:center;margin-top:10px;"><a style="display:flex;align-items:center;margin-right:14px;padding:0;" class="nav-link" href="/data_entry/sales_entry/view"><button type="button" class="btn btn-primary m-0"><i class="fa fa-plus" style="color:#fff !important;"></i> <span class="ts-sale-text">Sale</span><span class="ts-order-text"> Order</span></button></a></li>
                         {{-- Hidden logout form used by sidebar logout link --}}
                         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                             @csrf
@@ -998,9 +1081,9 @@
 	// Desktop sidebar scroll is handled in app-menu.js (document capture wheel handler)
 	</script>
     @stack('scripts')
-    <script type="text/javascript" src="{{env('CDN_DOMAIN')}}/js/manifest.js"></script>
-    <script type="text/javascript" src="{{env('CDN_DOMAIN')}}/js/vendor.js"></script>
-    <script type="text/javascript" src="{{env('CDN_DOMAIN')}}/js/app.js"></script>
+    <script type="text/javascript" src="{{env('CDN_DOMAIN')}}/js/manifest.js?v={{time()}}"></script>
+    <script type="text/javascript" src="{{env('CDN_DOMAIN')}}/js/vendor.js?v={{time()}}"></script>
+    <script type="text/javascript" src="{{env('CDN_DOMAIN')}}/js/app.js?v={{time()}}"></script>
     <!-- <script src="{{asset('/assets/js/jquery.dataTables.min.js')}}"></script> -->
     <script type="text/javascript">$('#productsTable').DataTable({ordering: false,language : {
             "zeroRecords": " "
@@ -1069,6 +1152,39 @@
         window.addEventListener('orientationchange', function() {
             setTimeout(function() { lastHeight = vv.height; }, 500);
         });
+    })();
+    </script>
+
+    <script>
+    (function(){
+        var key = 'ts_invoice_view';
+        var current = localStorage.getItem(key) || 'off';
+        function applyInvoiceView(val) {
+            current = val;
+            localStorage.setItem(key, val);
+            var isOn = val === 'on';
+            // Update tablet button
+            var btnT = document.getElementById('invoice-view-btn-tablet');
+            if (btnT) {
+                btnT.style.background = isOn ? 'linear-gradient(135deg,#f97316,#ea580c)' : '#f4f4f5';
+                btnT.style.color = isOn ? '#fff' : '#64748b';
+            }
+            var lbl = document.getElementById('invoice-view-label-tablet');
+            if (lbl) lbl.textContent = isOn ? 'Card View' : 'Table View';
+            // Update mobile navbar toggle
+            var track = document.getElementById('mobile-dv-track');
+            var thumb = document.getElementById('mobile-dv-thumb');
+            var mlbl = document.getElementById('mobile-dv-label');
+            if (track) track.style.background = isOn ? '#f97316' : '#d1d5db';
+            if (thumb) thumb.style.left = isOn ? '16px' : '3px';
+            if (mlbl) mlbl.style.color = isOn ? '#f97316' : '#64748b';
+            // Notify React
+            window.dispatchEvent(new CustomEvent('ts-invoice-view', { detail: val }));
+        }
+        window.tsToggleInvoiceView = function() { applyInvoiceView(current === 'on' ? 'off' : 'on'); };
+        window.tsMobileDVToggle = function() { applyInvoiceView(current === 'on' ? 'off' : 'on'); };
+        // Apply on load
+        document.addEventListener('DOMContentLoaded', function(){ applyInvoiceView(current); });
     })();
     </script>
 
@@ -1172,6 +1288,7 @@
     })();
     </script>
 
+<div id="datepicker-portal" style="position:relative;z-index:99999;"></div>
 </body>
 <!-- END: Body-->
 

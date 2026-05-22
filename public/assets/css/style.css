@@ -1080,13 +1080,31 @@ body.vertical-layout.vertical-menu.menu-collapsed .main-menu .sidebar-logout i {
 
 /* ── Open/expanded parent ── */
 .main-menu.menu-dark .navigation > li.open:not(.navigation-header) {
+  background: transparent !important;
   border-left: none !important;
 }
 .main-menu.menu-dark .navigation > li.open:not(.navigation-header) > a {
-  background: var(--color-dark, #fff7ed) !important;
+  background: transparent !important;
   color: var(--color-on-dark, #374151) !important;
   padding-left: 14px !important;
   box-shadow: none !important;
+}
+/* Has-sub parent whose child is active: show same active accent as top-level active items
+   (orange left bar + bold dark text + orange icon), without painting a peach box. */
+.main-menu.menu-dark .navigation > li.has-sub.active:not(.navigation-header) {
+  background: transparent !important;
+}
+.main-menu.menu-dark .navigation > li.has-sub.active:not(.navigation-header) > a {
+  background: transparent !important;
+  color: var(--color-on-dark, #374151) !important;
+  font-weight: 600 !important;
+  box-shadow: inset 3px 0 0 var(--color-primary, #f97316) !important;
+}
+.main-menu.menu-dark .navigation > li.has-sub.active:not(.navigation-header) > a > i {
+  color: var(--color-primary, #f97316) !important;
+}
+.main-menu.menu-dark .navigation li.open > ul.menu-content {
+  background: transparent !important;
 }
 
 /* ── Chevron arrow for has-sub items ── */
@@ -1114,15 +1132,17 @@ body.vertical-layout.vertical-menu.menu-collapsed .main-menu .sidebar-logout i {
 .main-menu.menu-dark .navigation li.open > ul.menu-content {
   display: block !important;
   overflow: visible !important;
-  background: rgba(0, 0, 0, 0.02) !important;
-  border-radius: 0 0 10px 10px !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
   padding: 4px 0 6px 0 !important;
-  margin: 0 !important;
+  margin: 0 0 0 14px !important;
 }
 
 /* ── Sub-menu items ── */
 .main-menu.menu-dark .navigation li ul.menu-content > li {
-  margin: 1px 6px !important;
+  margin: 4px 15px !important;
   border-radius: 8px !important;
   border-left: none !important;
 }
@@ -1134,10 +1154,17 @@ body.vertical-layout.vertical-menu.menu-collapsed .main-menu .sidebar-logout i {
   min-height: 42px !important;
   display: flex !important;
   align-items: center !important;
-  padding: 0 12px 0 24px !important;
+  padding: 0 12px 0 12px !important;
   border-radius: 8px !important;
   transition: all 0.18s ease !important;
   position: relative !important;
+}
+/* Visual rail connecting sub-items to the parent */
+.main-menu.menu-dark .navigation li.open > ul.menu-content {
+  position: relative !important;
+}
+.main-menu.menu-dark .navigation li.open > ul.menu-content::before {
+  display: none !important;
 }
 /* Sub-item icons */
 .main-menu.menu-dark .navigation li ul.menu-content > li > a > i {
@@ -1157,17 +1184,19 @@ body.vertical-layout.vertical-menu.menu-collapsed .main-menu .sidebar-logout i {
 .main-menu.menu-dark .navigation li ul.menu-content > li:hover > a > i {
   color: var(--color-primary, #f97316) !important;
 }
-/* Sub-item active */
+/* Sub-item active — match top-level active style */
+.main-menu.menu-dark .navigation li ul.menu-content > li.active {
+  background: var(--color-dark, #fff7ed) !important;
+  box-shadow: inset 3px 0 0 var(--color-primary, #f97316) !important;
+}
 .main-menu.menu-dark .navigation li ul.menu-content > li.active > a {
-  color: #fff !important;
+  color: var(--color-on-dark, #374151) !important;
   font-weight: 600 !important;
-  background: #F27420 !important;
-  border-radius: 6px;
-  margin: 2px 10px;
-  padding: 8px 12px !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 .main-menu.menu-dark .navigation li ul.menu-content > li.active > a > i {
-  color: #fff !important;
+  color: var(--color-primary, #f97316) !important;
 }
 
 /* ══════════════════════════════════════════════════════════════════
@@ -2916,4 +2945,9 @@ select.form-control option:checked, select.form-control option:hover,
     white-space: nowrap !important;
   }
   .footer { margin-left: 0 !important; }
+}
+
+/* ── Keep page header above date-range calendar dropdown (z-index 9999) ── */
+.header-navbar.fixed-top {
+  z-index: 10000 !important;
 }

@@ -38,7 +38,10 @@ class RoleController extends Controller
 
     public function list(Request $request)
     {
-		$data = RoleModel::withCount('customerrole')->where('id','!=', 1)->get();
+		// customerrole_count = users in this role; permissions_count = permissions granted to it.
+		$data = RoleModel::withCount(['customerrole', 'permissions'])
+			->where('id','!=', 1)
+			->get();
 		return $this->successResponse($data);
     }
 	

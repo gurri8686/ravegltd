@@ -418,7 +418,6 @@ if(!function_exists('routeExist'))
 					$relatedRoutes = [
 						'Customers' => [
 							'management.customers.on_account_payment.view.index',
-							'customer_payment_history.view.index',
 						],
 						'Suppliers' => [
 							'management.suppliers.on_account_payment.view.index',

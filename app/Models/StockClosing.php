@@ -12,7 +12,7 @@ class StockClosing extends Model
     use HasFactory;
 	
 	protected $fillable = [
-        'product_id','stock',
+        'product_id','stock','remark','is_reviewed',
         'created_at','updated_at'
     ];
 }

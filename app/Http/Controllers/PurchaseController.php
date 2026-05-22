@@ -56,8 +56,14 @@ class PurchaseController extends Controller
             $obj->salesman_id = Auth::user()->id;
             $obj->supplier_id = $request->supplier_id;
             $obj->other_invoice_id = $request->other_invoice_id ?? "";
+            if (\Schema::hasColumn('supplier_invoices', 'delivery_no')) {
+                $obj->delivery_no = $request->delivery_no ?? null;
+                $obj->supplier_invoice_no = $request->supplier_invoice_no ?? null;
+                $obj->awb = $request->awb ?? null;
+                $obj->remarks = $request->remarks ?? null;
+            }
             if ($request->date) {
-                $obj->created_at = $request->date;
+                $obj->created_at = \Carbon\Carbon::parse($request->date)->setTime(12, 0, 0);
             }
             $obj->save();
 
@@ -145,7 +151,11 @@ class PurchaseController extends Controller
 		);
     }
     public function ajaxProductsList(){
-        $productsList = (new Product())->get();
+        // Cache for 5 minutes — products list rarely changes and is large.
+        $cacheKey = 'purchase_products_list_' . (request()->getHost() ?: 'default');
+        $productsList = \Cache::remember($cacheKey, 300, function () {
+            return (new Product())->get();
+        });
         return json_encode($productsList);
     }
 
@@ -509,6 +519,7 @@ class PurchaseController extends Controller
 				'remarks'=>$request->remarks,
 				'quantity'=>$request->input('quantity'),
 				'unit_price'=>$request->input('price'),
+				'sale_price'=>$request->input('sale_price') ? $request->input('sale_price') : null,
 				'sub_total'=>$request->input('totalPrice'),
 				'product_info' => json_encode(Product::where('id',$request->product)->first())
 			];
@@ -580,13 +591,14 @@ class PurchaseController extends Controller
                     $data['product_id'] = $request->product;
                     $data['quantity'] = $request->quantity;
                     $data['unit_price'] = $request->price;
+					$data['sale_price'] = $request->sale_price ? $request->sale_price : null;
 					$data['remarks'] = $request->remarks;
                     $data['sub_total'] = $request->totalPrice;
                     $data['supplier_id'] =$getSupplierInvoice['supplier_id'];
                     $data['supplier_invoice_id'] = $request->invoiceId;
                     $data['product_info'] = json_encode(Product::where('id',$request->product)->first());
                     $save = SupplierInvoiceProduct::create($data);
-					
+
 					// stock record.
 					$stockProducts->recordStock([
 						'supplier_id' => $getSupplierInvoice['supplier_id'],
@@ -619,6 +631,7 @@ class PurchaseController extends Controller
                 $data['quantity'] = $request->quantity;
 				$data['remarks'] = $request->remarks;
                 $data['unit_price'] = $request->price;
+				$data['sale_price'] = $request->sale_price ? $request->sale_price : null;
                 $data['sub_total'] = $request->totalPrice;
                 $data['supplier_id'] =$getSupplierInvoice['supplier_id'];
                 $data['supplier_invoice_id'] = $request->invoiceId;
@@ -706,19 +719,89 @@ class PurchaseController extends Controller
 		return view('daily-report.purchase-print', compact('invoices', 'start_date', 'end_date', 'companyDetails', 'currency'));
     }
 
+	public function statementDailyBookPurchase(Request $request)
+	{
+		$rules = [
+			'start_date' => 'required',
+			'end_date' => 'required',
+		];
+		$validator = Validator::make($request->all(), $rules);
+		if ($validator->fails()) {
+			return 'Start date and end date are required';
+		}
+
+		$start_date = $request->start_date;
+		$end_date = $request->end_date;
+		$supplier_id = $request->supplier_id;
+
+		$data = (new SupplierInvoice())
+			->whereDate('created_at', '>=', $start_date)
+			->whereDate('created_at', '<=', $end_date);
+
+		if (!empty($supplier_id)) {
+			$data->where('supplier_id', $supplier_id);
+		}
+
+		$invoices = $data->withSum(['products as total' => function ($q) {
+				$q->where('is_archive', 0);
+			}], 'sub_total')
+			->withSum('payments as total_paid', 'amount')
+			->with('supplier')
+			->orderBy('created_at', 'desc')
+			->get();
+
+		$currency = env('CURRENCY_SYMBOL', '£');
+		$rows = [];
+		$i = 1;
+		foreach ($invoices as $invoice) {
+			$total = (float)($invoice->total ?? 0);
+			$paid = (float)($invoice->total_paid ?? 0);
+			$pending = $total - $paid;
+			$status = ($paid >= $total && $total > 0) ? 'Paid' : ($paid > 0 ? 'Partial' : 'Unpaid');
+			$rows[] = [
+				$i++,
+				\Carbon\Carbon::parse($invoice->created_at)->format('d M Y'),
+				'#' . $invoice->id,
+				$invoice->supplier->name ?? '—',
+				number_format($total, 2),
+				number_format($paid, 2),
+				number_format($pending, 2),
+				$status,
+			];
+		}
+
+		$headings = ['#', 'Date', 'Invoice', 'Supplier', 'Amount (' . $currency . ')', 'Paid (' . $currency . ')', 'Pending (' . $currency . ')', 'Status'];
+
+		$export = new class($rows, $headings) implements
+			\Maatwebsite\Excel\Concerns\FromArray,
+			\Maatwebsite\Excel\Concerns\WithHeadings {
+			protected $rows;
+			protected $headings;
+			public function __construct($rows, $headings) {
+				$this->rows = $rows;
+				$this->headings = $headings;
+			}
+			public function array(): array { return $this->rows; }
+			public function headings(): array { return $this->headings; }
+		};
+
+		$fileName = "daily-purchase-statement-{$start_date}-to-{$end_date}.xlsx";
+		return \Maatwebsite\Excel\Facades\Excel::download($export, $fileName);
+	}
+	
 	public function list(Request $request)
     {
 		$supplier_id = $product_id = $start_date = $end_date = "";
 
 		extract($request->only('product_id', 'supplier_id', 'start_date', 'end_date'));
 
-		$data = (new \App\Models\SupplierInvoice());
+		$data = \App\Models\SupplierInvoice::select('*', DB::raw("DATE(created_at) as date_only"));
 
 		if(!empty($start_date)){
-			$data = $data->whereDate('created_at', '>=', $start_date);
+			$data = $data->whereRaw('DATE(created_at) >= ?', [$start_date]);
 		}
 		if(!empty($end_date)){
-			$data = $data->whereDate('created_at', '<=', $end_date);
+			$data = $data->whereRaw('DATE(created_at) <= ?', [$end_date]);
 		}
 
 		if(!empty($supplier_id)){
@@ -730,7 +813,16 @@ class PurchaseController extends Controller
 			}], 'sub_total')->withCount(['products as products_count' => function ($q) {
 				$q->where('is_archive', 0);
 			}])->with('supplier')->orderBy('created_at', 'desc')->get();
-		return $this->successResponse($data);
+		$results = $data->map(function($item) {
+			$arr = $item->toArray();
+			$dateOnly = $item->date_only ?? substr($item->getAttributes()['created_at'] ?? '', 0, 10);
+			if ($dateOnly) {
+				$ts = strtotime($dateOnly . ' 12:00:00');
+				$arr['created_at'] = date('d M Y', $ts);
+			}
+			return $arr;
+		});
+		return $this->successResponse($results);
     }
 	
     public function dailyBookSales(){
@@ -749,6 +841,8 @@ class PurchaseController extends Controller
            $dataget->total_amount = $total;
            $dataget->paid_amount = $paid;
            $dataget->pending_amount = $total - $paid;
+           $dt = $dataget->getAttributes()['created_at'] ?? '';
+           $dataget->formatted_date = $dt ? substr($dt, 0, 10) : '';
            return json_encode($dataget);
         }catch(\Exception $ex){
             $this->exceptionResponse($ex);
@@ -768,9 +862,62 @@ public function invoicedownload($id){
     $data =  SupplierInvoice::where('id',$id)->with('product')->with('order')->first();
     $companyDetails = CompanyDetailModel::first();
     $pdf = PDF::loadView('purchase-invoice',compact('data','companyDetails'));
-	
+
 	//return $pdf->stream('pdf_file.pdf');
     return $pdf->download('pdf_file.pdf');
+}
+
+public function invoiceExcel($id){
+	$invoice = SupplierInvoice::where('id', $id)
+		->with(['product', 'supplier', 'order'])
+		->first();
+
+	if (!$invoice) {
+		return response('Invoice not found', 404);
+	}
+
+	$currency = env('CURRENCY_SYMBOL', '£');
+	$rows = [];
+	$i = 1;
+	$grandTotal = 0;
+	$products = $invoice->product ?? collect();
+	foreach ($products as $p) {
+		if (!empty($p->is_archive)) continue;
+		$qty = (float)($p->quantity ?? 0);
+		$price = (float)($p->unit_price ?? 0);
+		$sub = (float)($p->sub_total ?? ($qty * $price));
+		$grandTotal += $sub;
+		$rows[] = [
+			$i++,
+			$p->product->name ?? ($p->product_name ?? '—'),
+			$p->remarks ?? '',
+			$qty,
+			number_format($price, 2),
+			number_format($sub, 2),
+		];
+	}
+
+	$rows[] = ['', 'TOTAL', '', '', '', number_format($grandTotal, 2)];
+
+	$headings = ['#', 'Product', 'Remarks', 'Qty', 'Unit Price (' . $currency . ')', 'Total (' . $currency . ')'];
+
+	$export = new class($rows, $headings) implements
+		\Maatwebsite\Excel\Concerns\FromArray,
+		\Maatwebsite\Excel\Concerns\WithHeadings {
+		protected $rows;
+		protected $headings;
+		public function __construct($rows, $headings) {
+			$this->rows = $rows;
+			$this->headings = $headings;
+		}
+		public function array(): array { return $this->rows; }
+		public function headings(): array { return $this->headings; }
+	};
+
+	$supplierName = $invoice->supplier->name ?? 'supplier';
+	$supplierSlug = preg_replace('/[^A-Za-z0-9]+/', '-', $supplierName);
+	$fileName = "purchase-invoice-{$invoice->id}-{$supplierSlug}.xlsx";
+	return \Maatwebsite\Excel\Facades\Excel::download($export, $fileName);
 }
 
 public function mail($id){
@@ -819,9 +966,10 @@ public function mail($id){
             {
                 $postnestedData['product_id'] = $data['product_id'];
                 $postnestedData['payment'] = "";
-                $postnestedData['product'] = ["label" => $data["product"]['name'], "value" => $data['product_id']];
+                $postnestedData['product'] = ["label" => $data["product"] ? $data["product"]['name'] : 'Unknown', "value" => $data['product_id']];
                 $postnestedData['quantity'] = $data['quantity'];
                 $postnestedData['price'] = $data['unit_price'];
+				$postnestedData['sale_price'] = $data['sale_price'];
 				$postnestedData['remarks'] = $data['remarks'];
                 $postnestedData['totalPrice'] = (float)$data['sub_total'];
                 $postnestedData['fieldToggle'] = "checked";

@@ -3,6 +3,46 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
+/**
+ * Lightweight auto-dismiss toast. type: 'success' | 'error'
+ */
+function showFormToast(message, type) {
+    type = type || 'success';
+    if (!document.getElementById('form-toast-style')) {
+        var st = document.createElement('style');
+        st.id = 'form-toast-style';
+        st.innerHTML = ''
+            + '#form-toast-wrap{position:fixed;top:78px;right:18px;z-index:999999;display:flex;flex-direction:column;gap:10px;}'
+            + '.form-toast{display:flex;align-items:center;gap:10px;min-width:240px;max-width:360px;padding:13px 16px;border-radius:10px;'
+            + 'font-size:13.5px;font-weight:600;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,0.18);'
+            + 'opacity:0;transform:translateX(24px);transition:opacity .25s ease,transform .25s ease;}'
+            + '.form-toast.show{opacity:1;transform:translateX(0);}'
+            + '.form-toast--success{background:#16a34a;}'
+            + '.form-toast--error{background:#dc2626;}'
+            + '.form-toast svg{flex-shrink:0;}';
+        document.head.appendChild(st);
+    }
+    var wrap = document.getElementById('form-toast-wrap');
+    if (!wrap) {
+        wrap = document.createElement('div');
+        wrap.id = 'form-toast-wrap';
+        document.body.appendChild(wrap);
+    }
+    var icon = type === 'error'
+        ? '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
+        : '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    var toast = document.createElement('div');
+    toast.className = 'form-toast form-toast--' + type;
+    toast.innerHTML = icon + '<span>' + message + '</span>';
+    wrap.appendChild(toast);
+    requestAnimationFrame(function () { toast.classList.add('show'); });
+    setTimeout(function () {
+        toast.classList.remove('show');
+        setTimeout(function () { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 300);
+    }, 3000);
+}
+
 function submitForm(form, url, output) {
 
     $.ajax({
@@ -121,7 +161,7 @@ function submitAjaxFormData(form, url, method) {
                 if (typeof response.payload.redirect != "undefined") {
                     window.location.href = response.payload.redirect;
                 } else {
-                    bootbox.alert({centerVertical: true, "message": response.payload.message});
+                    showFormToast(response.payload.message, 'success');
                     // reset form
                 }
             }

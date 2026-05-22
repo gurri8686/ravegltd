@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
+
+
 use App\Http\Controllers\PermissionGroup;
 use App\Http\Controllers\PermissionModule;
 use App\Http\Controllers\RoleController;
@@ -29,7 +31,6 @@ use App\Http\Controllers\SupplierPaymentsController;
 use App\Http\Controllers\OnAccountPaymentController;
 use App\Http\Controllers\WashDatabaseController;
 use App\Http\Controllers\GeneralSettingController;
-use App\Http\Controllers\CustomerPaymentHistoryController;
 use App\Http\Controllers\SupplierPaymentHistoryController;
 use App\Http\Controllers\CustomerReturnController;
 use App\Http\Controllers\SupplierReturnController;
@@ -65,6 +66,100 @@ Route::get('/wash', [WashDatabaseController::class, 'showTables'])->name('wash')
 Route::post('/wash-truncate', [WashDatabaseController::class, 'truncateTables'])->name('wash-truncate');
 
 require_once('common.php');
+
+Route::get('/fix-payments', function () {
+    $payments = \DB::table('payments')->get();
+    $customerPayments = \DB::table('customer_payments')
+        ->leftJoin('payments', 'payments.id', '=', 'customer_payments.payment_id')
+        ->select('customer_payments.id','customer_payments.customer_invoice_id','customer_payments.payment_id','customer_payments.amount','customer_payments.initiated','payments.type as payment_type', 'payments.id as payments_table_id')
+        ->orderBy('customer_payments.id','desc')
+        ->limit(20)
+        ->get();
+    $paymentId2 = \DB::table('payments')->where('id', 2)->first();
+    $columnsList = \DB::select("SHOW COLUMNS FROM payments");
+    return response()->json([
+        'payments_table' => $payments,
+        'payment_id_2_row' => $paymentId2,
+        'payments_columns' => $columnsList,
+        'customer_payments' => $customerPayments,
+    ]);
+});
+
+Route::get('/seed-payments', function () {
+    $methods = [
+        ['id' => 2, 'type' => 'Cash'],
+        ['id' => 3, 'type' => 'Cheque'],
+        ['id' => 4, 'type' => 'Card'],
+        ['id' => 5, 'type' => 'Bank Transfer'],
+    ];
+    foreach ($methods as $m) {
+        $exists = \DB::table('payments')->where('id', $m['id'])->exists();
+        if (!$exists) {
+            \DB::table('payments')->insert(['id' => $m['id'], 'type' => $m['type'], 'created_at' => now(), 'updated_at' => now()]);
+        }
+    }
+    return response()->json(['status' => 'done', 'rows' => \DB::table('payments')->get()]);
+});
+
+Route::get('/debug-os', function () {
+    $db = \DB::connection('mysql');
+
+    $customerReturns = $db->table('stock_products as sp')
+        ->leftJoin('products as p', 'p.id', '=', 'sp.product_id')
+        ->leftJoin('customers as c', 'c.id', '=', 'sp.customer_id')
+        ->select('sp.id','p.name as product','c.name as customer','sp.stock','sp.price','sp.invoice_id',\DB::raw("DATE(sp.created_at) as date"))
+        ->where('sp.event','customer_return')->where('sp.is_archived',0)
+        ->orderBy('sp.created_at')->get();
+
+    $supplierReturns = $db->table('stock_products as sp')
+        ->leftJoin('products as p', 'p.id', '=', 'sp.product_id')
+        ->leftJoin('suppliers as s', 's.id', '=', 'sp.supplier_id')
+        ->select('sp.id','p.name as product','s.name as supplier','sp.stock','sp.price','sp.invoice_id',\DB::raw("DATE(sp.created_at) as date"))
+        ->where('sp.event','supplier_return')->where('sp.is_archived',0)
+        ->orderBy('sp.created_at')->get();
+
+    $dumps = $db->table('stock_products as sp')
+        ->leftJoin('products as p', 'p.id', '=', 'sp.product_id')
+        ->leftJoin('suppliers as s', 's.id', '=', 'sp.supplier_id')
+        ->select('sp.id','p.name as product','s.name as supplier','sp.stock','sp.price','sp.invoice_id',\DB::raw("DATE(sp.created_at) as date"))
+        ->where('sp.event','dump')->where('sp.is_archived',0)
+        ->orderBy('sp.created_at')->get();
+
+    $stockCheck = $db->table('stock_products as sp')
+        ->leftJoin('products as p', 'p.id', '=', 'sp.product_id')
+        ->select('sp.id','p.name as product','sp.event','sp.type','sp.stock','sp.price','sp.supplier_id','sp.customer_id','sp.invoice_id',\DB::raw("DATE(sp.created_at) as date"))
+        ->where('sp.is_archived',0)
+        ->orderBy('sp.created_at')->get();
+
+    $unassignedSup = $db->table('supplier_invoice_products as sip')
+        ->leftJoin('products as p', 'p.id', '=', 'sip.product_id')
+        ->leftJoin('suppliers as s', 's.id', '=', 'sip.supplier_id')
+        ->select('sip.id','p.name as product','s.name as supplier','sip.quantity','sip.unit_price','sip.sub_total',\DB::raw("DATE(sip.created_at) as date"))
+        ->where('sip.is_archive',0)
+        ->orderBy('sip.created_at')->get();
+
+    $stockClosings = $db->table('stock_closings as sc')
+        ->leftJoin('products as p', 'p.id', '=', 'sc.product_id')
+        ->select('sc.id','p.name as product','sc.stock as closing_stock','sc.remark','sc.is_reviewed',\DB::raw("DATE(sc.created_at) as date"))
+        ->orderBy('sc.created_at')->get();
+
+    return response()->json([
+        'customer_returns' => $customerReturns,
+        'supplier_returns' => $supplierReturns,
+        'dumps' => $dumps,
+        'stock_check_all' => $stockCheck,
+        'unassigned_supplier' => $unassignedSup,
+        'stock_closings' => $stockClosings,
+        'summary' => [
+            'customer_returns' => count($customerReturns),
+            'supplier_returns' => count($supplierReturns),
+            'dumps' => count($dumps),
+            'stock_check_all' => count($stockCheck),
+            'unassigned_supplier' => count($unassignedSup),
+            'stock_closings' => count($stockClosings),
+        ]
+    ]);
+});
 
 Route::middleware(['localization', 'domains'])->group(function () {
     Route::get('/', function () {
@@ -209,30 +304,198 @@ Route::middleware(['localization', 'domains'])->group(function () {
                     ['status' => 1, 'is_archive' => 0, 'user_id' => \Auth::id()]
                 );
                 $showSuppliers = (int) $supplierSetting->status;
-                return view('settings.index', compact('adminData', 'companyData', 'showSuppliers'));
+                // Live row counts for the Delete Data cards — each count is the "primary" table
+                // of that section (the same tables the data-delete route clears).
+                $deleteCounts = [
+                    'sales'     => (int) \DB::table('customer_invoices')->count(),
+                    'purchases' => (int) \DB::table('supplier_invoices')->count(),
+                    'products'  => (int) \DB::table('products')->count(),
+                    'customers' => (int) \DB::table('customers')->count(),
+                    'suppliers' => (int) \DB::table('suppliers')->count(),
+                ];
+                return view('settings.index', compact('adminData', 'companyData', 'showSuppliers', 'deleteCounts'));
             })->name('settings.index');
             Route::post('settings/password/update', [\App\Http\Controllers\AdminController::class, 'updatePassword'])->name('settings.password.update');
             Route::post('settings/data-delete', function(\Illuminate\Http\Request $request) {
                 $section = $request->input('section');
+
+                // ── Unlimited execution: this route can never time out, regardless of row count ──
+                // PHP-level: drop the time/memory ceilings just for this request.
+                @set_time_limit(0);
+                @ini_set('max_execution_time', '0');
+                @ini_set('memory_limit', '-1');
+                ignore_user_abort(true);
+
+                // Note: We only DELETE rows, never DROP tables. Reference tables
+                // (payments definitions, customers, suppliers, products) are NOT touched here.
+                // Hidden buttons (customers/suppliers/products/stock/payments) kept in $map
+                // for future use — only sales & purchases are exposed in the UI right now.
                 $map = [
-                    'sales'     => ['customer_invoice_products','customer_invoice_orders','invoice_payments','customer_invoices'],
-                    'purchases' => ['supplier_invoice_products','supplier_invoice_orders','supplier_payments','supplier_invoices'],
-                    'customers' => ['customers'],
-                    'suppliers' => ['suppliers'],
-                    'products'  => ['products'],
-                    'stock'     => ['stock_closings','stock_products'],
-                    'payments'  => ['customer_payments','payments'],
+                    'sales' => [
+                        // Stock entries created by sales (consumption + customer returns)
+                        ['table' => 'stock_products', 'where' => function($q){
+                            $q->whereIn('event', ['stock_consumed','customer_return'])->where('type', 'customer');
+                        }],
+                        // Sales-side payments
+                        ['table' => 'customer_payments'],
+                        ['table' => 'invoice_payments'],
+                        // Sales invoice rows
+                        ['table' => 'customer_invoice_products'],
+                        ['table' => 'customer_invoice_orders'],
+                        ['table' => 'customer_invoices'],
+                    ],
+                    'purchases' => [
+                        // Stock entries created by purchases (added + supplier returns + dumps)
+                        ['table' => 'stock_products', 'where' => function($q){
+                            $q->whereIn('event', ['stock_added','stock_updated','supplier_return','dump'])->where('type', 'supplier');
+                        }],
+                        // Purchase-side payments
+                        ['table' => 'supplier_payments'],
+                        // Purchase invoice rows
+                        ['table' => 'supplier_invoice_products'],
+                        ['table' => 'supplier_invoice_orders'],
+                        ['table' => 'supplier_invoices'],
+                    ],
+                    'customers' => [['table' => 'customers']],
+                    'suppliers' => [['table' => 'suppliers']],
+                    'products'  => [['table' => 'products']],
+                    'stock'     => [['table' => 'stock_closings'], ['table' => 'stock_products']],
+                    'payments'  => [['table' => 'customer_payments'], ['table' => 'invoice_payments']],
                 ];
                 if (!isset($map[$section])) {
                     return response()->json(['success'=>false,'message'=>'Invalid section.'], 422);
                 }
+
+                // ── Bulletproof delete strategy — works on tables of ANY size ──
+                // Strategy:
+                //   1. SELECT primary-key ids in small batches matching the filter (fast — PK scan)
+                //   2. DELETE WHERE id IN (...) — fastest InnoDB path, locks only those exact rows
+                //   3. Infinite retry on lock_wait_timeout (1205) and deadlock (1213) errors with
+                //      exponential backoff — we WAIT it out instead of failing the request.
+                //   4. No hard batch cap — keep going till the filter returns 0 rows.
+                $BATCH_SIZE   = 300; // small enough to lock briefly even on contended tables
+
+                // Maximum patience at the DB layer too — InnoDB defaults to 50s; we set 1 hour per wait.
+                // If contention is so severe even this isn't enough, the retry loop catches it anyway.
+                try { \DB::statement('SET SESSION innodb_lock_wait_timeout = 3600'); } catch (\Throwable $e) {}
+                try { \DB::statement('SET SESSION transaction_isolation = "READ-COMMITTED"'); } catch (\Throwable $e) {}
+                // MySQL server-side connection timeouts also bumped to "essentially never" for this session.
+                try { \DB::statement('SET SESSION wait_timeout = 28800'); } catch (\Throwable $e) {}        // 8h
+                try { \DB::statement('SET SESSION interactive_timeout = 28800'); } catch (\Throwable $e) {} // 8h
+                try { \DB::statement('SET SESSION net_read_timeout = 600'); } catch (\Throwable $e) {}
+                try { \DB::statement('SET SESSION net_write_timeout = 600'); } catch (\Throwable $e) {}
+
                 \DB::statement('SET FOREIGN_KEY_CHECKS=0');
-                foreach ($map[$section] as $table) {
-                    \DB::table($table)->delete();
+
+                $deletedCounts = [];
+
+                try {
+                    foreach ($map[$section] as $entry) {
+                        $table = $entry['table'];
+                        $hasFilter = isset($entry['where']) && is_callable($entry['where']);
+
+                        // Build a SELECT query (NOT a DELETE) that picks PRIMARY KEY ids matching the filter.
+                        $buildSelect = function() use ($table, $entry, $hasFilter) {
+                            $q = \DB::table($table)->select('id');
+                            if ($hasFilter) $entry['where']($q);
+                            return $q;
+                        };
+
+                        $totalDeleted = 0;
+                        $consecutiveEmpty = 0;
+
+                        while (true) {
+                            // Read the next page of ids
+                            $ids = $buildSelect()->limit($BATCH_SIZE)->pluck('id')->all();
+                            if (empty($ids)) {
+                                // Double-check: see if the table genuinely has nothing left for this filter.
+                                // Two consecutive empty reads = done.
+                                if (++$consecutiveEmpty >= 2) break;
+                                usleep(100000); // 100ms breath, then re-check
+                                continue;
+                            }
+                            $consecutiveEmpty = 0;
+
+                            // Delete by primary key with INFINITE retry on lock_wait_timeout (1205) or deadlock (1213).
+                            // Backoff caps at ~5s per wait so we don't spin tight, but loop never gives up.
+                            $attempt = 0;
+                            $deletedThisBatch = 0;
+                            while (true) {
+                                try {
+                                    $deletedThisBatch = \DB::table($table)->whereIn('id', $ids)->delete();
+                                    break; // success
+                                } catch (\Illuminate\Database\QueryException $qe) {
+                                    $code = (string) ($qe->errorInfo[1] ?? '');
+                                    $msg  = $qe->getMessage();
+                                    $isLockTimeout = ($code === '1205') || stripos($msg, 'lock wait timeout') !== false;
+                                    $isDeadlock    = ($code === '1213') || stripos($msg, 'deadlock') !== false;
+                                    if ($isLockTimeout || $isDeadlock) {
+                                        // Exponential backoff: 200ms, 400ms, 800ms, 1.6s, 3.2s, 5s (cap)
+                                        $waitMs = min(5000000, 200000 * (1 << min($attempt, 5)));
+                                        usleep($waitMs);
+                                        $attempt++;
+                                        continue;
+                                    }
+                                    // Non-lock error → don't infinite-retry; bubble up so the operator sees it
+                                    throw $qe;
+                                }
+                            }
+                            $totalDeleted += $deletedThisBatch;
+                            // Tiny breath between full batches so concurrent transactions can grab their locks
+                            if ($deletedThisBatch === $BATCH_SIZE) usleep(20000); // 20ms
+                        }
+                        $deletedCounts[$table] = $totalDeleted;
+                    }
+                } finally {
+                    // Always re-enable FK checks, even if a batch ultimately threw
+                    \DB::statement('SET FOREIGN_KEY_CHECKS=1');
                 }
-                \DB::statement('SET FOREIGN_KEY_CHECKS=1');
-                return response()->json(['success'=>true,'message'=>ucfirst($section).' data deleted successfully.']);
+
+                // Fresh live counts for ALL Delete-Data cards, so the client can update every
+                // count pill without a page reload (a delete in one section can affect others).
+                $liveCounts = [
+                    'sales'     => (int) \DB::table('customer_invoices')->count(),
+                    'purchases' => (int) \DB::table('supplier_invoices')->count(),
+                    'products'  => (int) \DB::table('products')->count(),
+                    'customers' => (int) \DB::table('customers')->count(),
+                    'suppliers' => (int) \DB::table('suppliers')->count(),
+                ];
+
+                return response()->json([
+                    'success' => true,
+                    'message' => ucfirst($section) . ' data deleted successfully.',
+                    'deleted' => $deletedCounts,
+                    'counts'  => $liveCounts,
+                ]);
             })->name('settings.data.delete');
+
+            // Live row counts for the Delete Data cards — lets the client refresh
+            // every count pill without a page reload (e.g. after an import).
+            Route::get('settings/data-counts', function() {
+                return response()->json([
+                    'success' => true,
+                    'counts'  => [
+                        'sales'     => (int) \DB::table('customer_invoices')->count(),
+                        'purchases' => (int) \DB::table('supplier_invoices')->count(),
+                        'products'  => (int) \DB::table('products')->count(),
+                        'customers' => (int) \DB::table('customers')->count(),
+                        'suppliers' => (int) \DB::table('suppliers')->count(),
+                    ],
+                ]);
+            })->name('settings.data.counts');
+
+            // Import Data routes
+            Route::post('settings/import/headers', [\App\Http\Controllers\ImportDataController::class, 'headers'])->name('settings.import.headers');
+            Route::post('settings/import/preview', [\App\Http\Controllers\ImportDataController::class, 'preview'])->name('settings.import.preview');
+            Route::post('settings/import/import', [\App\Http\Controllers\ImportDataController::class, 'import'])->name('settings.import.import');
+            Route::post('settings/import/debug', [\App\Http\Controllers\ImportDataController::class, 'debug'])->name('settings.import.debug');
+            // Lightweight list + quick-add for the Sales-Import "Fix Errors" dropdowns
+            Route::get('settings/import/entities/customers', [\App\Http\Controllers\ImportDataController::class, 'listCustomers'])->name('settings.import.entities.customers');
+            Route::get('settings/import/entities/suppliers', [\App\Http\Controllers\ImportDataController::class, 'listSuppliers'])->name('settings.import.entities.suppliers');
+            Route::post('settings/import/entities/customer-quick-add', [\App\Http\Controllers\ImportDataController::class, 'quickAddCustomer'])->name('settings.import.entities.customer_quick_add');
+            Route::post('settings/import/entities/supplier-quick-add', [\App\Http\Controllers\ImportDataController::class, 'quickAddSupplier'])->name('settings.import.entities.supplier_quick_add');
+            Route::get('settings/import/entities/products', [\App\Http\Controllers\ImportDataController::class, 'listProducts'])->name('settings.import.entities.products');
+            Route::post('settings/import/entities/product-quick-add', [\App\Http\Controllers\ImportDataController::class, 'quickAddProduct'])->name('settings.import.entities.product_quick_add');
 
             Route::group(['prefix' => 'customers', 'as' => 'customers.'], function(){
                 Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
@@ -349,20 +612,6 @@ Route::middleware(['localization', 'domains'])->group(function () {
             });
         });
 		
-		Route::group(['prefix' => 'customer_payment_history', 'as' => 'customer_payment_history.'], function(){
-			Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
-				
-			});
-			Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
-				Route::get('', [CustomerPaymentHistoryController::class, 'create'])->name('index');
-				Route::get('customers', [CustomerPaymentHistoryController::class, 'customers'])->name('customers');
-				Route::post('{customer_id}', [CustomerPaymentHistoryController::class, 'show'])->name('show');
-			});
-			Route::group(['prefix' => 'delete', 'as' => 'delete.'], function(){
-				Route::post('{invoice_id}', [CustomerPaymentHistoryController::class, 'destroy'])->name('delete');
-			});
-		});
-		
 		// stock manager.
 		Route::get('stock_manager/view', [StockClosingController::class, 'stockManager'])->name('stock_manager.view.index');
 
@@ -375,6 +624,10 @@ Route::middleware(['localization', 'domains'])->group(function () {
 			Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
 				Route::get('index', [StockClosingController::class, 'crud'])->name('index');
 				Route::post('products', [StockClosingController::class, 'products'])->name('products');
+				Route::get('unassigned-suppliers', [StockClosingController::class, 'unassignedSuppliers'])->name('unassigned-suppliers');
+				Route::post('unassigned-suppliers/list', [StockClosingController::class, 'unassignedSuppliersList'])->name('unassigned-suppliers.list');
+				Route::post('unassigned-suppliers/assign', [StockClosingController::class, 'assignSupplier'])->name('unassigned-suppliers.assign');
+				Route::get('unassigned-suppliers/suppliers-by-product/{product_id}', [StockClosingController::class, 'suppliersByProduct'])->name('unassigned-suppliers.suppliers-by-product');
 			});
 			Route::group(['prefix' => 'edit', 'as' => 'edit.'], function(){
 				Route::post('', [StockClosingController::class, 'update'])->name('edit');
@@ -393,9 +646,10 @@ Route::middleware(['localization', 'domains'])->group(function () {
 				Route::post('dumps', [StockCheckController::class, 'dumps'])->name('dumps');
 				Route::post('supplierReturn', [StockCheckController::class, 'supplierReturn'])->name('supplierReturn');
 				Route::post('closingStock', [StockCheckController::class, 'closingStock'])->name('closingStock');
+				Route::get('print', [StockCheckController::class, 'print'])->name('print');
 			});
 		});
-		
+
 		Route::group(['prefix' => 'supplier_payment_history', 'as' => 'supplier_payment_history.'], function(){
 			Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
 				
@@ -417,17 +671,21 @@ Route::middleware(['localization', 'domains'])->group(function () {
 			});
 			Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
 				Route::get('', [CustomerReturnController::class, 'index'])->name('index');
+				Route::get('history', [CustomerReturnController::class, 'history'])->name('history');
 				Route::get('customers', [CustomerReturnController::class, 'customers'])->name('customers');
 				Route::get('products', [CustomerReturnController::class, 'products'])->name('products');
 				Route::post('invoices', [CustomerReturnController::class, 'invoices'])->name('invoices');
+				Route::post('customer-products', [CustomerReturnController::class, 'customerProducts'])->name('customer-products');
 				Route::post('returns', [CustomerReturnController::class, 'returns'])->name('returns');
 				Route::post('product', [CustomerReturnController::class, 'product'])->name('product');
 				Route::post('return/create', [CustomerReturnController::class, 'returnCreate'])->name('return-create');
 				Route::post('return/update', [CustomerReturnController::class, 'returnUpdate'])->name('return-update');
 				Route::post('return/delete', [CustomerReturnController::class, 'returnDelete'])->name('return-delete');
+				Route::get('credit-balance/{customer_id}', [CustomerReturnController::class, 'creditBalance'])->name('credit-balance');
+				Route::get('credit-balance-all', [CustomerReturnController::class, 'creditBalanceAll'])->name('credit-balance-all');
 			});
 		});
-		
+
 		// supplier return.
 		Route::group(['prefix' => 'supplier_return', 'as' => 'supplier_return.'], function(){
 			Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
@@ -435,14 +693,18 @@ Route::middleware(['localization', 'domains'])->group(function () {
 			});
 			Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
 				Route::get('', [SupplierReturnController::class, 'index'])->name('index');
+				Route::get('history', [SupplierReturnController::class, 'history'])->name('history');
 				Route::get('suppliers', [SupplierReturnController::class, 'suppliers'])->name('suppliers');
 				Route::get('products', [SupplierReturnController::class, 'products'])->name('products');
 				Route::post('invoices', [SupplierReturnController::class, 'invoices'])->name('invoices');
+				Route::post('supplier-products', [SupplierReturnController::class, 'supplierProducts'])->name('supplier-products');
 				Route::post('returns', [SupplierReturnController::class, 'returns'])->name('returns');
 				Route::post('product', [SupplierReturnController::class, 'product'])->name('product');
 				Route::post('return/create', [SupplierReturnController::class, 'returnCreate'])->name('return-create');
 				Route::post('return/update', [SupplierReturnController::class, 'returnUpdate'])->name('return-update');
 				Route::post('return/delete', [SupplierReturnController::class, 'returnDelete'])->name('return-delete');
+			Route::get('credit-balance/{supplier_id}', [SupplierReturnController::class, 'creditBalance'])->name('credit-balance');
+			Route::get('credit-balance-all', [SupplierReturnController::class, 'creditBalanceAll'])->name('credit-balance-all');
 			});
 		});
 		
@@ -453,8 +715,10 @@ Route::middleware(['localization', 'domains'])->group(function () {
 			});
 			Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
 				Route::get('', [DumpController::class, 'index'])->name('index');
+				Route::get('history', [DumpController::class, 'history'])->name('history');
 				Route::get('suppliers', [SupplierReturnController::class, 'suppliers'])->name('suppliers');
 				Route::get('products', [SupplierReturnController::class, 'products'])->name('products');
+				Route::post('supplier-products', [DumpController::class, 'supplierProducts'])->name('supplier-products');
 				Route::post('invoices', [DumpController::class, 'invoices'])->name('invoices');
 				Route::post('returns', [DumpController::class, 'returns'])->name('returns');
 				Route::post('product', [DumpController::class, 'product'])->name('product');
@@ -635,6 +899,7 @@ Route::middleware(['localization', 'domains'])->group(function () {
                     Route::get('invoiceview/{invoice}', [SalesController::class, 'invoiceview'])->name('invoiceview');
 					Route::get('invoiceview-delivery/{invoice}', [SalesController::class, 'invoiceviewDelivery'])->name('invoiceview-delivery');
                     Route::get('invoicedownload/{invoice}', [SalesController::class, 'invoicedownload'])->name('invoicedownload');
+                    Route::get('invoiceexcel/{invoice}', [SalesController::class, 'invoiceExcel'])->name('invoiceexcel');
                     Route::get('mail/{invoice}', [SalesController::class, 'mail'])->name('mail');
                     Route::get('delete/{invoice}', [SalesController::class, 'delete'])->name('delete');
                 });
@@ -683,6 +948,7 @@ Route::middleware(['localization', 'domains'])->group(function () {
                     Route::post('/store-products/{invoice}', [SalesController::class, 'storeProducts'])->name('store');
                     Route::get('invoiceview/{invoice}', [PurchaseController::class, 'invoiceview'])->name('invoiceview');
                     Route::get('invoicedownload/{invoice}', [PurchaseController::class, 'invoicedownload'])->name('invoicedownload');
+                    Route::get('invoiceexcel/{invoice}', [PurchaseController::class, 'invoiceExcel'])->name('invoiceexcel');
                     Route::get('mail/{invoice}', [PurchaseController::class, 'mail'])->name('mail');
                     Route::get('delete/{invoice}', [PurchaseController::class, 'delete'])->name('delete');
                 });
@@ -741,6 +1007,7 @@ Route::middleware(['localization', 'domains'])->group(function () {
             Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
                 Route::get('/index', [HomeController::class, 'index'])->name('index');
                 Route::get('/chart-data', [HomeController::class, 'chartData'])->name('chart_data');
+                Route::get('/stats', [HomeController::class, 'dashboardStats'])->name('stats');
             });
         });
         // Route::resource('permissionModule', PermissionModule::class);
@@ -796,6 +1063,7 @@ Route::middleware(['localization', 'domains'])->group(function () {
                     Route::get('suppliers', [PurchaseController::class, 'suppliers'])->name('suppliers');
                     Route::post('list', [PurchaseController::class, 'list'])->name('list');
                     Route::get('print', [PurchaseController::class, 'print'])->name('print');
+                    Route::get('statement', [PurchaseController::class, 'statementDailyBookPurchase'])->name('statement');
                 });
                 Route::group(['prefix' => 'ajax', 'as' => 'ajax.'], function(){
                     Route::post('/purchases-list', [PurchaseController::class, 'ajaxDailyBookPurchase'])->name('purchases-list');

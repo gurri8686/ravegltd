@@ -310,14 +310,6 @@ $_details = [
         'html' => (function () { return ""; })(),
     ],
 
-    'customer_payment_history.view.index' => [
-        'breadcrumbs' => [
-            ['link' => '', 'title' => 'Customer Payment History']
-        ],
-        'title' => 'Customer Payment History',
-        'html' => (function () { return ""; })(),
-    ],
-
     'supplier_payment_history.view.index' => [
         'breadcrumbs' => [
             ['link' => '', 'title' => 'Supplier Payment History']
@@ -387,7 +379,7 @@ $_details = [
 <div class="content-header-left col-md-8 col-12 mb-2">
 	<div class="row breadcrumbs-top">
 	<div class="breadcrumb-wrapper col-12">
-		@if($route !== 'data_entry.sales_entry.invoice.index' && $route !== 'data_entry.sales_entry.view.index' && $route !== 'data_entry.purchase_entry.invoice.index' && $route !== 'data_entry.purchase_entry.view.index' && $route !== 'product_history.view.index' && $route !== 'management.products.view.index' && $route !== 'product_profit_loss.view.index' && $route !== 'daily_report.daily_book_sales.view.index' && $route !== 'daily_report.daily_book_purchase.view.index' && $route !== 'management.roles.role.view.index' && $route !== 'management.roles.role.edit.edit' && $route !== 'management.roles.permission.view.index' && $route !== 'management.roles.permission.edit.edit' && $route !== 'management.users.view.index' && $route !== 'stock_closing.view.index' && $route !== 'stock_check.view.index' && $route !== 'management.users.edit.edit' && $route !== 'management.products.edit.edit' && $route !== 'management.products.create.create' && $route !== 'management.customers.view.index' && $route !== 'management.customers.create.create' && $route !== 'management.customers.edit.edit' && $route !== 'management.customers.on_account_payment.view.index' && $route !== 'customer_return.view.index' && $route !== 'customer_history.view.index' && $route !== 'payments.customer_payment.view.index' && $route !== 'dashboard.view.index')
+		@if($route !== 'data_entry.sales_entry.invoice.index' && $route !== 'data_entry.sales_entry.view.index' && $route !== 'data_entry.purchase_entry.invoice.index' && $route !== 'data_entry.purchase_entry.view.index' && $route !== 'product_history.view.index' && $route !== 'management.products.view.index' && $route !== 'product_profit_loss.view.index' && $route !== 'daily_report.daily_book_sales.view.index' && $route !== 'daily_report.daily_book_purchase.view.index' && $route !== 'management.roles.role.view.index' && $route !== 'management.roles.role.edit.edit' && $route !== 'management.roles.permission.view.index' && $route !== 'management.roles.permission.edit.edit' && $route !== 'management.users.view.index' && $route !== 'stock_closing.view.index' && $route !== 'stock_check.view.index' && $route !== 'management.users.edit.edit' && $route !== 'management.products.edit.edit' && $route !== 'management.products.create.create' && $route !== 'management.customers.view.index' && $route !== 'management.customers.create.create' && $route !== 'management.customers.edit.edit' && $route !== 'management.customers.on_account_payment.view.index' && $route !== 'customer_return.view.index' && $route !== 'customer_history.view.index' && $route !== 'payments.customer_payment.view.index' && $route !== 'dashboard.view.index' && $route !== 'settings.index')
 		<ol class="breadcrumb">
 			<li class="breadcrumb-item"><a href="{{route('dashboard.view.index')}}"><i class="fa fa-home"></i> Home</a></li>
 			@if(isset($_details[$route]))
