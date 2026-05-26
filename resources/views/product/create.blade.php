@@ -16,7 +16,7 @@
 }
 .toggle-active-no { background: #dc2626; color: #fff; }
 .toggle-inactive-no { background: #fff; color: #94a3b8; }
-.toggle-active-yes { background: #F27420; color: #fff; }
+.toggle-active-yes { background: rgb(234, 88, 12); color: #fff; }
 .toggle-inactive-yes { background: #fff; color: #94a3b8; }
 
 /* Input with icon */
@@ -92,8 +92,8 @@
     .input-with-icon { padding-left: 16px !important; }
     .form-control::placeholder { color: #c5cdd8 !important; font-weight: 400 !important; }
     .form-control:focus {
-        border-color: #F27420 !important;
-        box-shadow: 0 0 0 3px rgba(242,116,32,0.1) !important;
+        border-color: rgb(234, 88, 12) !important;
+        box-shadow: 0 0 0 3px rgba(234,88,12,0.1) !important;
         outline: none !important;
     }
 
@@ -145,8 +145,8 @@
     .create-header-card .create-icon {
         width: 40px !important; height: 40px !important;
         border-radius: 12px !important; flex-shrink: 0 !important;
-        background: #F27420 !important;
-        box-shadow: 0 3px 10px rgba(242,116,32,0.3) !important;
+        background: rgb(234, 88, 12) !important;
+        box-shadow: 0 3px 10px rgba(234,88,12,0.3) !important;
     }
     .create-header-card .create-icon i { font-size: 17px !important; color: #fff !important; }
     .create-header-card h1 { font-size: 17px !important; font-weight: 800 !important; margin: 0 !important; }
@@ -207,8 +207,8 @@
     .input-with-icon { padding-left: 40px !important; }
     .form-control::placeholder { color: #c5cdd8 !important; font-weight: 400 !important; }
     .form-control:focus {
-        border-color: #F27420 !important;
-        box-shadow: 0 0 0 3px rgba(242,116,32,0.08) !important;
+        border-color: rgb(234, 88, 12) !important;
+        box-shadow: 0 0 0 3px rgba(234,88,12,0.08) !important;
         outline: none !important;
     }
 
@@ -238,6 +238,12 @@
         border-radius: 12px !important; font-size: 14px !important;
     }
 }
+
+/* ── Bootstrap-checkbox toggle (Yes pill) — apply on all viewports ── */
+.checkbox-success .btn-success,
+.btn-group .btn-success,
+input.switch ~ .btn-group .btn-success,
+.btn.btn-success.active { background-color: rgb(234, 88, 12) !important; border-color: rgb(234, 88, 12) !important; color: #fff !important; }
 </style>
 @endpush
 
@@ -254,11 +260,11 @@
 <div class="create-header-card" style="margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#fff;border-radius:16px;padding:18px 24px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border:1px solid #f1f5f9;">
 	<div style="display:flex;align-items:center;gap:14px;">
 		<a href="{{route('management.products.view.index')}}" class="back-btn" style="width:40px;height:40px;border-radius:10px;border:1px solid #e2e8f0;background:#fff;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:#64748b;transition:all 0.15s;" title="Back to Products"
-		   onmouseover="this.style.borderColor='#F27420';this.style.color='#F27420';this.style.background='#fff7ed';"
+		   onmouseover="this.style.borderColor='rgb(234, 88, 12)';this.style.color='rgb(234, 88, 12)';this.style.background='#fff7ed';"
 		   onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b';this.style.background='#fff';">
 		    <i class="fa fa-arrow-left"></i>
 		</a>
-		<div class="create-icon" style="width:48px;height:48px;border-radius:14px;background:#F27420;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(242,116,32,0.25);">
+		<div class="create-icon" style="width:48px;height:48px;border-radius:14px;background:rgb(234, 88, 12);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(234,88,12,0.25);">
 			<i class="fa fa-shopping-bag" style="color:#fff;font-size:20px;"></i>
 		</div>
 		<div>
@@ -356,10 +362,10 @@
                         </div>
 
                         <div class="create-actions" style="display:flex;align-items:center;justify-content:flex-end;gap:12px;padding-top:20px;border-top:1px solid #eef2f7;margin-top:20px;">
-                            <a href="{{ route('management.products.view.index') }}" style="height:44px;padding:0 24px;border-radius:12px;border:1.5px solid #e2e8f0;background:#fff;color:#64748b;font-size:13.5px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all 0.15s;outline:none;" onmouseover="this.style.borderColor='#F27420';this.style.color='#F27420';this.style.background='#FFF8F3';" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b';this.style.background='#fff';">
+                            <a href="{{ route('management.products.view.index') }}" style="height:44px;padding:0 24px;border-radius:12px;border:1.5px solid #e2e8f0;background:#fff;color:#64748b;font-size:13.5px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all 0.15s;outline:none;" onmouseover="this.style.borderColor='rgb(234, 88, 12)';this.style.color='rgb(234, 88, 12)';this.style.background='#FFF8F3';" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b';this.style.background='#fff';">
                                 <i class="fa fa-times" style="font-size:11px;color:#000;margin-right:4px;"></i> Cancel
                             </a>
-                            <button type="submit" class="btn" style="height:44px;padding:0 28px;border-radius:12px;border:none;background:#F27420;color:#fff;font-size:13.5px;font-weight:700;box-shadow:0 2px 8px rgba(242,116,32,0.3);display:inline-flex;align-items:center;gap:6px;outline:none;transition:all 0.15s;white-space:nowrap;" onmouseover="this.style.background='#e0600e';" onmouseout="this.style.background='#F27420';">
+                            <button type="submit" class="btn" style="height:44px;padding:0 28px;border-radius:12px;border:none;background:rgb(234, 88, 12);color:#fff;font-size:13.5px;font-weight:700;box-shadow:0 2px 8px rgba(234,88,12,0.3);display:inline-flex;align-items:center;gap:6px;outline:none;transition:all 0.15s;white-space:nowrap;" onmouseover="this.style.background='#e0600e';" onmouseout="this.style.background='rgb(234, 88, 12)';">
                                 <i class="fa fa-check" style="font-size:11px;"></i> <span style="white-space:nowrap;">Save Product</span>
                             </button>
                         </div>

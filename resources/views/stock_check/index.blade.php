@@ -30,9 +30,9 @@
     white-space:nowrap;text-decoration:none;transition:all 0.16s ease;
 }
 .sc-tab i { font-size:13px; }
-.sc-tab:hover { color:#f97316;background:#fff7ed;text-decoration:none; }
-.sc-tab.active { background:#fff7ed !important;border-top:3px solid #f97316;color:#f97316 !important;font-weight:700;border-radius:0 !important; }
-.sc-tab.active i { color:#f97316; }
+.sc-tab:hover { color:rgb(234, 88, 12);background:#fff7ed;text-decoration:none; }
+.sc-tab.active { background:#fff7ed !important;border-top:3px solid rgb(234, 88, 12);color:rgb(234, 88, 12) !important;font-weight:700;border-radius:0 !important; }
+.sc-tab.active i { color:rgb(234, 88, 12); }
 .sc-section { display:none; }
 .sc-section.active { display:block; }
 
@@ -56,9 +56,9 @@
     }
     .sc-mob-brand-icon {
         width:32px;height:32px;border-radius:10px;flex-shrink:0;
-        background:linear-gradient(135deg,#f97316 0%,#ea580c 100%);
+        background:rgb(234, 88, 12);
         display:flex;align-items:center;justify-content:center;
-        box-shadow:0 2px 8px rgba(249,115,22,0.3);
+        box-shadow:0 2px 8px rgba(234,88,12,0.3);
     }
     .sc-mob-brand-icon i { color:#fff;font-size:15px; }
     .sc-mob-brand-text { font-size:14px;font-weight:800;color:#0f172a;letter-spacing:-0.2px; }
@@ -74,10 +74,10 @@
         cursor:pointer;outline:none !important;box-shadow:none !important;transition:all 0.15s;
     }
     .sc-mob-dd-trigger.open {
-        background:#fff7ed;border-color:#f97316;
+        background:#fff7ed;border-color:rgb(234, 88, 12);
     }
     .sc-mob-dd-label {
-        font-size:13px;font-weight:700;color:#f97316;flex:1;text-align:left;
+        font-size:13px;font-weight:700;color:rgb(234, 88, 12);flex:1;text-align:left;
         overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
     }
     .sc-mob-dd-chevron {
@@ -102,14 +102,14 @@
         width:100%;text-align:left;outline:none !important;box-shadow:none !important;
     }
     .sc-mob-dd-item:focus { outline:none !important;box-shadow:none !important; }
-    .sc-mob-dd-item:hover { background:#F27420;color:#fff; }
-    .sc-mob-dd-item:active { background:#ea580c;color:#fff; }
-    .sc-mob-dd-item.active { color:#f97316;background:#fff7ed;font-weight:700; }
-    .sc-mob-dd-item.active:hover { background:#F27420;color:#fff; }
+    .sc-mob-dd-item:hover { background:rgb(234, 88, 12);color:#fff; }
+    .sc-mob-dd-item:active { background:#c2410c;color:#fff; }
+    .sc-mob-dd-item.active { color:rgb(234, 88, 12);background:#fff7ed;font-weight:700; }
+    .sc-mob-dd-item.active:hover { background:rgb(234, 88, 12);color:#fff; }
     .sc-mob-dd-item.active .sc-mob-dd-tick { display:flex; }
     .sc-mob-dd-tick {
         display:none;align-items:center;justify-content:center;
-        width:20px;height:20px;border-radius:50%;background:#f97316;flex-shrink:0;
+        width:20px;height:20px;border-radius:50%;background:rgb(234, 88, 12);flex-shrink:0;
     }
 }
 </style>
@@ -122,7 +122,7 @@
 
     {{-- Desktop header --}}
     <div class="sc-desktop-header" style="display:flex;align-items:center;gap:14px;padding:17px 20px 23px 14px;">
-        <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#f97316 0%,#ea580c 100%);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(249,115,22,0.3);flex-shrink:0;">
+        <div style="width:40px;height:40px;border-radius:12px;background:rgb(234, 88, 12);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(234,88,12,0.3);flex-shrink:0;">
             <i class="fa fa-cubes" style="color:#fff;font-size:18px;"></i>
         </div>
         <div>
@@ -140,7 +140,7 @@
         <div class="sc-mob-dd-wrap" id="sc-mob-dd-wrap">
             <button type="button" class="sc-mob-dd-trigger" id="sc-mob-dd-trigger" onclick="toggleScMobDd()">
                 <span class="sc-mob-dd-label" id="sc-mob-dd-label">Stock Check</span>
-                <svg class="sc-mob-dd-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                <svg class="sc-mob-dd-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgb(234, 88, 12)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
             <div class="sc-mob-dd-menu" id="sc-mob-dd-menu">
                 <button type="button" class="sc-mob-dd-item active" data-tab="stock-check" data-label="Stock Check" onclick="pickScMobTab(this)">

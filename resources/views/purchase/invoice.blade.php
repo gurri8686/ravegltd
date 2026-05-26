@@ -106,24 +106,28 @@
     <thead>
       <tr>
         <th style="width:40px">#</th>
-        <th>Item</th>
-        <th class="text-center">Price</th>
+        <th>Product</th>
+        <th>Remarks</th>
         <th class="text-center">Qty</th>
+        <th class="text-center">Price</th>
+        <th class="text-center">Sell Price</th>
         <th class="text-right">Total</th>
       </tr>
     </thead>
     <tbody>
       <?php $subtotal = 0; $i = 1; ?>
       @foreach ($data->product as $item)
+      <?php
+        $getjson = json_decode($item->product_info);
+        $productName = $getjson->name ?? optional($item->product)->name ?? '';
+      ?>
       <tr>
         <td style="color:#94a3b8">{{$i++}}</td>
-        <td>
-          <?php $getjson = json_decode($item->product_info); ?>
-          <span class="product-name">{{ $getjson->name ?? '—' }}</span>
-          @if($item->remarks)<br><span class="product-remarks">{{$item->remarks}}</span>@endif
-        </td>
-        <td class="text-center">{{env('CURRENCY_SYMBOL', '£')}} {{number_format($item->unit_price, 2)}}</td>
+        <td><span class="product-name">{{ $productName }}</span></td>
+        <td>{{ $item->remarks ?? '' }}</td>
         <td class="text-center">{{$item->quantity}}</td>
+        <td class="text-center">{{env('CURRENCY_SYMBOL', '£')}} {{number_format($item->unit_price, 2)}}</td>
+        <td class="text-center">{{ !empty($item->sale_price) ? env('CURRENCY_SYMBOL', '£') . ' ' . number_format($item->sale_price, 2) : '' }}</td>
         <td class="text-right" style="font-weight:700">{{env('CURRENCY_SYMBOL', '£')}} {{number_format($item->sub_total, 2)}}</td>
         <?php $subtotal += $item->sub_total; ?>
       </tr>

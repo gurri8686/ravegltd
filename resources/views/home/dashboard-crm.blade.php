@@ -9,22 +9,22 @@
 .content-header { display: none !important; }
 @keyframes dcFadeIn{from{opacity:0;transform:translateY(-6px);filter:blur(2px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
 .dc-day{width:40px;height:40px;border-radius:12px;border:none;font-size:13px;font-weight:600;cursor:pointer;outline:none;transition:all 0.15s;background:transparent;color:#1e293b;position:relative;}
-.dc-day:hover{background:linear-gradient(135deg,#FFF5ED,#fff7ed);color:#F27420;transform:scale(1.08);}
-.dc-day.dc-today{background:linear-gradient(135deg,#fef3e2,#fff7ed);color:#ea580c;font-weight:800;box-shadow:inset 0 0 0 2px #fed7aa;}
-.dc-day.dc-selected{background:linear-gradient(135deg,#F27420,#ea580c) !important;color:#fff !important;box-shadow:0 4px 12px rgba(242,116,32,0.4);transform:scale(1.05);font-weight:700;}
+.dc-day:hover{background:linear-gradient(135deg,#FFF5ED,#fff7ed);color:rgb(234, 88, 12);transform:scale(1.08);}
+.dc-day.dc-today{background:linear-gradient(135deg,#fef3e2,#fff7ed);color:#c2410c;font-weight:800;box-shadow:inset 0 0 0 2px #fed7aa;}
+.dc-day.dc-selected{background:rgb(234, 88, 12) !important;color:#fff !important;box-shadow:0 4px 12px rgba(234,88,12,0.4);transform:scale(1.05);font-weight:700;}
 .dc-day.dc-other{color:#e8ecf0;font-weight:400;pointer-events:none;opacity:0.15;}
 .dc-day.dc-disabled{color:#e2e8f0;cursor:not-allowed;opacity:0.4;}
 .dc-day.dc-disabled:hover{background:transparent;color:#e2e8f0;transform:none;}
 .dc-nav{width:34px;height:34px;border-radius:10px;border:1.5px solid #e5e7eb;background:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:#64748b;font-weight:700;transition:all 0.15s;outline:none;}
-.dc-nav:hover{background:linear-gradient(135deg,#F27420,#ea580c);border-color:#F27420;color:#fff;box-shadow:0 3px 10px rgba(242,116,32,0.3);transform:scale(1.05);}
+.dc-nav:hover{background:rgb(234, 88, 12);border-color:rgb(234, 88, 12);color:#fff;box-shadow:0 3px 10px rgba(234,88,12,0.3);transform:scale(1.05);}
 .dc-hdr-select{border:1.5px solid #e2e8f0;border-radius:10px;padding:7px 28px 7px 12px;font-size:13px;font-weight:700;color:#1e293b;background:#fff;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;transition:all 0.15s;background-image:url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2710%27 height=%2710%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23F27420%27 stroke-width=%273%27 stroke-linecap=%27round%27%3E%3Cpolyline points=%276 9 12 15 18 9%27/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right 8px center;box-shadow:0 1px 3px rgba(0,0,0,0.04);}
-.dc-hdr-select:hover{border-color:#F27420;background:#FFF5ED;}
-.dc-hdr-select:focus{border-color:#F27420;background:#fff;box-shadow:none;outline:none;}
+.dc-hdr-select:hover{border-color:rgb(234, 88, 12);background:#FFF5ED;}
+.dc-hdr-select:focus{border-color:rgb(234, 88, 12);background:#fff;box-shadow:none;outline:none;}
 .dc-hdr-select option{padding:8px 12px;font-weight:500;font-size:13px;}
-.dc-hdr-select option:checked{background:#F27420 linear-gradient(#F27420,#F27420);color:#fff;}
+.dc-hdr-select option:checked{background:rgb(234, 88, 12) linear-gradient(rgb(234, 88, 12),rgb(234, 88, 12));color:#fff;}
 .dc-hdr-select option:hover{background:#FFF5ED linear-gradient(#FFF5ED,#FFF5ED);}
 .dc-hdr-select::-webkit-scrollbar{width:4px;}
-.dc-hdr-select::-webkit-scrollbar-thumb{background:#F27420;border-radius:4px;}
+.dc-hdr-select::-webkit-scrollbar-thumb{background:rgb(234, 88, 12);border-radius:4px;}
 .dc-footer-btn{border:none;background:none;font-size:12px;font-weight:700;cursor:pointer;padding:6px 14px;border-radius:8px;transition:all 0.15s;}
 .dc-footer-btn:hover{transform:scale(1.03);}
 /* Date filter — preset buttons + custom range inputs */
@@ -34,15 +34,15 @@
     transition: border-color 0.15s, background 0.15s, color 0.15s; padding: 0 10px;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.dash-preset-btn:hover { border-color: #F27420; color: #F27420; background: #fffbf5; }
-.dash-preset-btn.active { border-color: #F27420; background: #F27420; color: #fff; }
+.dash-preset-btn:hover { border-color: rgb(234, 88, 12); color: rgb(234, 88, 12); background: #fffbf5; }
+.dash-preset-btn.active { border-color: rgb(234, 88, 12); background: rgb(234, 88, 12); color: #fff; }
 .dash-date-input {
     width: 100%; height: 36px; padding: 0 10px; border-radius: 9px;
     border: 1.5px solid #e5e7eb; background: #fafbfc; font-size: 12.5px;
     font-weight: 600; color: #0f172a; outline: none; transition: border-color 0.15s, background 0.15s;
     font-family: inherit;
 }
-.dash-date-input:focus { border-color: #F27420; background: #fff; }
+.dash-date-input:focus { border-color: rgb(234, 88, 12); background: #fff; }
 /* Custom calendar trigger (replaces native <input type="date">) */
 .dash-cal-trigger {
     width: 100%; height: 38px; padding: 0 12px; border-radius: 10px;
@@ -53,8 +53,8 @@
     transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
     font-family: inherit; text-align: left;
 }
-.dash-cal-trigger:hover, .dash-cal-trigger.active { border-color: #F27420; background: #fff; }
-.dash-cal-trigger.active { box-shadow: 0 0 0 3px rgba(242,116,32,0.10); }
+.dash-cal-trigger:hover, .dash-cal-trigger.active { border-color: rgb(234, 88, 12); background: #fff; }
+.dash-cal-trigger.active { box-shadow: 0 0 0 3px rgba(234,88,12,0.10); }
 /* Calendar navigation arrows */
 .dash-cal-nav-btn {
     width: 28px; height: 28px; border-radius: 8px;
@@ -63,35 +63,36 @@
     align-items: center; justify-content: center;
     transition: border-color 0.15s, color 0.15s, background 0.15s;
 }
-.dash-cal-nav-btn:hover { border-color: #F27420; color: #F27420; background: #fffbf5; }
-/* Calendar day cells */
+.dash-cal-nav-btn:hover { border-color: rgb(234, 88, 12); color: rgb(234, 88, 12); background: #fffbf5; }
+/* Calendar day cells — matched to daily_book_sales picker theme */
 .dash-cal-dow {
     height: 28px; display: flex; align-items: center; justify-content: center;
-    font-size: 10.5px; font-weight: 700; color: #94a3b8;
+    font-size: 10.5px; font-weight: 700; color: #9ca3af;
     text-transform: uppercase; letter-spacing: 0.4px;
 }
 .dash-cal-day {
     height: 34px; display: flex; align-items: center; justify-content: center;
-    font-size: 12.5px; font-weight: 600; color: #0f172a;
-    border-radius: 8px; cursor: pointer; border: none; background: transparent;
-    outline: none; transition: background 0.12s, color 0.12s;
+    font-size: 12.5px; font-weight: 600; color: #1f2937;
+    border-radius: 50%; cursor: pointer; border: none; background: transparent;
+    outline: none; transition: background 0.1s, color 0.1s;
     font-family: inherit; padding: 0;
 }
-.dash-cal-day:hover:not(.disabled):not(.selected) { background: #fff7ed; color: #F27420; }
-.dash-cal-day.muted { color: #cbd5e1; font-weight: 500; }
-.dash-cal-day.today { color: #F27420; font-weight: 800; box-shadow: inset 0 0 0 1.5px #fed7aa; }
-.dash-cal-day.selected { background: #F27420; color: #fff; font-weight: 700; box-shadow: 0 2px 6px rgba(242,116,32,0.30); border-radius: 8px; z-index: 1; position: relative; }
-.dash-cal-day.selected:hover { background: #ea580c; }
+.dash-cal-day:hover:not(.disabled):not(.selected):not(.in-range) { background: #f1f5f9; color: #1f2937; }
+.dash-cal-day.muted { color: transparent; pointer-events: none; }
+.dash-cal-day.today { color: rgb(234, 88, 12); font-weight: 700; background: transparent; }
+.dash-cal-day.selected { background: rgb(234, 88, 12); color: #fff; font-weight: 700; border-radius: 50%; z-index: 2; position: relative; }
+.dash-cal-day.selected:hover { background: rgb(234, 88, 12); color: #fff; }
 .dash-cal-day.disabled { color: #e2e8f0; cursor: not-allowed; pointer-events: none; }
-/* Range selection — cells between From and To get a soft peach fill */
+/* Range selection — soft peach fill between range endpoints */
 .dash-cal-day.in-range {
-    background: #fff7ed; color: #ea580c; border-radius: 0;
+    background: #ffedd5; color: rgb(234, 88, 12); border-radius: 0; font-weight: 600;
     box-shadow: none;
 }
+.dash-cal-day.in-range:hover { background: #fed7aa; color: rgb(234, 88, 12); }
 .dash-cal-day.in-range.muted { color: #fed7aa; }
-.dash-cal-day.range-start { border-radius: 8px 0 0 8px; }
-.dash-cal-day.range-end   { border-radius: 0 8px 8px 0; }
-.dash-cal-day.range-start.range-end { border-radius: 8px; }
+.dash-cal-day.range-start { border-radius: 50% 0 0 50%; background: rgb(234, 88, 12); color: #fff; font-weight: 700; }
+.dash-cal-day.range-end   { border-radius: 0 50% 50% 0; background: rgb(234, 88, 12); color: #fff; font-weight: 700; }
+.dash-cal-day.range-start.range-end { border-radius: 50%; }
 /* Range summary pill — read-only display of the picked range */
 .dash-range-summary {
     width: 100%;
@@ -109,7 +110,7 @@
     font-family: inherit;
 }
 .dash-range-label { color: #0f172a; font-weight: 700; }
-.dash-range-sep { color: #f97316; font-weight: 700; flex-shrink: 0; }
+.dash-range-sep { color: rgb(234, 88, 12); font-weight: 700; flex-shrink: 0; }
 /* Pending state — when user picked start but not yet end, dim the To label */
 .dash-range-summary.pending .dash-range-label.to-label { color: #cbd5e1; font-weight: 500; }
 .dash-card {
@@ -136,14 +137,14 @@
 .dash-panel-title { font-size: 15px; font-weight: 700; color: #0f172a; }
 .dash-bar { height: 100%; border-radius: 6px 6px 0 0; min-width: 1px; transition: all 0.3s; }
 .chart-col{display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;cursor:pointer;position:relative;transition:all 0.15s;border-radius:8px;padding:4px 0;}
-.chart-col:hover{background:rgba(242,116,32,0.04);}
+.chart-col:hover{background:rgba(234,88,12,0.04);}
 .chart-col:hover .chart-bar-s{filter:brightness(1.1);transform:scaleX(1.15);}
 .chart-col:hover .chart-bar-p{filter:brightness(1.1);transform:scaleX(1.15);}
-.chart-col:hover .chart-day{color:#F27420 !important;font-weight:800 !important;}
+.chart-col:hover .chart-day{color:rgb(234, 88, 12) !important;font-weight:800 !important;}
 #chartContainer{scrollbar-width:none !important;-ms-overflow-style:none !important;}
 #chartContainer::-webkit-scrollbar{display:none !important;}
 .chart-scroll-bar{height:4px;border-radius:10px;background:#f1f5f9;margin:8px 24px 0;position:relative;overflow:hidden;}
-.chart-scroll-thumb{height:100%;border-radius:10px;background:#F27420;position:absolute;left:0;top:0;transition:left 0.1s;}
+.chart-scroll-thumb{height:100%;border-radius:10px;background:rgb(234, 88, 12);position:absolute;left:0;top:0;transition:left 0.1s;}
 
 @media (max-width: 991px) {
     .dash-bottom-grid { grid-template-columns: 1fr !important; }
@@ -475,7 +476,7 @@
     {{-- Header — exact spec UI --}}
     <div class="dash-header-card" style="margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#ffffff;border-radius:12px;padding:18px 22px;box-shadow:0 1px 2px rgba(15,17,21,0.04),0 6px 18px -8px rgba(15,17,21,0.12);border:1px solid #e8e8ec;">
         <div style="display:flex;align-items:center;gap:14px;">
-            <span class="dash-header-icon" style="width:44px;height:44px;border-radius:11px;background:#ea580c;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,0.25),0 6px 14px -4px rgba(234,88,12,0.45);">
+            <span class="dash-header-icon" style="width:44px;height:44px;border-radius:11px;background:rgb(234, 88, 12);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,0.25),0 6px 14px -4px rgba(234,88,12,0.45);">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14"/><path d="M9 9h.01M9 13h.01M9 17h.01M15 9h.01M15 13h.01M15 17h.01"/></svg>
             </span>
             <div>
@@ -486,8 +487,8 @@
 
         {{-- Date filter — real-time updates Today's Sales/Purchases/Orders without a page reload --}}
         <div id="dashDateFilterWrap" style="position:relative;">
-            <button type="button" id="dashDateBtn" onclick="dashToggleDatePicker(event)" style="display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 16px;border-radius:99px;border:1px solid #e8e8ec;background:#ffffff;color:#0f1115;font-size:13px;font-weight:700;cursor:pointer;outline:none;box-shadow:0 1px 2px rgba(15,17,21,0.04);transition:border-color 0.15s,box-shadow 0.15s,background 0.15s;" onmouseover="this.style.borderColor='#F27420';this.style.background='#fffbf5'" onmouseout="if(!this._open){this.style.borderColor='#e8e8ec';this.style.background='#fff';}">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F27420" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+            <button type="button" id="dashDateBtn" onclick="dashToggleDatePicker(event)" style="display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 16px;border-radius:99px;border:1px solid #e8e8ec;background:#ffffff;color:#0f1115;font-size:13px;font-weight:700;cursor:pointer;outline:none;box-shadow:0 1px 2px rgba(15,17,21,0.04);transition:border-color 0.15s,box-shadow 0.15s,background 0.15s;" onmouseover="this.style.borderColor='rgb(234, 88, 12)';this.style.background='#fffbf5'" onmouseout="if(!this._open){this.style.borderColor='#e8e8ec';this.style.background='#fff';}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgb(234, 88, 12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
                 <span id="dashDateBtnLabel">{{ $selectedCarbon->isToday() ? 'Today' : $selectedCarbon->format('d M Y') }}</span>
                 <svg id="dashDateBtnCaret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;transition:transform 0.15s;"><path d="M6 9l6 6 6-6"></path></svg>
             </button>
@@ -509,7 +510,7 @@
                     <input type="hidden" id="dashDateFrom" value="{{ $selectedDate }}">
                     <input type="hidden" id="dashDateTo"   value="{{ $selectedDate }}">
                     <div id="dashRangeSummary" class="dash-range-summary">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F27420" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgb(234, 88, 12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                         <span id="dashRangeFromLabel" class="dash-range-label from-label">{{ $selectedCarbon->format('d M Y') }}</span>
                         <span class="dash-range-sep">→</span>
                         <span id="dashRangeToLabel"   class="dash-range-label to-label">{{ $selectedCarbon->format('d M Y') }}</span>
@@ -532,7 +533,7 @@
                     </div>
                     <div style="display:flex;justify-content:space-between;margin-top:6px;">
                         <button type="button" onclick="dashCalClear()" style="background:none;border:none;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;outline:none;padding:4px 8px;border-radius:6px;">Clear</button>
-                        <button type="button" onclick="dashCalToday()" style="background:none;border:none;color:#F27420;font-size:12px;font-weight:700;cursor:pointer;outline:none;padding:4px 8px;border-radius:6px;">Today</button>
+                        <button type="button" onclick="dashCalToday()" style="background:none;border:none;color:rgb(234, 88, 12);font-size:12px;font-weight:700;cursor:pointer;outline:none;padding:4px 8px;border-radius:6px;">Today</button>
                     </div>
                 </div>
 
@@ -541,7 +542,7 @@
                     <button type="button" onclick="dashMobileCancel()" style="flex:1;height:44px;border-radius:10px;border:1.5px solid #e5e7eb;background:#ffffff;color:#475569;font-size:14px;font-weight:600;cursor:pointer;outline:none;">
                         Cancel
                     </button>
-                    <button type="button" onclick="dashMobileApply()" style="flex:1;height:44px;border-radius:10px;border:none;background:#F27420;color:#ffffff;font-size:14px;font-weight:700;cursor:pointer;outline:none;box-shadow:0 2px 6px rgba(242,116,32,0.30);">
+                    <button type="button" onclick="dashMobileApply()" style="flex:1;height:44px;border-radius:10px;border:none;background:rgb(234, 88, 12);color:#ffffff;font-size:14px;font-weight:700;cursor:pointer;outline:none;box-shadow:0 2px 6px rgba(234,88,12,0.30);">
                         Apply
                     </button>
                 </div>
@@ -575,7 +576,7 @@
         </div>
 
         <div class="dash-card">
-            <div class="dash-icon" style="background:#FFF5ED;color:#F27420;box-shadow:0 2px 8px rgba(242,116,32,0.15);">
+            <div class="dash-icon" style="background:#FFF5ED;color:rgb(234, 88, 12);box-shadow:0 2px 8px rgba(234,88,12,0.15);">
                 <i class="fa fa-shopping-bag"></i>
             </div>
             <div>
@@ -602,7 +603,7 @@
     <div class="dash-row-alltime" style="display:grid;grid-template-columns:repeat(3, 1fr);gap:16px;margin-bottom:20px;">
 
         <div class="dash-card">
-            <div class="dash-icon" style="background:#FFF5ED;color:#F27420;box-shadow:0 2px 8px rgba(242,116,32,0.15);">
+            <div class="dash-icon" style="background:#FFF5ED;color:rgb(234, 88, 12);box-shadow:0 2px 8px rgba(234,88,12,0.15);">
                 <i class="fa fa-bar-chart"></i>
             </div>
             <div>
@@ -646,9 +647,9 @@
                         <button type="button" onclick="toggleMonthDrop(event)" class="dc-hdr-select" style="font-size:12px;padding:5px 22px 5px 10px;min-width:60px;text-align:left;outline:none !important;box-shadow:none !important;" id="monthDropBtn">{{ ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][now()->month - 1] }}</button>
                         <div id="monthDrop" style="display:none;position:absolute;top:calc(100% + 4px);left:0;z-index:100;background:#fff;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.15);border:1px solid #f0f0f0;max-height:180px;overflow-y:auto;min-width:90px;animation:dcFadeIn 0.15s;">
                             @foreach(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] as $i => $m)
-                            <div onclick="selectMonth({{ $i + 1 }},'{{ $m }}',event)" style="padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.1s;color:{{ ($i + 1) == now()->month ? '#fff' : '#374151' }};background:{{ ($i + 1) == now()->month ? '#F27420' : 'transparent' }};border-radius:6px;"
-                                onmouseover="if(!this.dataset.active){this.style.background='#FFF5ED';this.style.color='#F27420';}else{this.style.background='#ea580c';}"
-                                onmouseout="if(!this.dataset.active){this.style.background='transparent';this.style.color='#374151';}else{this.style.background='#F27420';}"
+                            <div onclick="selectMonth({{ $i + 1 }},'{{ $m }}',event)" style="padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.1s;color:{{ ($i + 1) == now()->month ? '#fff' : '#374151' }};background:{{ ($i + 1) == now()->month ? 'rgb(234, 88, 12)' : 'transparent' }};border-radius:6px;"
+                                onmouseover="if(!this.dataset.active){this.style.background='#FFF5ED';this.style.color='rgb(234, 88, 12)';}else{this.style.background='#c2410c';}"
+                                onmouseout="if(!this.dataset.active){this.style.background='transparent';this.style.color='#374151';}else{this.style.background='rgb(234, 88, 12)';}"
                                 data-val="{{ $i + 1 }}" {{ ($i + 1) == now()->month ? 'data-active=1' : '' }}>{{ $m }}</div>
                             @endforeach
                         </div>
@@ -659,8 +660,8 @@
                         <button type="button" onclick="toggleYearDrop(event)" class="dc-hdr-select" style="font-size:12px;padding:5px 22px 5px 10px;min-width:60px;text-align:left;outline:none !important;box-shadow:none !important;" id="yearDropBtn">{{ now()->year }}</button>
                         <div id="yearDrop" style="display:none;position:absolute;top:calc(100% + 4px);right:0;z-index:100;background:#fff;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.15);border:1px solid #f0f0f0;max-height:180px;overflow-y:auto;min-width:80px;animation:dcFadeIn 0.15s;">
                             @for($y = now()->year; $y >= now()->year - 5; $y--)
-                            <div onclick="selectYear({{ $y }},event)" style="padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.1s;color:{{ $y == now()->year ? '#fff' : '#374151' }};background:{{ $y == now()->year ? '#F27420' : 'transparent' }};border-radius:{{ $y == now()->year ? '6px' : '0' }};"
-                                onmouseover="if(!this.dataset.active)this.style.background='#FFF5ED';this.style.color='#F27420';"
+                            <div onclick="selectYear({{ $y }},event)" style="padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.1s;color:{{ $y == now()->year ? '#fff' : '#374151' }};background:{{ $y == now()->year ? 'rgb(234, 88, 12)' : 'transparent' }};border-radius:{{ $y == now()->year ? '6px' : '0' }};"
+                                onmouseover="if(!this.dataset.active)this.style.background='#FFF5ED';this.style.color='rgb(234, 88, 12)';"
                                 onmouseout="if(!this.dataset.active){this.style.background='transparent';this.style.color='#374151';}"
                                 data-val="{{ $y }}" {{ $y == now()->year ? 'data-active=1' : '' }}>{{ $y }}</div>
                             @endfor
@@ -671,7 +672,7 @@
             </div>
             {{-- Legend --}}
             <div class="dash-chart-legend" style="padding:12px 24px 0;display:flex;align-items:center;gap:16px;">
-                <div style="display:flex;align-items:center;gap:5px;"><div style="width:10px;height:10px;border-radius:3px;background:#F27420;"></div><span style="font-size:11px;color:#64748b;font-weight:600;">Sales</span></div>
+                <div style="display:flex;align-items:center;gap:5px;"><div style="width:10px;height:10px;border-radius:3px;background:rgb(234, 88, 12);"></div><span style="font-size:11px;color:#64748b;font-weight:600;">Sales</span></div>
                 <div style="display:flex;align-items:center;gap:5px;"><div style="width:10px;height:10px;border-radius:3px;background:#3b82f6;"></div><span style="font-size:11px;color:#64748b;font-weight:600;">Purchases</span></div>
             </div>
             <div id="chartContainer" class="dash-chart-area" style="padding:16px 24px 24px;display:flex;align-items:flex-end;gap:2px;height:240px;overflow-x:scroll;-webkit-overflow-scrolling:touch;">
@@ -686,12 +687,12 @@
         <div class="dash-panel">
             <div class="dash-panel-header">
                 <span class="dash-panel-title">Latest Products</span>
-                <a href="/management/products/view/index" style="font-size:11px;font-weight:600;color:#F27420;text-decoration:none;">View All →</a>
+                <a href="/management/products/view/index" style="font-size:11px;font-weight:600;color:rgb(234, 88, 12);text-decoration:none;">View All →</a>
             </div>
             <div style="padding:4px 0;">
                 @foreach($latestProducts as $prod)
                 <a href="/product_history/view?product={{ $prod->id }}" class="dash-product-item" style="text-decoration:none;display:flex;align-items:center;gap:12px;padding:12px 24px;transition:background 0.1s;" onmouseover="this.style.background='#fefaf6'" onmouseout="this.style.background='transparent'">
-                    <div class="dash-product-icon" style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#F27420,#fb923c);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 6px rgba(242,116,32,0.2);">
+                    <div class="dash-product-icon" style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,rgb(234, 88, 12),#fb923c);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 6px rgba(234,88,12,0.2);">
                         <i class="fa fa-cube" style="font-size:13px;color:#fff;"></i>
                     </div>
                     <div style="flex:1;min-width:0;">
@@ -735,7 +736,7 @@
     function openPopover() {
         pop.style.display = 'block';
         btn._open = true;
-        btn.style.borderColor = '#F27420';
+        btn.style.borderColor = 'rgb(234, 88, 12)';
         btn.style.background = '#fffbf5';
         caret.style.transform = 'rotate(180deg)';
         if (isMobile()) {
@@ -1110,7 +1111,7 @@
                         const ph = Math.max(3, (d.purchases / maxVal) * 100);
                         html += '<div class="chart-col" data-idx="'+i+'" style="flex:0 0 '+colW+'px;min-width:'+colW+'px;">';
                         html += '<div style="flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center;gap:2px;">';
-                        html += '<div class="chart-bar-s" style="width:45%;max-width:20px;height:'+sh+'%;border-radius:6px 6px 0 0;background:linear-gradient(to top,#F27420,#fb923c);opacity:'+(d.sales>0?1:0.12)+';transition:all 0.3s;transform-origin:bottom;"></div>';
+                        html += '<div class="chart-bar-s" style="width:45%;max-width:20px;height:'+sh+'%;border-radius:6px 6px 0 0;background:rgb(234, 88, 12);opacity:'+(d.sales>0?1:0.12)+';transition:all 0.3s;transform-origin:bottom;"></div>';
                         html += '<div class="chart-bar-p" style="width:45%;max-width:20px;height:'+ph+'%;border-radius:6px 6px 0 0;background:linear-gradient(to top,#3b82f6,#60a5fa);opacity:'+(d.purchases>0?1:0.12)+';transition:all 0.3s;transform-origin:bottom;"></div>';
                         html += '</div>';
                         html += '<div class="chart-day" style="font-size:10px;font-weight:700;color:#94a3b8;line-height:1;transition:all 0.15s;">'+d.day+'</div>';
@@ -1129,7 +1130,7 @@
                         const isP = profit >= 0;
                         tip.innerHTML =
                             '<div style="font-size:11px;font-weight:600;color:#94a3b8;margin-bottom:10px;">' + d.label + ', ' + d.day + '</div>' +
-                            '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><div style="width:8px;height:8px;border-radius:3px;background:#F27420;flex-shrink:0;"></div><div style="flex:1;font-size:12px;color:#94a3b8;">Sales</div><div style="font-size:13px;font-weight:700;color:#fb923c;">' + currency + ' ' + d.sales.toLocaleString() + '</div></div>' +
+                            '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><div style="width:8px;height:8px;border-radius:3px;background:rgb(234, 88, 12);flex-shrink:0;"></div><div style="flex:1;font-size:12px;color:#94a3b8;">Sales</div><div style="font-size:13px;font-weight:700;color:rgb(234, 88, 12);">' + currency + ' ' + d.sales.toLocaleString() + '</div></div>' +
                             '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><div style="width:8px;height:8px;border-radius:3px;background:#3b82f6;flex-shrink:0;"></div><div style="flex:1;font-size:12px;color:#94a3b8;">Purchases</div><div style="font-size:13px;font-weight:700;color:#60a5fa;">' + currency + ' ' + d.purchases.toLocaleString() + '</div></div>' +
                             '<div style="border-top:1px solid #334155;padding-top:8px;display:flex;align-items:center;justify-content:space-between;">' +
                             '<span style="font-size:11px;font-weight:700;color:#94a3b8;">' + (isP ? '▲ Profit' : '▼ Loss') + '</span>' +
@@ -1225,7 +1226,7 @@
         document.getElementById('monthDrop').style.display = 'none';
         // Reset active states
         document.querySelectorAll('#monthDrop > div').forEach(el => { el.style.background='transparent'; el.style.color='#374151'; el.dataset.active=''; });
-        e.currentTarget.style.background='#F27420'; e.currentTarget.style.color='#fff'; e.currentTarget.dataset.active='1';
+        e.currentTarget.style.background='rgb(234, 88, 12)'; e.currentTarget.style.color='#fff'; e.currentTarget.dataset.active='1';
         loadChart();
     };
     window.selectYear = function(val, e) {
@@ -1234,7 +1235,7 @@
         document.getElementById('yearDropBtn').textContent = val;
         document.getElementById('yearDrop').style.display = 'none';
         document.querySelectorAll('#yearDrop > div').forEach(el => { el.style.background='transparent'; el.style.color='#374151'; el.dataset.active=''; });
-        e.currentTarget.style.background='#F27420'; e.currentTarget.style.color='#fff'; e.currentTarget.dataset.active='1';
+        e.currentTarget.style.background='rgb(234, 88, 12)'; e.currentTarget.style.color='#fff'; e.currentTarget.dataset.active='1';
         loadChart();
     };
     document.addEventListener('click', function() { document.getElementById('monthDrop').style.display='none'; document.getElementById('yearDrop').style.display='none'; });
@@ -1345,7 +1346,7 @@
 
         // Footer
         html += '<div style="display:flex;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid #f1f5f9;">';
-        html += '<button type="button" onclick="dcSelect(\'' + todayStr + '\')" style="border:none;background:none;font-size:12px;font-weight:600;color:#F27420;cursor:pointer;padding:4px 8px;border-radius:6px;transition:all 0.1s;" onmouseover="this.style.background=\'#FFF5ED\'" onmouseout="this.style.background=\'none\'">Today</button>';
+        html += '<button type="button" onclick="dcSelect(\'' + todayStr + '\')" style="border:none;background:none;font-size:12px;font-weight:600;color:rgb(234, 88, 12);cursor:pointer;padding:4px 8px;border-radius:6px;transition:all 0.1s;" onmouseover="this.style.background=\'#FFF5ED\'" onmouseout="this.style.background=\'none\'">Today</button>';
         if (selected !== todayStr) {
             html += '<button type="button" onclick="dcSelect(\'' + todayStr + '\')" style="border:none;background:none;font-size:12px;font-weight:500;color:#94a3b8;cursor:pointer;padding:4px 8px;">Reset</button>';
         }

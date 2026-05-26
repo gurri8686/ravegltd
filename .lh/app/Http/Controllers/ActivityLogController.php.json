@@ -1,0 +1,46 @@
+{
+    "sourceFile": "app/Http/Controllers/ActivityLogController.php",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 7,
+            "patches": [
+                {
+                    "date": 1758608145448,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1758608151994,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,7 +1,7 @@\n \n <?php\n-// app/Http/Controllers/ActivityLogController.php\n+\n namespace App\\Http\\Controllers;\n \n use Illuminate\\Http\\Request;\n use Spatie\\Activitylog\\Models\\Activity;\n"
+                },
+                {
+                    "date": 1758608189273,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,5 +1,4 @@\n-\n <?php\n \n namespace App\\Http\\Controllers;\n \n@@ -32,5 +31,5 @@\n         $logs = $query->latest()->paginate(15);\n \n         return view('activity_logs.index', compact('logs'));\n     }\n-}\n+}\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1758608553831,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -28,8 +28,8 @@\n             $query->whereDate('created_at', '<=', $request->date_to);\n         }\n \n         $logs = $query->latest()->paginate(15);\n-\n+        print_r($logs); exit;\n         return view('activity_logs.index', compact('logs'));\n     }\n }\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1758608581544,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -28,8 +28,8 @@\n             $query->whereDate('created_at', '<=', $request->date_to);\n         }\n \n         $logs = $query->latest()->paginate(15);\n-        print_r($logs); exit;\n+        \n         return view('activity_logs.index', compact('logs'));\n     }\n }\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1758609878924,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -27,9 +27,9 @@\n         if ($request->filled('date_to')) {\n             $query->whereDate('created_at', '<=', $request->date_to);\n         }\n \n-        $logs = $query->latest()->paginate(15);\n+        $logs = $query->latest()->paginate(2);\n         \n         return view('activity_logs.index', compact('logs'));\n     }\n }\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1758609890675,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -27,9 +27,9 @@\n         if ($request->filled('date_to')) {\n             $query->whereDate('created_at', '<=', $request->date_to);\n         }\n \n-        $logs = $query->latest()->paginate(2);\n+        $logs = $query->latest()->paginate(1);\n         \n         return view('activity_logs.index', compact('logs'));\n     }\n }\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1758610134913,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -27,9 +27,9 @@\n         if ($request->filled('date_to')) {\n             $query->whereDate('created_at', '<=', $request->date_to);\n         }\n \n-        $logs = $query->latest()->paginate(1);\n+        $logs = $query->latest()->paginate(20);\n         \n         return view('activity_logs.index', compact('logs'));\n     }\n }\n\\ No newline at end of file\n"
+                }
+            ],
+            "date": 1758608145448,
+            "name": "Commit-0",
+            "content": "\n<?php\n// app/Http/Controllers/ActivityLogController.php\nnamespace App\\Http\\Controllers;\n\nuse Illuminate\\Http\\Request;\nuse Spatie\\Activitylog\\Models\\Activity;\n\nclass ActivityLogController extends Controller\n{\n    public function index(Request $request)\n    {\n        $query = Activity::with('causer', 'subject'); // load related models\n\n        // Filters\n        if ($request->filled('user_id')) {\n            $query->where('causer_id', $request->user_id);\n        }\n\n        if ($request->filled('event')) {\n            $query->where('event', $request->event);\n        }\n\n        if ($request->filled('date_from')) {\n            $query->whereDate('created_at', '>=', $request->date_from);\n        }\n\n        if ($request->filled('date_to')) {\n            $query->whereDate('created_at', '<=', $request->date_to);\n        }\n\n        $logs = $query->latest()->paginate(15);\n\n        return view('activity_logs.index', compact('logs'));\n    }\n}\n"
+        }
+    ]
+}

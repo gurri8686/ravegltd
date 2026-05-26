@@ -23,10 +23,10 @@
     border-color: #9CA3AF transparent transparent transparent !important;
 }
 .select2-container--default.select2-container--open .select2-selection--single {
-    border-color: #F27420 !important; box-shadow: 0 0 0 3px rgba(242,116,32,0.10) !important;
+    border-color: rgb(234, 88, 12) !important; box-shadow: 0 0 0 3px rgba(234,88,12,0.10) !important;
 }
 .select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
-    border-color: transparent transparent #F27420 transparent !important;
+    border-color: transparent transparent rgb(234, 88, 12) transparent !important;
 }
 .select2-dropdown {
     border-radius: 12px !important; border: 1px solid #E5E7EB !important;
@@ -37,14 +37,14 @@
     border-radius: 8px !important; border: 1px solid #E5E7EB !important;
     font-size: 13px !important; padding: 7px 12px !important; outline: none !important;
 }
-.select2-search--dropdown .select2-search__field:focus { border-color: #F27420 !important; }
+.select2-search--dropdown .select2-search__field:focus { border-color: rgb(234, 88, 12) !important; }
 .select2-results__options { max-height: 220px !important; }
 .select2-results__option { font-size: 13px !important; padding: 8px 14px !important; }
 .select2-container--default .select2-results__option--highlighted[aria-selected] {
-    background: #FFF7ED !important; color: #F27420 !important;
+    background: #FFF7ED !important; color: rgb(234, 88, 12) !important;
 }
 .select2-container--default .select2-results__option[aria-selected=true] {
-    background: #FEF3E6 !important; color: #F27420 !important; font-weight: 600 !important;
+    background: #FEF3E6 !important; color: rgb(234, 88, 12) !important; font-weight: 600 !important;
 }
 .select2-container--default .select2-selection--single .select2-selection__clear { color: #9CA3AF !important; font-size: 16px !important; margin-right: 4px !important; }
 .select2-container--disabled .select2-selection--single { background: #f9fafb !important; opacity: 0.6 !important; cursor: not-allowed !important; }
@@ -56,16 +56,16 @@
     font-weight: 600 !important; font-size: 14px !important; text-decoration: none !important;
     transition: background 0.18s, border-color 0.18s, color 0.18s; cursor: pointer !important; flex: none !important;
 }
-.cfa-cancel:hover, .cfa-cancel:active { background: #fff8f3 !important; border-color: #f97316 !important; color: #f97316 !important; text-decoration: none !important; }
+.cfa-cancel:hover, .cfa-cancel:active { background: #fff8f3 !important; border-color: rgb(234, 88, 12) !important; color: rgb(234, 88, 12) !important; text-decoration: none !important; }
 .cfa-save {
     display: inline-flex !important; align-items: center !important; gap: 7px !important;
     height: 42px !important; padding: 0 26px !important; border-radius: 10px !important;
-    background: linear-gradient(135deg, #f97316, #ea580c) !important; color: #fff !important;
+    background: rgb(234, 88, 12) !important; color: #fff !important;
     font-weight: 700 !important; font-size: 14px !important; border: none !important;
-    box-shadow: 0 4px 14px rgba(249,115,22,0.35) !important; cursor: pointer !important;
+    box-shadow: 0 4px 14px rgba(234,88,12,0.35) !important; cursor: pointer !important;
     transition: box-shadow 0.18s, transform 0.18s; outline: none !important; flex: none !important;
 }
-.cfa-save:hover { box-shadow: 0 6px 20px rgba(249,115,22,0.45) !important; transform: translateY(-1px); }
+.cfa-save:hover { box-shadow: 0 6px 20px rgba(234,88,12,0.45) !important; transform: translateY(-1px); }
 .cfa-save:active { transform: translateY(0); }
 
 @media (max-width: 767px), (min-width: 768px) and (max-width: 1024px) {
@@ -113,7 +113,7 @@
     h4.form-section i {
         width: 30px !important; height: 30px !important; min-width: 30px !important;
         border-radius: 8px !important; background: #FFF5ED !important;
-        color: #F27420 !important; font-size: 14px !important;
+        color: rgb(234, 88, 12) !important; font-size: 14px !important;
         display: inline-flex !important; align-items: center !important; justify-content: center !important;
     }
 
@@ -143,8 +143,8 @@
     }
     .form-control::placeholder { color: #C5D0DC !important; font-size: 14px !important; }
     .form-control:focus {
-        border-color: #F27420 !important;
-        box-shadow: 0 0 0 3px rgba(242,116,32,0.10) !important;
+        border-color: rgb(234, 88, 12) !important;
+        box-shadow: 0 0 0 3px rgba(234,88,12,0.10) !important;
         outline: none !important;
     }
     textarea.form-control {
@@ -231,10 +231,10 @@
         box-shadow: none !important;
         cursor: pointer !important;
     }
-    .bootstrap-switch.bootstrap-switch-on { border-color: #F27420 !important; }
+    .bootstrap-switch.bootstrap-switch-on { border-color: rgb(234, 88, 12) !important; }
     .bootstrap-switch .bootstrap-switch-container { border-radius: 7px !important; }
     .bootstrap-switch .bootstrap-switch-handle-on {
-        background: #F27420 !important; color: #fff !important;
+        background: rgb(234, 88, 12) !important; color: #fff !important;
         font-size: 12px !important; font-weight: 700 !important;
         border-radius: 7px 0 0 7px !important; line-height: 1 !important;
     }
@@ -278,6 +278,12 @@
     /* Textarea fills height */
     .cust-others-row > div:last-child textarea.form-control { min-height: 100px !important; height: 100px !important; }
 }
+
+/* ── Bootstrap-checkbox toggle (Yes pill) — apply on all viewports ── */
+.checkbox-success .btn-success,
+.btn-group .btn-success,
+input.switch ~ .btn-group .btn-success,
+.btn.btn-success.active { background-color: rgb(234, 88, 12) !important; border-color: rgb(234, 88, 12) !important; color: #fff !important; }
 </style>
 @endpush
 
@@ -316,11 +322,11 @@ $(document).ready(function() {
 <div class="cust-create-header" style="margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#fff;border-radius:16px;padding:18px 24px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border:1px solid #f1f5f9;">
 	<div style="display:flex;align-items:center;gap:14px;">
 		<a href="{{route('management.customers.view.index')}}" class="cust-back-btn" style="width:40px;height:40px;border-radius:10px;border:1px solid #e2e8f0;background:#fff;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:#64748b;transition:all 0.15s;" title="Back to Customers"
-		   onmouseover="this.style.borderColor='#F27420';this.style.color='#F27420';this.style.background='#fff7ed';"
+		   onmouseover="this.style.borderColor='rgb(234, 88, 12)';this.style.color='rgb(234, 88, 12)';this.style.background='#fff7ed';"
 		   onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b';this.style.background='#fff';">
 		    <i class="fa fa-arrow-left"></i>
 		</a>
-		<div class="cust-icon" style="width:48px;height:48px;border-radius:14px;background:#F27420;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(242,116,32,0.25);">
+		<div class="cust-icon" style="width:48px;height:48px;border-radius:14px;background:rgb(234, 88, 12);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(234,88,12,0.25);">
 			<i class="fa fa-user-plus" style="color:#fff;font-size:20px;"></i>
 		</div>
 		<div>

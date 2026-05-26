@@ -11,25 +11,24 @@ class CustomerStatementMail extends Mailable
     use Queueable, SerializesModels;
 
     public $data;
-    public $pdfContent;
+    public $attachmentBinary;
 
-    /**
-     * @param array  $data        view data (customer, period, message, etc.)
-     * @param string $pdfContent  raw PDF bytes to attach
-     */
-    public function __construct(array $data, $pdfContent)
+    public function __construct(array $data, $attachmentBinary)
     {
         $this->data = $data;
-        $this->pdfContent = $pdfContent;
+        $this->attachmentBinary = $attachmentBinary;
     }
 
     public function build()
     {
+        $name = $this->data['attachment_name'] ?? ($this->data['pdf_name'] ?? 'statement.xlsx');
+        $mime = str_ends_with(strtolower($name), '.pdf')
+            ? 'application/pdf'
+            : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
         $mail = $this->subject($this->data['subject'])
             ->view('emails.customer-statement', ['data' => $this->data])
-            ->attachData($this->pdfContent, $this->data['pdf_name'], [
-                'mime' => 'application/pdf',
-            ]);
+            ->attachData($this->attachmentBinary, $name, ['mime' => $mime]);
 
         if (!empty($this->data['cc_email'])) {
             $mail->cc($this->data['cc_email']);

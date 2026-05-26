@@ -1,0 +1,18 @@
+{
+    "sourceFile": "app/Models/CompanyDetailModel.php",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1758607224291,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1758607224291,
+            "name": "Commit-0",
+            "content": "<?php\r\n\r\nnamespace App\\Models;\r\n\r\nuse Illuminate\\Database\\Eloquent\\Factories\\HasFactory;\r\nuse Illuminate\\Database\\Eloquent\\Model;\r\n\r\nclass CompanyDetailModel extends Model\r\n{\r\n    use \\App\\Models\\Traits\\LogsActivityTrait;\r\n    use HasFactory;\r\n    protected $table = 'company_details';\r\n    protected $fillable = [\r\n        'company_name', 'custemailomer_id', 'mobile', 'website', 'telephone', 'fax','address1', 'address2','country',\r\n        'state', 'city', 'zipcode', 'vat_no', 'comp_reg_no', 'bank_name','account_no', 'ifsc_code','eirl_no','remarks'\r\n    ];\r\n}\r\n"
+        }
+    ]
+}

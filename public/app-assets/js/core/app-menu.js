@@ -657,6 +657,8 @@
       var hidden = this.hidden;
       var menu = $body.data('menu');
 
+      if (!currentBreakpoint) return;
+
       switch (currentBreakpoint.name) {
         case 'xl':
           if (expanded === true) {

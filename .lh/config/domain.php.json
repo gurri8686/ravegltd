@@ -1,0 +1,18 @@
+{
+    "sourceFile": "config/domain.php",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1758527915500,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1758527915500,
+            "name": "Commit-0",
+            "content": "<?php\r\n\r\nreturn [\r\n  'env_stub' => '.env',\r\n  'storage_dirs' => [\r\n    'app' => [\r\n      'public' => [\r\n      ],\r\n    ],\r\n    'framework' => [\r\n      'cache' => [\r\n      ],\r\n      'testing' => [\r\n      ],\r\n      'sessions' => [\r\n      ],\r\n      'views' => [\r\n      ],\r\n    ],\r\n    'logs' => [\r\n    ],\r\n  ],\r\n  'domains' => [\r\n    'organization2.localhost' => 'organization2.localhost',\r\n    'tps1.localhost' => 'tps1.localhost',\r\n    'ravegltd.com' => 'ravegltd.com'\r\n  ],\r\n ];"
+        }
+    ]
+}

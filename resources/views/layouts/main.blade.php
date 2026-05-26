@@ -165,16 +165,55 @@
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
     }
-    /* ── Toast notifications: always above navbar ── */
-    .Toastify__toast-container { z-index: 999999 !important; }
+    /* ── Toast notifications: card UI (white card, colored left bar, circle icon, close) — always above navbar ── */
+    .Toastify__toast-container { z-index: 999999 !important; width: 360px !important; padding: 0 !important; }
     .Toastify__toast-container--top-right { top: 68px !important; right: 16px !important; }
-    .Toastify__toast { border-radius: 10px !important; font-size: 13px !important; font-weight: 500 !important; box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important; position: relative !important; }
-    .Toastify__close-button { position: absolute !important; top: 8px !important; right: 10px !important; background: none !important; border: none !important; cursor: pointer !important; opacity: 0.5 !important; font-size: 16px !important; color: #333 !important; padding: 4px !important; line-height: 1 !important; }
-    .Toastify__close-button:hover { opacity: 1 !important; }
+    .Toastify__toast {
+        position: relative !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+        min-height: 64px !important;
+        padding: 14px 38px 14px 18px !important;
+        margin-bottom: 12px !important;
+        background: #fff !important;
+        color: #0f172a !important;
+        border: none !important;
+        border-radius: 12px !important;
+        box-shadow: 0 12px 32px rgba(15,23,42,0.18) !important;
+        overflow: hidden !important;
+        font-family: inherit !important;
+    }
+    /* colored left accent bar */
+    .Toastify__toast::before { content: '' !important; position: absolute !important; left: 0 !important; top: 0 !important; bottom: 0 !important; width: 5px !important; }
+    .Toastify__toast--success::before { background: #22c55e !important; }
+    .Toastify__toast--error::before   { background: #ef4444 !important; }
+    .Toastify__toast--warning::before { background: #f59e0b !important; }
+    .Toastify__toast--info::before,
+    .Toastify__toast--default::before { background: #F27420 !important; }
+    /* message text */
+    .Toastify__toast-body { margin: 0 !important; padding: 0 !important; font-size: 13.5px !important; font-weight: 600 !important; color: #0f172a !important; line-height: 1.35 !important; align-items: center !important; }
+    /* built-in type icon → circular badge */
+    .Toastify__toast-icon { width: 34px !important; height: 34px !important; border-radius: 50% !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; margin-inline-end: 0 !important; flex-shrink: 0 !important; }
+    .Toastify__toast--success .Toastify__toast-icon { background: #22c55e !important; }
+    .Toastify__toast--error   .Toastify__toast-icon { background: #ef4444 !important; }
+    .Toastify__toast--warning .Toastify__toast-icon { background: #f59e0b !important; }
+    .Toastify__toast--info    .Toastify__toast-icon,
+    .Toastify__toast--default .Toastify__toast-icon { background: #F27420 !important; }
+    .Toastify__toast-icon svg { fill: #fff !important; width: 17px !important; height: 17px !important; }
+    /* progress bar tinted per type */
+    .Toastify__progress-bar--success { background: #22c55e !important; }
+    .Toastify__progress-bar--error   { background: #ef4444 !important; }
+    .Toastify__progress-bar--warning { background: #f59e0b !important; }
+    .Toastify__progress-bar--info,
+    .Toastify__progress-bar--default { background: #F27420 !important; }
+    .Toastify__close-button { position: absolute !important; top: 10px !important; right: 10px !important; background: none !important; border: none !important; cursor: pointer !important; opacity: 0.45 !important; font-size: 16px !important; color: #64748b !important; padding: 2px !important; line-height: 1 !important; align-self: flex-start !important; }
+    .Toastify__close-button:hover { opacity: 1 !important; color: #0f172a !important; }
     /* ── Mobile z-index: sidebar drawer above navbar ── */
     @media (max-width: 767px) {
         .header-navbar { z-index: 1000 !important; }
-        .Toastify__toast-container--top-right { top: 56px !important; right: 8px !important; }
+        .Toastify__toast-container { width: auto !important; }
+        .Toastify__toast-container--top-right { top: 56px !important; right: 8px !important; left: 8px !important; }
         .ph-table-wrap { overflow-x: scroll !important; -webkit-overflow-scrolling: touch !important; }
         .rdt_TableCell, .rdt_TableCol { padding: 0 8px !important; }
         .rdt_TableCell { font-size: 12px !important; }
@@ -674,11 +713,11 @@
     <style>
     /* ── Sidebar font override — loaded AFTER CDN to win cascade ── */
     body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li:not(.navigation-header) > a,
+    /* Expanded state only — collapsed state uses its own 9px rule above. */
+    body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li:not(.navigation-header) > a,
     body.vertical-layout.vertical-menu.menu-expanded .main-menu .navigation > li:not(.navigation-header) > a > span.menu-title,
-    body .main-menu .navigation > li:not(.navigation-header) > a,
-    body .main-menu .navigation > li:not(.navigation-header) > a > span.menu-title,
-    body .main-menu.menu-dark .navigation > li:not(.navigation-header) > a,
-    body .main-menu.menu-dark .navigation > li:not(.navigation-header) > a > span.menu-title {
+    body.vertical-layout.vertical-menu.menu-expanded .main-menu.menu-dark .navigation > li:not(.navigation-header) > a,
+    body.vertical-layout.vertical-menu.menu-expanded .main-menu.menu-dark .navigation > li:not(.navigation-header) > a > span.menu-title {
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
         font-size: 13.5px !important;
         font-weight: 500 !important;

@@ -163,9 +163,6 @@ class CustomerHistoryController extends Controller
 				return $this->errorResponse('No transactions found in the selected period. Nothing to email.');
 			}
 
-			$pdf = $this->buildStatementPdf($customerId, $fromDate, $toDate, $customerPayments);
-			$pdfName = 'statement-' . preg_replace('/[^A-Za-z0-9]+/', '-', $customer->name) . '.pdf';
-
 			$pastBalance    = $customerPayments::pastBalance($customerId, $fromDate);
 			$closingBalance = (float) $pastBalance;
 			foreach ($invoices as $inv) {
@@ -175,6 +172,33 @@ class CustomerHistoryController extends Controller
 			}
 
 			$cur = env('CURRENCY_SYMBOL', '£');
+
+			// Build Excel of invoices for attachment
+			$rows = [];
+			foreach ($invoices as $inv) {
+				if (($inv['is_credited'] ?? 0) == 1) continue;
+				$rows[] = [
+					$inv['id'] ?? '',
+					isset($inv['created_at']) ? Carbon::parse($inv['created_at'])->format('d M Y') : '',
+					number_format((float)($inv['net_amount'] ?? 0), 2),
+					number_format((float)($inv['total_paid'] ?? 0), 2),
+					number_format((float)($inv['credit_adj'] ?? 0), 2),
+					number_format((float)($inv['total_discounted'] ?? 0), 2),
+					number_format((float)($inv['balance'] ?? 0), 2),
+				];
+			}
+			$headings = ['Invoice','Date','Amount','Paid','Credit/Adj','Discount/Adj','Balance'];
+			$export = new class($rows, $headings) implements
+				\Maatwebsite\Excel\Concerns\FromArray,
+				\Maatwebsite\Excel\Concerns\WithHeadings {
+				protected $rows; protected $headings;
+				public function __construct($rows, $headings) { $this->rows = $rows; $this->headings = $headings; }
+				public function array(): array { return $this->rows; }
+				public function headings(): array { return $this->headings; }
+			};
+			$excelBinary = \Maatwebsite\Excel\Facades\Excel::raw($export, \Maatwebsite\Excel\Excel::XLSX);
+			$excelName = 'statement-' . preg_replace('/[^A-Za-z0-9]+/', '-', $customer->name) . '.xlsx';
+
 			$mailData = [
 				'company_name'    => $this->companyName(),
 				'customer_name'   => $customer->name,
@@ -184,7 +208,7 @@ class CustomerHistoryController extends Controller
 				'period'          => Carbon::parse($fromDate)->format('d M Y') . ' – ' . Carbon::parse($toDate)->format('d M Y'),
 				'closing_balance' => $cur . ' ' . number_format($closingBalance, 2),
 				'generated_on'    => date('d M Y'),
-				'pdf_name'        => $pdfName,
+				'attachment_name' => $excelName,
 			];
 
 			$log = [
@@ -202,7 +226,7 @@ class CustomerHistoryController extends Controller
 				$this->configureMailer();
 
 				Mail::to($request->to_email)
-					->send(new CustomerStatementMail($mailData, $pdf->output()));
+					->send(new CustomerStatementMail($mailData, $excelBinary));
 
 				CustomerHistoryEmail::create(array_merge($log, ['status' => 'sent']));
 

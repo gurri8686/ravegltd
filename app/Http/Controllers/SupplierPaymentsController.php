@@ -223,11 +223,11 @@ class SupplierPaymentsController extends Controller
 		//print_r($request->all()); exit;
 		$rules = [
 			'supplier_id' => ['required', 'integer',new \App\Rules\ValidSupplier],
-			'amount' => ['required','integer'],
+			'amount' => ['required','numeric','min:0'],
 			'paymentMode' => ['required'],
 			'date' => ['required', 'date'],
 			'invoices' => [
-				'required', 'array', 
+				'required', 'array',
 				new \App\Rules\InvoicesBelongToSupplier($request->supplier_id),
 				new \App\Rules\AmountCoversSupplierInvoices($request->supplier_id, $request->amount)
 				],
@@ -301,7 +301,7 @@ class SupplierPaymentsController extends Controller
 	public function storeOnAccount(Request $request, SupplierPayments $supplierPayments){
 		$rules = [
 			'payment_mode' => ['required', 'integer'],
-			'amount' => ['required', 'integer'],
+			'amount' => ['required', 'numeric', 'min:0'],
 			'date' => ['required','date'],
 			'supplier_id' => ['required','integer']
 		];

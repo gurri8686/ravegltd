@@ -174,10 +174,44 @@ class SalesPurchaseValidations
 		if($qty > $diff){
 			throw new \Exception(__("exception.canAddSaleEntryFromInvoice",["qty" => $diff]));
 		}
-		
+
 		return true;
     }
-	
+
+	/**
+	 * Product-level stock availability check (used when sales are NOT tied to a
+	 * specific supplier invoice, e.g. show_suppliers = OFF). Blocks selling more
+	 * than the product actually has in stock so Sales never goes out of sync with
+	 * the Stock Manager.
+	 *
+	 * available = SUM(purchased qty for product) - SUM(already-sold qty for product)
+	 *
+	 * @param int       $product_id
+	 * @param float|int $qty            quantity being added/requested
+	 * @param int|null  $exclude_cip_id customer_invoice_product id to ignore (when editing an existing row)
+	 */
+	public function canAddSaleEntryByProductStock($product_id, $qty, $exclude_cip_id = null)
+	{
+		$purchased = (float) SupplierInvoiceProduct::where('product_id', $product_id)
+			->where('is_archive', 0)
+			->sum('quantity');
+
+		$soldQuery = CustomerInvoiceProduct::where('product_id', $product_id)
+			->where('is_archive', 0);
+		if ($exclude_cip_id) {
+			$soldQuery->where('id', '!=', $exclude_cip_id);
+		}
+		$sold = (float) $soldQuery->sum('quantity');
+
+		$available = $purchased - $sold;
+
+		if ($qty > $available) {
+			throw new \Exception(__("exception.canAddSaleEntryFromInvoice", ["qty" => $available]));
+		}
+
+		return true;
+	}
+
 	public function canEditSaleEntryQtyFromInvoice($supplier_invoice_product_id, $invoice_product_id, $qty){
 		$supplier = SupplierInvoiceProduct::where('id',$supplier_invoice_product_id)->first();
 		$customers = CustomerInvoiceProduct

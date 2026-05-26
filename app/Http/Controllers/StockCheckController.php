@@ -64,6 +64,31 @@ class StockCheckController extends Controller
 			// For stock_consumed/customer_return: supplier_invoice_id field links back to source supplier invoice.
 			$srcInvoiceExpr = "(CASE WHEN event IN ('stock_added','stock_updated','supplier_return','dump') THEN invoice_id ELSE supplier_invoice_id END)";
 
+			// Carry-forward stock from before $from_date per (product, supplier_invoice).
+			// Used to populate Opening Stock when saved closing isn't available for that
+			// exact invoice key — keeps math correct without inventing rows that wouldn't
+			// have shown otherwise (display logic still gates on activity / saved closing).
+			$preHistory = StockProduct::select(
+				'product_id',
+				DB::raw("$srcInvoiceExpr as src_supplier_invoice_id"),
+				DB::raw("SUM(CASE WHEN event IN ('stock_added','stock_updated') THEN stock ELSE 0 END) as ns_total"),
+				DB::raw("SUM(CASE WHEN event IN ('stock_consumed') THEN stock ELSE 0 END) as sales_total"),
+				DB::raw("SUM(CASE WHEN event IN ('customer_return') THEN stock ELSE 0 END) as crtn_total"),
+				DB::raw("SUM(CASE WHEN event IN ('supplier_return') THEN stock ELSE 0 END) as srtn_total"),
+				DB::raw("SUM(CASE WHEN event IN ('dump') THEN stock ELSE 0 END) as dmps_total")
+			)
+			->where('is_archived', 0)
+			->whereDate('created_at', '<', $from_date)
+			->groupBy('product_id', DB::raw("$srcInvoiceExpr"))
+			->get();
+
+			$carryForward = [];
+			foreach ($preHistory as $p) {
+				$k = $p->product_id . '|' . ((int)$p->src_supplier_invoice_id);
+				$carry = (int)$p->ns_total - (int)$p->sales_total + (int)$p->crtn_total - (int)$p->srtn_total - (int)$p->dmps_total;
+				$carryForward[$k] = max(0, $carry);
+			}
+
 			$allHistory = StockProduct::select(
 				'product_id',
 				DB::raw("$srcInvoiceExpr as src_supplier_invoice_id"),
@@ -152,7 +177,15 @@ class StockCheckController extends Controller
 				}
 
 				$rowKey = $productId . '|' . $invId;
-				$runningOs = isset($prevDayClosing[$rowKey]) ? $prevDayClosing[$rowKey] : 0;
+				// Use saved previous-day closing as the inclusion trigger so
+				// rows only appear when the user has actually performed stock
+				// closing OR there is fresh activity on a date in range.
+				$prevClose = isset($prevDayClosing[$rowKey]) ? $prevDayClosing[$rowKey] : null;
+				// Carry-forward is the displayed Opening Stock fallback: shows
+				// real on-hand from prior history when no closing was saved
+				// for this exact (product, supplier_invoice).
+				$carryOs   = isset($carryForward[$rowKey]) ? $carryForward[$rowKey] : 0;
+				$runningOs = $prevClose !== null ? $prevClose : $carryOs;
 
 				foreach ($dates as $date) {
 					$hist = $histByDate[$date] ?? null;
@@ -166,8 +199,10 @@ class StockCheckController extends Controller
 					// not just opening stock or new purchases. Sales / customer returns /
 					// supplier returns / dumps on a day with no fresh stock must still
 					// appear so the page mirrors what Customer/Supplier Return pages show.
+					// Display gate matches earlier behavior: prev-day-closing OR activity
+					// (carry-forward alone never invents a row).
 					$hasAnyActivity = ($ns > 0) || ($sales > 0) || ($crtn > 0) || ($srtn > 0) || ($dmps > 0);
-					if ($runningOs > 0 || $hasAnyActivity) {
+					if (($prevClose !== null && $prevClose > 0) || $hasAnyActivity) {
 						$data[] = [
 							'product_id'         => $productId,
 							'product_name'       => $product->name,

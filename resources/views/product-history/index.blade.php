@@ -117,12 +117,12 @@
 	text-align: center;
 }
 .nav.nav-tabs .nav-item .nav-link:hover {
-	color: #F27420;
+	color: rgb(234, 88, 12);
 	background: #FFF5ED;
 }
 .nav.nav-tabs .nav-item .nav-link.active {
 	color: #fff;
-	background: #F27420;
+	background: rgb(234, 88, 12);
 	box-shadow: 0 2px 8px rgba(242, 116, 32, 0.3);
 	border: none;
 	outline: none;
@@ -142,7 +142,7 @@
 .dropdown-menu .dropdown-item:hover,
 .dropdown-menu .dropdown-item:focus {
 	background: #FFF5ED !important;
-	color: #F27420 !important;
+	color: rgb(234, 88, 12) !important;
 }
 #extraOptionsCollapse .dropdown {
 	position: relative;
@@ -169,7 +169,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 <section class="users-list-wrapper">
 <div style="margin-bottom:0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#fff;border-radius:16px 16px 0 0;padding:18px 24px;box-shadow:none;border:1px solid #eaecf2;border-bottom:none;">
 	<div style="display:flex;align-items:center;gap:14px;">
-		<div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#f97316 0%,#ea580c 100%);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(249,115,22,0.3);flex-shrink:0;">
+		<div style="width:40px;height:40px;border-radius:12px;background:rgb(234, 88, 12);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(234,88,12,0.3);flex-shrink:0;">
 			<i class="fa fa-cube" style="color:#fff;font-size:18px;"></i>
 		</div>
 		<div>

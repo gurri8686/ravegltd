@@ -9,7 +9,7 @@
 .content-header { display: none !important; }
 .rf-label { font-size:11px; font-weight:700; color:#64748b; letter-spacing:0.6px; text-transform:uppercase; margin-bottom:6px; display:block; }
 .rf-input { height:42px; width:100%; border:1.5px solid #e2e8f0; border-radius:10px; font-size:13px; background:#f8fafc; padding:0 14px; outline:none; color:#1e293b; transition:all 0.2s; box-sizing:border-box; }
-.rf-input:focus { border-color:#f97316; background:#fff; box-shadow:none; }
+.rf-input:focus { border-color:rgb(234, 88, 12); background:#fff; box-shadow:none; }
 .form-btn-cancel {
     display: inline-flex; align-items: center; gap: 7px;
     height: 42px; padding: 0 22px; border-radius: 10px;
@@ -18,16 +18,16 @@
     transition: background 0.18s, border-color 0.18s, color 0.18s;
     cursor: pointer;
 }
-.form-btn-cancel:hover, .form-btn-cancel:active { background: #fff8f3; border-color: #f97316; color: #f97316; text-decoration: none; }
+.form-btn-cancel:hover, .form-btn-cancel:active { background: #fff8f3; border-color: rgb(234, 88, 12); color: rgb(234, 88, 12); text-decoration: none; }
 .form-btn-save {
     display: inline-flex; align-items: center; gap: 7px;
     height: 42px; padding: 0 26px; border-radius: 10px;
-    background: linear-gradient(135deg, #f97316, #ea580c); color: #fff;
+    background: rgb(234, 88, 12); color: #fff;
     font-weight: 700; font-size: 14px; border: none;
-    box-shadow: 0 4px 14px rgba(249,115,22,0.35); cursor: pointer;
+    box-shadow: 0 4px 14px rgba(234,88,12,0.35); cursor: pointer;
     transition: box-shadow 0.18s, transform 0.18s; outline: none;
 }
-.form-btn-save:hover { box-shadow: 0 6px 20px rgba(249,115,22,0.45); transform: translateY(-1px); }
+.form-btn-save:hover { box-shadow: 0 6px 20px rgba(234,88,12,0.45); transform: translateY(-1px); }
 .form-btn-save:active { transform: translateY(0); }
 </style>
 @endpush
@@ -85,11 +85,11 @@ function showRoleEditToast(msg, type) {
 
     {{-- Page heading --}}
     <div style="margin-bottom:20px;display:flex;align-items:center;gap:14px;">
-        <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#f97316,#fb923c);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(249,115,22,0.3);">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgb(234, 88, 12);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(234,88,12,0.3);">
             <i class="fa fa-shield" style="font-size:17px;color:#fff;"></i>
         </div>
         <div>
-            <h1 style="font-size:20px;font-weight:800;color:#0f172a;margin:0 0 2px;">Edit <span style="color:#f97316;">Role</span></h1>
+            <h1 style="font-size:20px;font-weight:800;color:#0f172a;margin:0 0 2px;">Edit <span style="color:rgb(234, 88, 12);">Role</span></h1>
             <p style="font-size:12px;color:#94a3b8;margin:0;">Update role name — #{{ $data->id }}</p>
         </div>
     </div>
@@ -99,7 +99,7 @@ function showRoleEditToast(msg, type) {
         @csrf
         @method('PUT')
             <div style="margin-bottom:24px;">
-                <label class="rf-label">Role Name <span style="color:#f97316;">*</span></label>
+                <label class="rf-label">Role Name <span style="color:rgb(234, 88, 12);">*</span></label>
                 <input type="text" class="rf-input" id="name" name="name" placeholder="Enter role name" value="{{ $data->name }}">
                 <div data-validate="name" style="font-size:12px;color:#ef4444;margin-top:4px;"></div>
             </div>

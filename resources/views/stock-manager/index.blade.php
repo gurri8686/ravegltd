@@ -13,7 +13,7 @@
 <div style="margin-bottom:18px;background:#fff;border-radius:16px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border:1px solid #f1f5f9;overflow:hidden;">
 	<div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;">
 		<div style="display:flex;align-items:center;gap:14px;">
-			<div style="width:48px;height:48px;border-radius:14px;background:#F27420;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(242,116,32,0.25);flex-shrink:0;">
+			<div style="width:48px;height:48px;border-radius:14px;background:rgb(234, 88, 12);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(234,88,12,0.25);flex-shrink:0;">
 				<i class="fa fa-cubes" style="color:#fff;font-size:20px;"></i>
 			</div>
 			<div>

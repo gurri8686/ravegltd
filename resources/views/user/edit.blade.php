@@ -13,19 +13,53 @@
 <x-file-uploader.krajee.includes />
 <script>
 $(document).ready(function() {
+    var existingImage = @json($data->image ?? '');
+    var imageUrl = existingImage ? ("{{ config('filesystems.disks.public.url') }}/" + existingImage) : '';
+    var imageConfig = existingImage ? [{
+        caption: existingImage,
+        size: 0,
+        downloadUrl: imageUrl,
+        key: 1
+    }] : [];
+
+    // Force-close Krajee file preview popup when "close" button clicked
+    // (data-dismiss/data-bs-dismiss mismatch between Bootstrap 4 and 5)
+    $(document).on('click', '.kv-zoom-modal .btn-close, .kv-zoom-modal .close, .kv-fileinput-zoom-modal .btn-close, .kv-fileinput-zoom-modal .close, .file-zoom-dialog .btn-close, .file-zoom-dialog .close, [title="Close detailed preview"]', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $(this).closest('.modal').removeClass('show').css('display','none').attr('aria-hidden','true');
+        $('body').removeClass('modal-open').css({overflow:'',paddingRight:''});
+        $('.modal-backdrop').remove();
+    });
+
     $("#image").fileinput({
-        maxFileSize: 2000, 
+        maxFileSize: 2000,
         showCaption: false,
+        showClose: false,
+        showRemove: true,
+        showCancel: false,
+        showUpload: false,
+        showBrowse: true,
         showUploadedThumbs: false,
-        showClose: false, 
         initialPreviewAsData: true,
         initialPreviewFileType: 'image',
-        initialPreview:["{{isset($data->image) ? config('filesystems.disks.public.url').'/'.$data->image : ''}}"],  
-        showCaption: false, 
-        dropZoneEnabled: false, 
-        showUpload:false,
+        initialPreview: imageUrl ? [imageUrl] : [],
+        initialPreviewConfig: imageConfig,
+        dropZoneEnabled: false,
         maxFileCount: 1,
-        allowedFileExtensions: ["jpg", "png", "gif"]
+        allowedFileExtensions: ["jpg", "jpeg", "png", "gif"],
+        browseClass: "btn btn-primary",
+        browseLabel: " Browse",
+        browseIcon: '<i class="fa fa-folder-open"></i>',
+        removeClass: "btn btn-default",
+        removeLabel: " Remove",
+        removeIcon: '<i class="fa fa-trash"></i>',
+        previewFileIcon: '<i class="fa fa-file"></i>',
+        layoutTemplates: {
+            footer: '<div class="file-thumbnail-footer">' +
+                    '   <div class="file-footer-buttons" style="margin-top:4px;">{actions}</div>' +
+                    '</div>'
+        }
     });
 });
 </script>
@@ -48,8 +82,8 @@ $(document).ready(function() {
 	transition: border-color 0.2s;
 }
 .edit-form-card .form-control:focus {
-	border-color: #F27420;
-	box-shadow: 0 0 0 0.2rem rgba(242,116,32,0.15);
+	border-color: rgb(234, 88, 12);
+	box-shadow: 0 0 0 0.2rem rgba(234,88,12,0.15);
 }
 .edit-form-card select.form-control {
 	border: 1.5px solid #e5e7eb;
@@ -67,8 +101,8 @@ $(document).ready(function() {
 	cursor: pointer;
 }
 .edit-form-card select.form-control:focus {
-	border-color: #F27420;
-	box-shadow: 0 0 0 0.2rem rgba(242,116,32,0.15);
+	border-color: rgb(234, 88, 12);
+	box-shadow: 0 0 0 0.2rem rgba(234,88,12,0.15);
 }
 .edit-form-card select.form-control option {
 	padding: 10px;
@@ -83,19 +117,73 @@ $(document).ready(function() {
 	margin-bottom: 6px;
 }
 .edit-form-card label .text-danger {
-	color: #F27420 !important;
+	color: rgb(234, 88, 12) !important;
 	font-size: 11px;
 }
-.btn-file-remove, .fileinput-remove, .kv-file-remove, .file-input .btn-default, .file-input .btn.btn-secondary {
-	border: 1.5px solid #F27420 !important;
-	color: #F27420 !important;
+/* Krajee Bootstrap file input — Remove button (outline) */
+.edit-form-card .fileinput-remove,
+.edit-form-card .btn-file-remove,
+.edit-form-card .kv-file-remove,
+.edit-form-card .file-input .btn-default {
+	border: 1.5px solid rgb(234, 88, 12) !important;
+	color: rgb(234, 88, 12) !important;
 	background: #fff !important;
+	border-radius: 8px !important;
+	font-weight: 600 !important;
+	transition: all 0.15s;
 }
-.btn-file-remove:hover, .fileinput-remove:hover, .kv-file-remove:hover, .file-input .btn-default:hover, .file-input .btn.btn-secondary:hover,
-.btn-file-remove:focus, .fileinput-remove:focus, .kv-file-remove:focus, .file-input .btn-default:focus, .file-input .btn.btn-secondary:focus {
-	background: #fff !important;
-	color: #F27420 !important;
+.edit-form-card .fileinput-remove:hover,
+.edit-form-card .btn-file-remove:hover,
+.edit-form-card .kv-file-remove:hover,
+.edit-form-card .file-input .btn-default:hover {
+	background: rgb(234, 88, 12) !important;
+	color: #fff !important;
+}
+/* Krajee Browse button (orange solid) */
+.edit-form-card .btn-file,
+.edit-form-card .fileinput-upload-button,
+.edit-form-card .file-input .btn.btn-primary {
+	background: rgb(234, 88, 12) !important;
+	border: 1.5px solid rgb(234, 88, 12) !important;
+	color: #fff !important;
+	border-radius: 8px !important;
+	font-weight: 700 !important;
+	box-shadow: 0 2px 6px rgba(234,88,12,0.25);
+	transition: all 0.15s;
+}
+.edit-form-card .btn-file:hover,
+.edit-form-card .fileinput-upload-button:hover,
+.edit-form-card .file-input .btn.btn-primary:hover {
+	background: #c2410c !important;
+	border-color: #c2410c !important;
+	color: #fff !important;
+}
+/* File preview thumbnail border + paginator dots */
+.edit-form-card .file-preview {
+	border: 1.5px solid #fed7aa !important;
+	border-radius: 12px !important;
+}
+.edit-form-card .file-preview-frame {
+	border-radius: 10px !important;
 	box-shadow: none !important;
+}
+.edit-form-card .kv-preview-data {
+	border-radius: 8px;
+	max-width: 100%;
+	max-height: 220px;
+	object-fit: contain;
+	background: #fff;
+}
+.edit-form-card .file-thumbnail-footer .file-footer-buttons .btn {
+	border-radius: 6px;
+}
+.edit-form-card .file-thumbnail-footer .file-footer-buttons .btn-kv {
+	color: rgb(234, 88, 12);
+	border-color: rgb(234, 88, 12);
+}
+.edit-form-card .file-thumbnail-footer .file-footer-buttons .btn-kv:hover {
+	background: rgb(234, 88, 12);
+	color: #fff;
 }
 .edit-form-card .section-title {
 	font-size: 14px;
@@ -109,14 +197,14 @@ $(document).ready(function() {
 	gap: 8px;
 }
 .edit-form-card .section-title i {
-	color: #F27420;
+	color: rgb(234, 88, 12);
 }
 .edit-form-card .btn-save {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
 	height: 44px;
-	background: #F27420;
+	background: rgb(234, 88, 12);
 	border: none;
 	color: #fff;
 	border-radius: 12px;
@@ -124,12 +212,12 @@ $(document).ready(function() {
 	font-size: 13.5px;
 	font-weight: 700;
 	cursor: pointer;
-	box-shadow: 0 2px 8px rgba(242,116,32,0.3);
+	box-shadow: 0 2px 8px rgba(234,88,12,0.3);
 	transition: all 0.15s;
 	outline: none;
 }
 .edit-form-card .btn-save:hover {
-	background: #e0600e;
+	background: #c2410c;
 }
 .edit-form-card .btn-save:focus { outline: none; }
 .edit-form-card .btn-cancel {
@@ -150,9 +238,79 @@ $(document).ready(function() {
 	outline: none;
 }
 .edit-form-card .btn-cancel:hover {
-	border-color: #F27420;
-	color: #F27420;
+	border-color: rgb(234, 88, 12);
+	color: rgb(234, 88, 12);
 	background: #FFF8F3;
+}
+/* Yes/No toggle (jQuery switch plugin) — Yes (on) state */
+.switch-on, .switch.has-switch .switch-on, .has-switch span.switch-on, label.btn.switch-on,
+.switch.has-switch .switch-primary {
+	background: rgb(234, 88, 12) !important;
+	color: #fff !important;
+	border-color: rgb(234, 88, 12) !important;
+}
+/* Krajee file zoom modal — give it breathing room from navbar + a visible close button */
+.kv-fileinput-zoom-modal .modal-dialog,
+.kv-zoom-modal .modal-dialog,
+.file-zoom-dialog {
+	margin-top: 100px !important;
+	max-height: calc(100vh - 140px) !important;
+}
+.kv-fileinput-zoom-modal .modal-content,
+.kv-zoom-modal .modal-content,
+.file-zoom-dialog .modal-content {
+	border-radius: 14px !important;
+	box-shadow: 0 24px 60px -12px rgba(15,17,21,0.45) !important;
+	overflow: hidden;
+}
+/* Close (X) button for the zoom modal */
+.kv-fileinput-zoom-modal .btn-close,
+.kv-zoom-modal .btn-close,
+.file-zoom-dialog .btn-close,
+.kv-fileinput-zoom-modal .close,
+.kv-zoom-modal .close,
+.file-zoom-dialog .close {
+	display: inline-flex !important;
+	align-items: center;
+	justify-content: center;
+	position: absolute !important;
+	top: 12px !important;
+	right: 12px !important;
+	z-index: 10;
+	width: 34px; height: 34px;
+	background: #fff !important;
+	border: 1.5px solid #e2e8f0 !important;
+	border-radius: 50% !important;
+	color: #64748b !important;
+	font-size: 20px !important;
+	line-height: 1 !important;
+	opacity: 1 !important;
+	cursor: pointer;
+	box-shadow: 0 2px 8px rgba(15,17,21,0.15);
+	transition: all 0.15s;
+}
+.kv-fileinput-zoom-modal .btn-close::before,
+.kv-zoom-modal .btn-close::before,
+.file-zoom-dialog .btn-close::before {
+	content: '\00d7';
+	font-weight: 400;
+}
+.kv-fileinput-zoom-modal .btn-close:hover,
+.kv-zoom-modal .btn-close:hover,
+.file-zoom-dialog .btn-close:hover,
+.kv-fileinput-zoom-modal .close:hover,
+.kv-zoom-modal .close:hover,
+.file-zoom-dialog .close:hover {
+	background: rgb(234, 88, 12) !important;
+	border-color: rgb(234, 88, 12) !important;
+	color: #fff !important;
+}
+/* Modal header padding — also keep button accessible */
+.kv-fileinput-zoom-modal .modal-header,
+.kv-zoom-modal .modal-header,
+.file-zoom-dialog .modal-header {
+	border-bottom: 1px solid #f1f5f9 !important;
+	padding: 14px 20px !important;
 }
 .edit-form-card .btn-cancel:focus { outline: none; }
 </style>
@@ -163,7 +321,7 @@ $(document).ready(function() {
 <section class="users-list-wrapper">
 <div style="margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#fff;border-radius:16px;padding:18px 24px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border:1px solid #f1f5f9;">
 	<div style="display:flex;align-items:center;gap:14px;">
-		<div style="width:48px;height:48px;border-radius:14px;background:#F27420;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(242,116,32,0.25);">
+		<div style="width:48px;height:48px;border-radius:14px;background:rgb(234, 88, 12);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(234,88,12,0.25);">
 			<i class="fa fa-user-circle-o" style="color:#fff;font-size:20px;"></i>
 		</div>
 		<div>

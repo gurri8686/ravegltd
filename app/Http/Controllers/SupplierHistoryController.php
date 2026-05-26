@@ -104,7 +104,6 @@ class SupplierHistoryController extends Controller
 				return $this->errorResponse('No transactions found in the selected period. Nothing to email.');
 			}
 
-			// Build PDF (same view used by /print/supplier_history)
 			$pastBalance = $supplierPayments::pastBalance($request->currentSupplier, $fromDate);
 			$closingBalance = (float) $pastBalance;
 			foreach ($invoices as $inv) {
@@ -115,19 +114,34 @@ class SupplierHistoryController extends Controller
 
 			$companyDetails = \App\Models\CompanyDetailModel::first();
 			$companyName    = $companyDetails->company_name ?? 'R & A Veg Ltd';
-			$pdf = Pdf::loadView('pdf.supplier-history', [
-				'pastBalance' => $pastBalance,
-				'invoices'    => $invoices,
-				'type'        => 'with-balance',
-				'supplier_id' => $request->currentSupplier,
-				'start_date'  => $fromDate,
-				'end_date'    => $toDate,
-				'print'       => 0,
-			]);
-			$pdf->setPaper('A4', 'portrait');
-			$pdfName = 'supplier-statement-' . preg_replace('/[^A-Za-z0-9]+/', '-', $supplier->name) . '.pdf';
-
 			$cur = env('CURRENCY_SYMBOL', '£');
+
+			// Build Excel of supplier invoices
+			$rows = [];
+			foreach ($invoices as $inv) {
+				if (($inv['is_credited'] ?? 0) == 1) continue;
+				$rows[] = [
+					$inv['id'] ?? '',
+					isset($inv['created_at']) ? Carbon::parse($inv['created_at'])->format('d M Y') : '',
+					number_format((float)($inv['net_amount'] ?? 0), 2),
+					number_format((float)($inv['total_paid'] ?? 0), 2),
+					number_format((float)($inv['credit_adj'] ?? 0), 2),
+					number_format((float)($inv['total_discounted'] ?? 0), 2),
+					number_format((float)($inv['balance'] ?? 0), 2),
+				];
+			}
+			$headings = ['Invoice','Date','Amount','Paid','Credit/Adj','Discount/Adj','Balance'];
+			$export = new class($rows, $headings) implements
+				\Maatwebsite\Excel\Concerns\FromArray,
+				\Maatwebsite\Excel\Concerns\WithHeadings {
+				protected $rows; protected $headings;
+				public function __construct($rows, $headings) { $this->rows = $rows; $this->headings = $headings; }
+				public function array(): array { return $this->rows; }
+				public function headings(): array { return $this->headings; }
+			};
+			$excelBinary = \Maatwebsite\Excel\Facades\Excel::raw($export, \Maatwebsite\Excel\Excel::XLSX);
+			$excelName = 'supplier-statement-' . preg_replace('/[^A-Za-z0-9]+/', '-', $supplier->name) . '.xlsx';
+
 			$mailData = [
 				'company_name'    => $companyName,
 				'supplier_name'   => $supplier->name,
@@ -137,13 +151,13 @@ class SupplierHistoryController extends Controller
 				'period'          => Carbon::parse($fromDate)->format('d M Y') . ' – ' . Carbon::parse($toDate)->format('d M Y'),
 				'closing_balance' => $cur . ' ' . number_format($closingBalance, 2),
 				'generated_on'    => date('d M Y'),
-				'pdf_name'        => $pdfName,
+				'attachment_name' => $excelName,
 			];
 
 			try {
 				$this->configureMailerFromEnv();
 				Mail::to($request->to_email)
-					->send(new SupplierStatementMail($mailData, $pdf->output()));
+					->send(new SupplierStatementMail($mailData, $excelBinary));
 				return $this->successResponse(['message' => 'Statement emailed to ' . $request->to_email]);
 			} catch (\Exception $mailEx) {
 				return $this->errorResponse('Could not send email: ' . $mailEx->getMessage());

@@ -1,3 +1,30 @@
+# ── PHP overrides (safe — only run if mod_php is loaded; PHP-FPM uses .user.ini instead) ──
+# `Timeout` / `ProxyTimeout` are server-context directives that AllowOverride won't permit in
+# .htaccess on most servers (cause 500 errors). They must be set in the Apache vhost config:
+#     ProxyTimeout 3600
+#     Timeout 3600
+<IfModule mod_php.c>
+    php_value max_execution_time 0
+    php_value max_input_time 3600
+    php_value upload_max_filesize 50M
+    php_value post_max_size 60M
+    php_value memory_limit 1024M
+</IfModule>
+<IfModule mod_php7.c>
+    php_value max_execution_time 0
+    php_value max_input_time 3600
+    php_value upload_max_filesize 50M
+    php_value post_max_size 60M
+    php_value memory_limit 1024M
+</IfModule>
+<IfModule mod_php8.c>
+    php_value max_execution_time 0
+    php_value max_input_time 3600
+    php_value upload_max_filesize 50M
+    php_value post_max_size 60M
+    php_value memory_limit 1024M
+</IfModule>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes

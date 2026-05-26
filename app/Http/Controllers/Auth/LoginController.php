@@ -49,7 +49,15 @@ class LoginController extends Controller
 				'email' => [trans('auth.failed')],
 			]);
 		}
-		
+
+		// Deactivated account: if the credentials are otherwise correct, tell them
+		// clearly instead of a generic failure.
+		if(!$getEmail->is_active && \Illuminate\Support\Facades\Hash::check($request->password, $getEmail->password)){
+			throw ValidationException::withMessages([
+				'email' => ['Your account has been deactivated. Please contact the administrator.'],
+			]);
+		}
+
 		//return $request->only($this->username(), 'password');
         //return ['email' => $request->{$this->username()}, 'password' => $request->password, 'is_active' => 1];
 		//return ['email' => $request->{$this->username()}, 'password' => $request->password, 'is_active' => 1];

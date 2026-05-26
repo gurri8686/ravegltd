@@ -206,15 +206,41 @@ class PrintController extends Controller
 		$totalSales    = collect($sales)->sum('sub_total');
 
 		try {
-			// Build PDF (same view used by /print/product_history_statement)
-			$html = view('pdf.product-history-statement', compact(
-				'suppliers', 'supplier_returns', 'sales', 'customer_returns', 'dumps',
-				'start_date', 'end_date', 'companyDetails', 'currency', 'productName'
-			))->render();
+			// Build Excel of product history rows
+			$rows = [];
+			$pushRows = function ($collection, $type, $partyKey, $qtyKey, $priceKey) use (&$rows) {
+				foreach ($collection as $entry) {
+					$party = $entry[$partyKey]['name'] ?? '';
+					$qty = (float)($entry[$qtyKey] ?? 0);
+					$price = (float)($entry[$priceKey] ?? 0);
+					$rows[] = [
+						$type,
+						isset($entry['created_at']) ? \Carbon\Carbon::parse($entry['created_at'])->format('d M Y') : '',
+						$entry['product']['name'] ?? '',
+						$party,
+						$qty,
+						number_format($price, 2),
+						number_format($qty * $price, 2),
+					];
+				}
+			};
+			$pushRows($suppliers,        'Supplier',        'supplier', 'quantity', 'unit_price');
+			$pushRows($supplier_returns, 'Supplier Return', 'supplier', 'stock',    'price');
+			$pushRows($sales,            'Sale',            'customer', 'quantity', 'unit_price');
+			$pushRows($customer_returns, 'Customer Return', 'customer', 'stock',    'price');
+			$pushRows($dumps,            'Dump',            'supplier', 'stock',    'price');
 
-			$pdf = Pdf::loadHTML($html);
-			$pdf->setPaper('A4', 'landscape');
-			$pdfName = 'product-history-' . preg_replace('/[^A-Za-z0-9]+/', '-', $productName) . '.pdf';
+			$headings = ['Type','Date','Product','Party','Quantity','Unit Price','Total'];
+			$export = new class($rows, $headings) implements
+				\Maatwebsite\Excel\Concerns\FromArray,
+				\Maatwebsite\Excel\Concerns\WithHeadings {
+				protected $rows; protected $headings;
+				public function __construct($rows, $headings) { $this->rows = $rows; $this->headings = $headings; }
+				public function array(): array { return $this->rows; }
+				public function headings(): array { return $this->headings; }
+			};
+			$excelBinary = \Maatwebsite\Excel\Facades\Excel::raw($export, \Maatwebsite\Excel\Excel::XLSX);
+			$excelName = 'product-history-' . preg_replace('/[^A-Za-z0-9]+/', '-', $productName) . '.xlsx';
 
 			$periodText = (!empty($start_date) && !empty($end_date))
 				? \Carbon\Carbon::parse($start_date)->format('d M Y') . ' – ' . \Carbon\Carbon::parse($end_date)->format('d M Y')
@@ -230,12 +256,12 @@ class PrintController extends Controller
 				'total_purchases' => $currency . ' ' . number_format($totalPurchase, 2),
 				'total_sales'     => $currency . ' ' . number_format($totalSales, 2),
 				'generated_on'    => date('d M Y'),
-				'pdf_name'        => $pdfName,
+				'attachment_name' => $excelName,
 			];
 
 			$this->configureMailerFromEnv();
 			\Illuminate\Support\Facades\Mail::to($request->to_email)
-				->send(new \App\Mail\ProductStatementMail($mailData, $pdf->output()));
+				->send(new \App\Mail\ProductStatementMail($mailData, $excelBinary));
 
 			return response()->json(['success' => true, 'payload' => 'Statement emailed to ' . $request->to_email]);
 		} catch (\Exception $ex) {

@@ -15,5 +15,7 @@ class DatabaseSeeder extends Seeder
     {
         // \App\Models\User::factory(10)->create();
 
+        // Superadmin/vendor roles + the superadmin login (idempotent).
+        $this->call(SuperadminSeeder::class);
     }
 }

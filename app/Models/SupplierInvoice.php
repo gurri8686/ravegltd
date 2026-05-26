@@ -45,7 +45,7 @@ class SupplierInvoice extends Model
 	
 	public static function unpaidInvoices($supplier_id, $invoices = []){
 		$query = SupplierInvoice::query();
-		return $query
+		$query = $query
 			->select('supplier_invoices.*')
 			->selectSub(function ($query) {
 				$query->from('supplier_invoice_products')
@@ -78,7 +78,10 @@ class SupplierInvoice extends Model
 				), 0)
 			) as balance_due')
 			->having('balance_due', '>', 0)
-			->where('supplier_id', $supplier_id)
-			->whereIn('id',$invoices)->get();
+			->where('supplier_id', $supplier_id);
+		if (!empty($invoices)) {
+			$query = $query->whereIn('id', $invoices);
+		}
+		return $query->get();
 	}
 }

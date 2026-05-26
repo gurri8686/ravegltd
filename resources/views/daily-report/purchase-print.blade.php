@@ -143,7 +143,7 @@
 			<div class="meta-block">
 				<div class="meta-item">
 					<div class="meta-label">From – To Date</div>
-					<div class="meta-value">{{ \Carbon\Carbon::parse($start_date)->format('d M Y') }} – {{ \Carbon\Carbon::parse($end_date)->format('d M Y') }}</div>
+					<div class="meta-value">{{ ($start_date && $end_date) ? \Carbon\Carbon::parse($start_date)->format('d M Y') . ' – ' . \Carbon\Carbon::parse($end_date)->format('d M Y') : 'All time' }}</div>
 				</div>
 				<div class="meta-item">
 					<div class="meta-label">Today</div>
@@ -171,46 +171,31 @@
 			<table class="data-table">
 				<thead>
 					<tr>
-						<th class="num">#</th>
+						<th>Invoice No.</th>
 						<th>Date</th>
-						<th>Invoice</th>
-						<th>Supplier</th>
+						<th>Supplier Name</th>
 						<th class="right">Amount</th>
-						<th class="right">Paid</th>
-						<th class="right">Pending</th>
-						<th class="center">Status</th>
 					</tr>
 				</thead>
 				<tbody>
 					@forelse($invoices as $i => $invoice)
 						@php
-							$total      = $invoice->total ?? 0;
-							$paid       = $invoice->total_paid ?? 0;
-							$pending    = $total - $paid;
-							$badgeClass = $paid >= $total && $total > 0 ? 'badge-paid' : ($paid > 0 ? 'badge-partial' : 'badge-unpaid');
-							$badgeText  = $paid >= $total && $total > 0 ? 'Paid' : ($paid > 0 ? 'Partial' : 'Unpaid');
+							$total = $invoice->total ?? 0;
 						@endphp
 						<tr>
-							<td class="row-num">{{ $i + 1 }}</td>
+							<td class="row-invoice">#{{ $invoice->other_invoice_id ?? $invoice->id }}</td>
 							<td class="row-date">{{ \Carbon\Carbon::parse($invoice->created_at)->format('d M Y') }}</td>
-							<td class="row-invoice">#{{ $invoice->id }}</td>
-							<td class="row-supplier">{{ $invoice->supplier->name ?? '—' }}</td>
+							<td class="row-supplier">{{ $invoice->supplier->name ?? '' }}</td>
 							<td class="right row-amount">{{ $currency }} {{ number_format($total, 2) }}</td>
-							<td class="right row-amount">{{ $currency }} {{ number_format($paid, 2) }}</td>
-							<td class="right row-amount">{{ $currency }} {{ number_format($pending, 2) }}</td>
-							<td class="center"><span class="badge {{ $badgeClass }}">{{ $badgeText }}</span></td>
 						</tr>
 					@empty
-						<tr><td colspan="8"><div class="empty-state">No invoices found for this period.</div></td></tr>
+						<tr><td colspan="4"><div class="empty-state">No invoices found for this period.</div></td></tr>
 					@endforelse
 
 					@if($invoices->count() > 0)
 						<tr class="total-row">
-							<td colspan="4" class="total-label">Total</td>
+							<td colspan="3" class="total-label">Total</td>
 							<td class="right"><span class="currency">{{ $currency }}</span>{{ number_format($invoices->sum('total'), 2) }}</td>
-							<td class="right total-paid"><span class="currency">{{ $currency }}</span>{{ number_format($invoices->sum('total_paid'), 2) }}</td>
-							<td class="right total-pending"><span class="currency">{{ $currency }}</span>{{ number_format($invoices->sum('total') - $invoices->sum('total_paid'), 2) }}</td>
-							<td></td>
 						</tr>
 					@endif
 				</tbody>

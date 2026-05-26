@@ -1,0 +1,18 @@
+{
+    "sourceFile": "app/Models/Site.php",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1758607285864,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1758607285864,
+            "name": "Commit-0",
+            "content": "<?php\r\n\r\nnamespace App\\Models;\r\n\r\nuse Illuminate\\Database\\Eloquent\\Factories\\HasFactory;\r\nuse Illuminate\\Database\\Eloquent\\Model;\r\n\r\nclass Site extends Model\r\n{\r\n    use \\App\\Models\\Traits\\LogsActivityTrait;\r\n    use HasFactory;\r\n\r\n    protected $connection = 'organizations';\r\n\r\n    /**\r\n     * \r\n     */\r\n    public static function getValidDomainDatabase($domain){\r\n        $obj = new self();\r\n        $site = $obj->where('domain', $domain)->orWhere('subdomain', $domain)->first();\r\n\r\n        if(empty($site)){\r\n            return \"\";\r\n        }\r\n        return $site;     \r\n    }\r\n}\r\n"
+        }
+    ]
+}

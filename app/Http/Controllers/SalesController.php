@@ -478,7 +478,6 @@ class SalesController extends Controller
 
 		$currency = env('CURRENCY_SYMBOL', '£');
 		$rows = [];
-		$i = 1;
 		$grandTotal = 0;
 		$products = $invoice->product ?? collect();
 		foreach ($products as $p) {
@@ -488,8 +487,7 @@ class SalesController extends Controller
 			$sub = (float)($p->sub_total ?? ($qty * $price));
 			$grandTotal += $sub;
 			$rows[] = [
-				$i++,
-				$p->product->name ?? ($p->product_name ?? '—'),
+				$p->product->name ?? ($p->product_name ?? ''),
 				$p->remarks ?? '',
 				$qty,
 				number_format($price, 2),
@@ -498,9 +496,9 @@ class SalesController extends Controller
 		}
 
 		// Total row
-		$rows[] = ['', 'TOTAL', '', '', '', number_format($grandTotal, 2)];
+		$rows[] = ['TOTAL', '', '', '', number_format($grandTotal, 2)];
 
-		$headings = ['#', 'Product', 'Remarks', 'Qty', 'Unit Price (' . $currency . ')', 'Total (' . $currency . ')'];
+		$headings = ['Product', 'Remarks', 'Qty', 'Price (' . $currency . ')', 'Total (' . $currency . ')'];
 
 		$export = new class($rows, $headings) implements
 			\Maatwebsite\Excel\Concerns\FromArray,
@@ -590,6 +588,13 @@ class SalesController extends Controller
 		$request->supplier_invoice_product_id = 0;
 		$request->invoice_id = 0;
 		$request->supplier_id = 0;
+		// No supplier binding (e.g. show_suppliers = OFF): still block selling more
+		// than the product actually has in stock so Sales stays in sync with Stock Manager.
+		try {
+			$salePurchaseValidation->canAddSaleEntryByProductStock($request->product, $request->quantity);
+		} catch(\Exception $ex) {
+			return $this->errorResponse($ex->getMessage());
+		}
 	}
 	
 	// validation: only one combination of product is allowed to add. (supplier_invoice_id, customer_invoice_id, supplier_id, product_id)
@@ -739,24 +744,18 @@ class SalesController extends Controller
 	
 	public function print(Request $request)
     {
-		$rules = [
-			'start_date' => 'required',
-			'end_date' => 'required',
-		];
-
-		$validator = Validator::make($request->all(), $rules);
-		if ($validator->fails()) {
-		  return response('Start date and end date are required.', 422);
-		}
-
 		$customer_id = $start_date = $end_date = "";
 		extract($request->only('customer_id', 'start_date', 'end_date'));
 		$invoiceIds = $request->input('invoices', []);
 
-		$data = (new \App\Models\CustomerInvoice())
-			->whereDate('created_at', '>=', $start_date)
-			->whereDate('created_at', '<=', $end_date);
+		$data = (new \App\Models\CustomerInvoice());
 
+		if (!empty($start_date)) {
+			$data = $data->whereDate('created_at', '>=', $start_date);
+		}
+		if (!empty($end_date)) {
+			$data = $data->whereDate('created_at', '<=', $end_date);
+		}
 		if (!empty($customer_id)) {
 			$data->where('customer_id', $customer_id);
 		}
@@ -771,8 +770,22 @@ class SalesController extends Controller
 				$q->where('initiated', 0);
 			}], 'amount')
 			->with('customer')
+			->with(['payments' => function($q){
+				$q->where('initiated', 0)
+					->with('paymentMode')
+					->select('customer_invoice_id', 'payment_id', \DB::raw('SUM(amount) as total_amount'))
+					->groupBy('customer_invoice_id', 'payment_id');
+			}])
 			->orderBy('created_at', 'desc')
-			->get();
+			->get()->map(function($invoice){
+				$invoice->payments_list = $invoice->payments->map(function($p){
+					return [
+						'total_amount' => $p->total_amount,
+						'payment_mode_type' => $p->paymentMode->type ?? null,
+					];
+				})->toArray();
+				return $invoice;
+			});
 
 		$companyDetails = \App\Models\CompanyDetailModel::first();
 		$currency = env('CURRENCY_SYMBOL', '£');
@@ -782,24 +795,18 @@ class SalesController extends Controller
 	
 	public function statementDailyBookSales(Request $request)
 	{
-		$rules = [
-			'start_date' => 'required',
-			'end_date' => 'required',
-		];
-
-		$validator = Validator::make($request->all(), $rules);
-		if ($validator->fails()) {
-			return 'Start date and end date are required';
-		}
-
 		$start_date = $request->start_date;
 		$end_date = $request->end_date;
 		$customer_id = $request->customer_id;
 
-		$data = (new \App\Models\CustomerInvoice())
-			->whereDate('created_at', '>=', $start_date)
-			->whereDate('created_at', '<=', $end_date);
+		$data = (new \App\Models\CustomerInvoice());
 
+		if (!empty($start_date)) {
+			$data = $data->whereDate('created_at', '>=', $start_date);
+		}
+		if (!empty($end_date)) {
+			$data = $data->whereDate('created_at', '<=', $end_date);
+		}
 		if (!empty($customer_id)) {
 			$data->where('customer_id', $customer_id);
 		}
@@ -825,25 +832,33 @@ class SalesController extends Controller
 
 		$currency = env('CURRENCY_SYMBOL', '£');
 		$rows = [];
-		$i = 1;
 		foreach ($invoices as $invoice) {
 			$total = (float)($invoice->total ?? 0);
 			$paid = (float)($invoice->total_paid ?? 0);
-			$pending = $total - $paid;
 			$status = ($paid >= $total && $total > 0) ? 'Paid' : ($paid > 0 ? 'Partial' : 'Unpaid');
+			// Build payments column (e.g. "Cash £50.00, Card £20.00")
+			$paymentTotals = [];
+			foreach ($invoice->payments as $p) {
+				$mode = optional($p->paymentMode)->type;
+				if (!$mode || $mode === 'Unknown') continue;
+				$paymentTotals[$mode] = ($paymentTotals[$mode] ?? 0) + (float)$p->total_amount;
+			}
+			$paymentsText = '';
+			foreach ($paymentTotals as $mode => $amt) {
+				$paymentsText .= ($paymentsText ? ', ' : '') . $mode . ' ' . $currency . ' ' . number_format($amt, 2);
+			}
 			$rows[] = [
-				$i++,
-				\Carbon\Carbon::parse($invoice->created_at)->format('d M Y'),
 				'#' . $invoice->id,
-				$invoice->customer->name ?? '—',
+				\Carbon\Carbon::parse($invoice->created_at)->format('d M Y'),
+				$invoice->customer->name ?? '',
 				number_format($total, 2),
-				number_format($paid, 2),
-				number_format($pending, 2),
+				$paid > 0 ? number_format($paid, 2) : '',
 				$status,
+				$paymentsText,
 			];
 		}
 
-		$headings = ['#', 'Date', 'Invoice', 'Customer', 'Amount (' . $currency . ')', 'Paid (' . $currency . ')', 'Pending (' . $currency . ')', 'Status'];
+		$headings = ['Invoice No.', 'Date', 'Customer', 'Total (' . $currency . ')', 'Paid (' . $currency . ')', 'Status', 'Payments'];
 
 		$export = new class($rows, $headings) implements
 			\Maatwebsite\Excel\Concerns\FromArray,
@@ -858,30 +873,61 @@ class SalesController extends Controller
 			public function headings(): array { return $this->headings; }
 		};
 
-		$fileName = "daily-sales-statement-{$start_date}-to-{$end_date}.xlsx";
+		$range = ($start_date && $end_date) ? "{$start_date}-to-{$end_date}" : 'all';
+		$fileName = "daily-sales-statement-{$range}.xlsx";
 		return \Maatwebsite\Excel\Facades\Excel::download($export, $fileName);
+	}
+
+	private function configureMailerFromEnv()
+	{
+		config([
+			'mail.default'                => env('MAIL_MAILER', 'smtp'),
+			'mail.mailers.smtp.transport' => 'smtp',
+			'mail.mailers.smtp.host'      => env('MAIL_HOST'),
+			'mail.mailers.smtp.port'      => (int) env('MAIL_PORT', 587),
+			'mail.mailers.smtp.encryption'=> env('MAIL_ENCRYPTION', 'tls'),
+			'mail.mailers.smtp.username'  => env('MAIL_USERNAME'),
+			'mail.mailers.smtp.password'  => env('MAIL_PASSWORD'),
+			'mail.from.address'           => env('MAIL_FROM_ADDRESS'),
+			'mail.from.name'              => env('MAIL_FROM_NAME', 'R & A Veg Ltd'),
+		]);
+		app()->forgetInstance('mailer');
+		app()->forgetInstance('swift.mailer');
+		app()->forgetInstance('swift.transport');
+		\Illuminate\Support\Facades\Mail::clearResolvedInstances();
 	}
 
 	public function emailDailyBookSales(Request $request)
 	{
 		$rules = [
-			'start_date' => 'required',
-			'end_date' => 'required',
+			'to_email' => 'required|email',
 		];
 
 		$validator = Validator::make($request->all(), $rules);
 		if ($validator->fails()) {
-			return response()->json(['success' => false, 'payload' => 'Start date and end date are required']);
+			return response()->json([
+				'success' => false,
+				'payload' => 'Recipient email is required',
+			]);
+		}
+
+		$ccEmail = $request->input('cc_email');
+		if (!empty($ccEmail) && !filter_var($ccEmail, FILTER_VALIDATE_EMAIL)) {
+			return response()->json(['success' => false, 'payload' => 'Enter a valid CC email address.']);
 		}
 
 		$start_date = $request->start_date;
 		$end_date = $request->end_date;
 		$customer_id = $request->customer_id;
 
-		$data = (new \App\Models\CustomerInvoice())
-			->whereDate('created_at', '>=', $start_date)
-			->whereDate('created_at', '<=', $end_date);
+		$data = (new \App\Models\CustomerInvoice());
 
+		if (!empty($start_date)) {
+			$data = $data->whereDate('created_at', '>=', $start_date);
+		}
+		if (!empty($end_date)) {
+			$data = $data->whereDate('created_at', '<=', $end_date);
+		}
 		if (!empty($customer_id)) {
 			$data->where('customer_id', $customer_id);
 		}
@@ -890,25 +936,107 @@ class SalesController extends Controller
 				$q->where('is_archive', 0);
 			}], 'sub_total')
 			->with('customer')
-			->get();
+			->with(['payments' => function($q){
+				$q->where('initiated', 0)
+					->with('paymentMode')
+					->select('customer_invoice_id', 'payment_id', DB::raw('SUM(amount) as total_amount'))
+					->groupBy('customer_invoice_id', 'payment_id');
+			}])
+			->get()->map(function($invoice){
+				$invoice->total_paid = $invoice->payments->sum('total_amount');
+				return $invoice;
+			});
 
+		if ($invoices->isEmpty()) {
+			return response()->json([
+				'success' => false,
+				'payload' => 'No sales invoices found in the selected period. Nothing to email.',
+			]);
+		}
+
+		// Build Excel attachment using the same export shape
 		$companyDetails = \App\Models\CompanyDetailModel::first();
+		$companyName = $companyDetails->company_name ?? 'R & A Veg Ltd';
+		$currency = env('CURRENCY_SYMBOL', '£');
+
+		$totalAmount = $invoices->sum('total');
+		$totalPaid   = $invoices->sum('total_paid');
+		$totalPending = $totalAmount - $totalPaid;
+
+		$rows = [];
+		foreach ($invoices as $invoice) {
+			$total = (float)($invoice->total ?? 0);
+			$paid = (float)($invoice->total_paid ?? 0);
+			$status = ($paid >= $total && $total > 0) ? 'Paid' : ($paid > 0 ? 'Partial' : 'Unpaid');
+			$paymentTotals = [];
+			foreach ($invoice->payments as $p) {
+				$mode = optional($p->paymentMode)->type;
+				if (!$mode || $mode === 'Unknown') continue;
+				$paymentTotals[$mode] = ($paymentTotals[$mode] ?? 0) + (float)$p->total_amount;
+			}
+			$paymentsText = '';
+			foreach ($paymentTotals as $mode => $amt) {
+				$paymentsText .= ($paymentsText ? ', ' : '') . $mode . ' ' . $currency . ' ' . number_format($amt, 2);
+			}
+			$rows[] = [
+				'#' . $invoice->id,
+				\Carbon\Carbon::parse($invoice->created_at)->format('d M Y'),
+				$invoice->customer->name ?? '',
+				number_format($total, 2),
+				$paid > 0 ? number_format($paid, 2) : '',
+				$status,
+				$paymentsText,
+			];
+		}
+		$headings = ['Invoice No.', 'Date', 'Customer', 'Total (' . $currency . ')', 'Paid (' . $currency . ')', 'Status', 'Payments'];
+
+		$export = new class($rows, $headings) implements
+			\Maatwebsite\Excel\Concerns\FromArray,
+			\Maatwebsite\Excel\Concerns\WithHeadings {
+			protected $rows; protected $headings;
+			public function __construct($rows, $headings) { $this->rows = $rows; $this->headings = $headings; }
+			public function array(): array { return $this->rows; }
+			public function headings(): array { return $this->headings; }
+		};
+
+		$emailRange = ($start_date && $end_date) ? "{$start_date}-to-{$end_date}" : 'all';
+		$excelName = "daily-sales-statement-{$emailRange}.xlsx";
+		$excelBinary = \Maatwebsite\Excel\Facades\Excel::raw($export, \Maatwebsite\Excel\Excel::XLSX);
+
+		$periodText = ($start_date && $end_date)
+			? \Carbon\Carbon::parse($start_date)->format('d M Y') . ' – ' . \Carbon\Carbon::parse($end_date)->format('d M Y')
+			: 'All time';
+
+		$defaultSubject = "Daily Sales Report — {$periodText}";
+		$defaultMessage = "Dear team,\n\nPlease find attached the daily sales report for the period {$periodText}.\n\n" .
+			"Total Invoices: " . $invoices->count() . "\n" .
+			"Total Amount: " . $currency . " " . number_format($totalAmount, 2) . "\n" .
+			"Total Paid: " . $currency . " " . number_format($totalPaid, 2) . "\n" .
+			"Total Pending: " . $currency . " " . number_format($totalPending, 2);
+
+		$mailData = [
+			'company_name'  => $companyName,
+			'report_title'  => 'Daily Sales Report',
+			'subject'       => $request->input('subject') ?: $defaultSubject,
+			'message'       => $request->input('message') ?: $defaultMessage,
+			'cc_email'      => $ccEmail,
+			'period'        => $periodText,
+			'invoice_count' => $invoices->count(),
+			'total_amount'  => $currency . ' ' . number_format($totalAmount, 2),
+			'total_paid'    => $currency . ' ' . number_format($totalPaid, 2),
+			'total_pending' => $currency . ' ' . number_format($totalPending, 2),
+			'generated_on'  => date('d M Y'),
+			'excel_name'    => $excelName,
+			'excel_binary'  => $excelBinary,
+		];
 
 		try {
-			$toEmail = $companyDetails->email ?? config('mail.from.address');
-			$total = $invoices->sum('total');
-			$count = $invoices->count();
-			$currency = env('CURRENCY_SYMBOL', '$');
-			$body = "<h3>Daily Book Sales Report</h3><p>Period: {$start_date} to {$end_date}</p><p>Total Invoices: {$count}</p><p>Total Amount: {$currency}{$total}</p>";
-
-			\Illuminate\Support\Facades\Mail::raw('', function ($message) use ($toEmail, $start_date, $end_date, $body) {
-				$message->to($toEmail)
-					->subject("Daily Book Sales Report ({$start_date} to {$end_date})")
-					->setBody($body, 'text/html');
-			});
-			return response()->json(['success' => true, 'payload' => 'Email sent successfully!']);
+			$this->configureMailerFromEnv();
+			\Illuminate\Support\Facades\Mail::to($request->to_email)
+				->send(new \App\Mail\DailyReportMail($mailData));
+			return response()->json(['success' => true, 'payload' => 'Report emailed to ' . $request->to_email]);
 		} catch (\Exception $ex) {
-			return response()->json(['success' => false, 'payload' => $ex->getMessage()]);
+			return response()->json(['success' => false, 'payload' => 'Could not send email: ' . $ex->getMessage()]);
 		}
 	}
 
@@ -1217,8 +1345,15 @@ class SalesController extends Controller
 				$request->supplier_invoice_product_id = 0;
 				$request->invoice_id = 0;
 				$request->supplier_id = 0;
+				// No supplier binding: block editing qty above available product stock
+				// (exclude the row being edited so its own qty isn't double-counted).
+				try {
+					$salePurchaseValidation->canAddSaleEntryByProductStock($request->product, $request->quantity, $request->invoiceproductid);
+				} catch(\Exception $ex) {
+					return $this->errorResponse($ex->getMessage());
+				}
 			}
-			
+
 			// validation: only one combination of product is allowed to add. (supplier_invoice_id, customer_invoice_id, supplier_id, product_id)
 			/**
 			 * @description: settle with the unique(index) combinations of keys in table: customer_invoice_products

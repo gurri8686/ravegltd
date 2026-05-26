@@ -507,7 +507,6 @@ class PurchaseController extends Controller
 			}
 			
 		}catch(\Exception $ex){
-		print_R($ex); exit;
 			return $this->errorResponse($ex->getMessage());
 		}
 		
@@ -680,24 +679,18 @@ class PurchaseController extends Controller
 	
 	public function print(Request $request)
     {
-		$rules = [
-			'start_date' => 'required',
-			'end_date' => 'required',
-		];
-
-		$validator = Validator::make($request->all(), $rules);
-		if ($validator->fails()) {
-		  return response('Start date and end date are required.', 422);
-		}
-
 		$supplier_id = $start_date = $end_date = "";
 		extract($request->only('supplier_id', 'start_date', 'end_date'));
 		$invoiceIds = $request->input('invoices', []);
 
-		$data = (new SupplierInvoice())
-			->whereDate('created_at', '>=', $start_date)
-			->whereDate('created_at', '<=', $end_date);
+		$data = (new SupplierInvoice());
 
+		if (!empty($start_date)) {
+			$data = $data->whereDate('created_at', '>=', $start_date);
+		}
+		if (!empty($end_date)) {
+			$data = $data->whereDate('created_at', '<=', $end_date);
+		}
 		if (!empty($supplier_id)) {
 			$data->where('supplier_id', $supplier_id);
 		}
@@ -721,23 +714,18 @@ class PurchaseController extends Controller
 
 	public function statementDailyBookPurchase(Request $request)
 	{
-		$rules = [
-			'start_date' => 'required',
-			'end_date' => 'required',
-		];
-		$validator = Validator::make($request->all(), $rules);
-		if ($validator->fails()) {
-			return 'Start date and end date are required';
-		}
-
 		$start_date = $request->start_date;
 		$end_date = $request->end_date;
 		$supplier_id = $request->supplier_id;
 
-		$data = (new SupplierInvoice())
-			->whereDate('created_at', '>=', $start_date)
-			->whereDate('created_at', '<=', $end_date);
+		$data = (new SupplierInvoice());
 
+		if (!empty($start_date)) {
+			$data = $data->whereDate('created_at', '>=', $start_date);
+		}
+		if (!empty($end_date)) {
+			$data = $data->whereDate('created_at', '<=', $end_date);
+		}
 		if (!empty($supplier_id)) {
 			$data->where('supplier_id', $supplier_id);
 		}
@@ -752,25 +740,17 @@ class PurchaseController extends Controller
 
 		$currency = env('CURRENCY_SYMBOL', '£');
 		$rows = [];
-		$i = 1;
 		foreach ($invoices as $invoice) {
 			$total = (float)($invoice->total ?? 0);
-			$paid = (float)($invoice->total_paid ?? 0);
-			$pending = $total - $paid;
-			$status = ($paid >= $total && $total > 0) ? 'Paid' : ($paid > 0 ? 'Partial' : 'Unpaid');
 			$rows[] = [
-				$i++,
+				'#' . ($invoice->other_invoice_id ?? $invoice->id),
 				\Carbon\Carbon::parse($invoice->created_at)->format('d M Y'),
-				'#' . $invoice->id,
-				$invoice->supplier->name ?? '—',
+				$invoice->supplier->name ?? '',
 				number_format($total, 2),
-				number_format($paid, 2),
-				number_format($pending, 2),
-				$status,
 			];
 		}
 
-		$headings = ['#', 'Date', 'Invoice', 'Supplier', 'Amount (' . $currency . ')', 'Paid (' . $currency . ')', 'Pending (' . $currency . ')', 'Status'];
+		$headings = ['Invoice No.', 'Date', 'Supplier Name', 'Amount (' . $currency . ')'];
 
 		$export = new class($rows, $headings) implements
 			\Maatwebsite\Excel\Concerns\FromArray,
@@ -785,10 +765,145 @@ class PurchaseController extends Controller
 			public function headings(): array { return $this->headings; }
 		};
 
-		$fileName = "daily-purchase-statement-{$start_date}-to-{$end_date}.xlsx";
+		$range = ($start_date && $end_date) ? "{$start_date}-to-{$end_date}" : 'all';
+		$fileName = "daily-purchase-statement-{$range}.xlsx";
 		return \Maatwebsite\Excel\Facades\Excel::download($export, $fileName);
 	}
-	
+
+	private function configureMailerFromEnv()
+	{
+		config([
+			'mail.default'                => env('MAIL_MAILER', 'smtp'),
+			'mail.mailers.smtp.transport' => 'smtp',
+			'mail.mailers.smtp.host'      => env('MAIL_HOST'),
+			'mail.mailers.smtp.port'      => (int) env('MAIL_PORT', 587),
+			'mail.mailers.smtp.encryption'=> env('MAIL_ENCRYPTION', 'tls'),
+			'mail.mailers.smtp.username'  => env('MAIL_USERNAME'),
+			'mail.mailers.smtp.password'  => env('MAIL_PASSWORD'),
+			'mail.from.address'           => env('MAIL_FROM_ADDRESS'),
+			'mail.from.name'              => env('MAIL_FROM_NAME', 'R & A Veg Ltd'),
+		]);
+		app()->forgetInstance('mailer');
+		app()->forgetInstance('swift.mailer');
+		app()->forgetInstance('swift.transport');
+		\Illuminate\Support\Facades\Mail::clearResolvedInstances();
+	}
+
+	public function emailDailyBookPurchase(Request $request)
+	{
+		$rules = [
+			'to_email'   => 'required|email',
+		];
+		$validator = Validator::make($request->all(), $rules);
+		if ($validator->fails()) {
+			return response()->json([
+				'success' => false,
+				'payload' => 'Recipient email is required',
+			]);
+		}
+		$ccEmail = $request->input('cc_email');
+		if (!empty($ccEmail) && !filter_var($ccEmail, FILTER_VALIDATE_EMAIL)) {
+			return response()->json(['success' => false, 'payload' => 'Enter a valid CC email address.']);
+		}
+
+		$start_date = $request->start_date;
+		$end_date = $request->end_date;
+		$supplier_id = $request->supplier_id;
+
+		$data = (new SupplierInvoice());
+
+		if (!empty($start_date)) {
+			$data = $data->whereDate('created_at', '>=', $start_date);
+		}
+		if (!empty($end_date)) {
+			$data = $data->whereDate('created_at', '<=', $end_date);
+		}
+		if (!empty($supplier_id)) {
+			$data->where('supplier_id', $supplier_id);
+		}
+		$invoices = $data->withSum(['products as total' => function ($q) {
+				$q->where('is_archive', 0);
+			}], 'sub_total')
+			->withSum('payments as total_paid', 'amount')
+			->with('supplier')
+			->orderBy('created_at', 'desc')
+			->get();
+
+		if ($invoices->isEmpty()) {
+			return response()->json([
+				'success' => false,
+				'payload' => 'No purchase invoices found in the selected period. Nothing to email.',
+			]);
+		}
+
+		$companyDetails = \App\Models\CompanyDetailModel::first();
+		$companyName = $companyDetails->company_name ?? 'R & A Veg Ltd';
+		$currency = env('CURRENCY_SYMBOL', '£');
+
+		$totalAmount  = $invoices->sum('total');
+		$totalPaid    = $invoices->sum('total_paid');
+		$totalPending = $totalAmount - $totalPaid;
+
+		$rows = [];
+		foreach ($invoices as $invoice) {
+			$total = (float)($invoice->total ?? 0);
+			$rows[] = [
+				'#' . ($invoice->other_invoice_id ?? $invoice->id),
+				\Carbon\Carbon::parse($invoice->created_at)->format('d M Y'),
+				$invoice->supplier->name ?? '',
+				number_format($total, 2),
+			];
+		}
+		$headings = ['Invoice No.', 'Date', 'Supplier Name', 'Amount (' . $currency . ')'];
+
+		$export = new class($rows, $headings) implements
+			\Maatwebsite\Excel\Concerns\FromArray,
+			\Maatwebsite\Excel\Concerns\WithHeadings {
+			protected $rows; protected $headings;
+			public function __construct($rows, $headings) { $this->rows = $rows; $this->headings = $headings; }
+			public function array(): array { return $this->rows; }
+			public function headings(): array { return $this->headings; }
+		};
+		$emailRange = ($start_date && $end_date) ? "{$start_date}-to-{$end_date}" : 'all';
+		$excelName = "daily-purchase-statement-{$emailRange}.xlsx";
+		$excelBinary = \Maatwebsite\Excel\Facades\Excel::raw($export, \Maatwebsite\Excel\Excel::XLSX);
+
+		$periodText = ($start_date && $end_date)
+			? \Carbon\Carbon::parse($start_date)->format('d M Y') . ' – ' . \Carbon\Carbon::parse($end_date)->format('d M Y')
+			: 'All time';
+		$defaultSubject = "Daily Purchase Report — {$periodText}";
+		$defaultMessage = "Dear team,\n\nPlease find attached the daily purchase report for the period {$periodText}.\n\n" .
+			"Total Invoices: " . $invoices->count() . "\n" .
+			"Total Amount: " . $currency . " " . number_format($totalAmount, 2) . "\n" .
+			"Total Paid: " . $currency . " " . number_format($totalPaid, 2) . "\n" .
+			"Total Pending: " . $currency . " " . number_format($totalPending, 2);
+
+		$mailData = [
+			'company_name'  => $companyName,
+			'report_title'  => 'Daily Purchase Report',
+			'subject'       => $request->input('subject') ?: $defaultSubject,
+			'message'       => $request->input('message') ?: $defaultMessage,
+			'cc_email'      => $ccEmail,
+			'period'        => $periodText,
+			'invoice_count' => $invoices->count(),
+			'total_amount'  => $currency . ' ' . number_format($totalAmount, 2),
+			'total_paid'    => $currency . ' ' . number_format($totalPaid, 2),
+			'total_pending' => $currency . ' ' . number_format($totalPending, 2),
+			'generated_on'  => date('d M Y'),
+			'excel_name'    => $excelName,
+			'excel_binary'  => $excelBinary,
+		];
+
+		try {
+			$this->configureMailerFromEnv();
+			\Illuminate\Support\Facades\Mail::to($request->to_email)
+				->send(new \App\Mail\DailyReportMail($mailData));
+			return response()->json(['success' => true, 'payload' => 'Report emailed to ' . $request->to_email]);
+		} catch (\Exception $ex) {
+			return response()->json(['success' => false, 'payload' => 'Could not send email: ' . $ex->getMessage()]);
+		}
+	}
+
 	public function list(Request $request)
     {
 		$supplier_id = $product_id = $start_date = $end_date = "";
@@ -878,7 +993,6 @@ public function invoiceExcel($id){
 
 	$currency = env('CURRENCY_SYMBOL', '£');
 	$rows = [];
-	$i = 1;
 	$grandTotal = 0;
 	$products = $invoice->product ?? collect();
 	foreach ($products as $p) {
@@ -886,20 +1000,21 @@ public function invoiceExcel($id){
 		$qty = (float)($p->quantity ?? 0);
 		$price = (float)($p->unit_price ?? 0);
 		$sub = (float)($p->sub_total ?? ($qty * $price));
+		$sellPrice = $p->sale_price;
 		$grandTotal += $sub;
 		$rows[] = [
-			$i++,
-			$p->product->name ?? ($p->product_name ?? '—'),
+			$p->product->name ?? ($p->product_name ?? ''),
 			$p->remarks ?? '',
 			$qty,
 			number_format($price, 2),
+			!empty($sellPrice) ? number_format((float)$sellPrice, 2) : '',
 			number_format($sub, 2),
 		];
 	}
 
-	$rows[] = ['', 'TOTAL', '', '', '', number_format($grandTotal, 2)];
+	$rows[] = ['TOTAL', '', '', '', '', number_format($grandTotal, 2)];
 
-	$headings = ['#', 'Product', 'Remarks', 'Qty', 'Unit Price (' . $currency . ')', 'Total (' . $currency . ')'];
+	$headings = ['Product', 'Remarks', 'Qty', 'Price (' . $currency . ')', 'Sell Price (' . $currency . ')', 'Total (' . $currency . ')'];
 
 	$export = new class($rows, $headings) implements
 		\Maatwebsite\Excel\Concerns\FromArray,

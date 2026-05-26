@@ -15,13 +15,13 @@
         transition: background 0.18s, border-color 0.18s, color 0.18s;
         cursor: pointer;
     }
-    .form-btn-cancel:hover, .form-btn-cancel:active { background: #fff8f3; border-color: #f97316; color: #f97316; text-decoration: none; }
+    .form-btn-cancel:hover, .form-btn-cancel:active { background: #fff8f3; border-color: rgb(234, 88, 12); color: rgb(234, 88, 12); text-decoration: none; }
     .form-btn-save {
         display: inline-flex; align-items: center; gap: 7px;
         height: 42px; padding: 0 26px; border-radius: 10px;
-        background: linear-gradient(135deg, #f97316, #ea580c); color: #fff;
+        background: rgb(234, 88, 12); color: #fff;
         font-weight: 700; font-size: 14px; border: none;
-        box-shadow: 0 4px 14px rgba(249,115,22,0.35); cursor: pointer;
+        box-shadow: 0 4px 14px rgba(234,88,12,0.35); cursor: pointer;
         transition: box-shadow 0.18s, transform 0.18s; outline: none;
     }
     .form-btn-save:hover { box-shadow: 0 6px 20px rgba(249,115,22,0.45); transform: translateY(-1px); }
@@ -49,7 +49,7 @@
     <section>
     <div style="margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#fff;border-radius:16px;padding:18px 24px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border:1px solid #f1f5f9;">
         <div style="display:flex;align-items:center;gap:14px;">
-            <div style="width:48px;height:48px;border-radius:14px;background:#F27420;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(242,116,32,0.25);">
+            <div style="width:48px;height:48px;border-radius:14px;background:rgb(234, 88, 12);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(234,88,12,0.25);">
                 <i class="fa fa-users" style="color:#fff;font-size:20px;"></i>
             </div>
             <div>

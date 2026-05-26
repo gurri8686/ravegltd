@@ -57,14 +57,12 @@ class ExcelController extends Controller
 		$invoices = $customerPayments::invoicePaymentsHistory($customer_id, $start_date, $end_date);
 
 		$rows = [];
-		$i = 1;
 		$currency = env('CURRENCY_SYMBOL', '£');
 		foreach ($invoices as $inv) {
 			if (($inv['is_credited'] ?? 0) == 1) continue;
 			$rows[] = [
-				$i++,
-				isset($inv['created_at']) ? \Carbon\Carbon::parse($inv['created_at'])->format('d M Y') : '',
 				$inv['id'] ?? '',
+				isset($inv['created_at']) ? \Carbon\Carbon::parse($inv['created_at'])->format('d M Y') : '',
 				number_format((float)($inv['net_amount'] ?? 0), 2),
 				number_format((float)($inv['total_paid'] ?? 0), 2),
 				number_format((float)($inv['credit_adj'] ?? 0), 2),
@@ -73,7 +71,7 @@ class ExcelController extends Controller
 			];
 		}
 
-		$headings = ['#','Date','Invoice','Amount','Paid','Credit/Adj','Discount/Adj','Balance'];
+		$headings = ['Invoice','Date','Amount','Paid','Credit/Adj','Discount/Adj','Balance'];
 		$range = (!empty($start_date) && !empty($end_date)) ? ($start_date . '_to_' . $end_date) : 'all';
 		$fileName = 'customer_history-' . $range . '.xlsx';
 
@@ -96,13 +94,11 @@ class ExcelController extends Controller
 		$invoices = $supplierPayments::invoicePaymentsHistory($supplier_id, $start_date, $end_date);
 
 		$rows = [];
-		$i = 1;
 		foreach ($invoices as $inv) {
 			if (($inv['is_credited'] ?? 0) == 1) continue;
 			$rows[] = [
-				$i++,
-				isset($inv['created_at']) ? \Carbon\Carbon::parse($inv['created_at'])->format('d M Y') : '',
 				$inv['id'] ?? '',
+				isset($inv['created_at']) ? \Carbon\Carbon::parse($inv['created_at'])->format('d M Y') : '',
 				number_format((float)($inv['net_amount'] ?? 0), 2),
 				number_format((float)($inv['total_paid'] ?? 0), 2),
 				number_format((float)($inv['credit_adj'] ?? 0), 2),
@@ -111,7 +107,7 @@ class ExcelController extends Controller
 			];
 		}
 
-		$headings = ['#','Date','Invoice','Amount','Paid','Credit/Adj','Discount/Adj','Balance'];
+		$headings = ['Invoice','Date','Amount','Paid','Credit/Adj','Discount/Adj','Balance'];
 		$range = (!empty($start_date) && !empty($end_date)) ? ($start_date . '_to_' . $end_date) : 'all';
 		$fileName = 'supplier_history-' . $range . '.xlsx';
 
@@ -135,14 +131,12 @@ class ExcelController extends Controller
 		$dumps            = ProductHistory::dumps($product_id, $start_date, $end_date, $supplier_id);
 
 		$rows = [];
-		$i = 1;
-		$pushRows = function ($collection, $type, $partyKey, $qtyKey, $priceKey) use (&$rows, &$i) {
+		$pushRows = function ($collection, $type, $partyKey, $qtyKey, $priceKey) use (&$rows) {
 			foreach ($collection as $entry) {
 				$party = $entry[$partyKey]['name'] ?? '';
 				$qty = (float)($entry[$qtyKey] ?? 0);
 				$price = (float)($entry[$priceKey] ?? 0);
 				$rows[] = [
-					$i++,
 					$type,
 					isset($entry['created_at']) ? \Carbon\Carbon::parse($entry['created_at'])->format('d M Y') : '',
 					$entry['product']['name'] ?? '',
@@ -160,7 +154,7 @@ class ExcelController extends Controller
 		$pushRows($customer_returns, 'Customer Return',  'customer', 'stock',    'price');
 		$pushRows($dumps,            'Dump',             'supplier', 'stock',    'price');
 
-		$headings = ['#','Type','Date','Product','Party','Quantity','Unit Price','Total'];
+		$headings = ['Type','Date','Product','Party','Quantity','Unit Price','Total'];
 		$range = (!empty($start_date) && !empty($end_date)) ? ($start_date . '_to_' . $end_date) : 'all';
 		$fileName = 'product_history-' . $range . '.xlsx';
 
@@ -184,7 +178,6 @@ class ExcelController extends Controller
 		$products = $payload['payload'] ?? [];
 
 		$rows = [];
-		$i = 1;
 		foreach ($products as $p) {
 			$os    = (int)($p['os'] ?? 0);
 			$ns    = array_sum($p['ns'] ?? []);
@@ -203,7 +196,6 @@ class ExcelController extends Controller
 			$result = !$hasCl ? '' : ($diff == 0 ? 'OK' : ($diff > 0 ? '+'.$diff.' Excess' : abs($diff).' Short'));
 
 			$rows[] = [
-				$i++,
 				$p['product_name'] ?? '',
 				$p['supplier_name'] ?? '',
 				$os, $ns, $sales, $crtn, $dmps, $srtn,
@@ -213,7 +205,7 @@ class ExcelController extends Controller
 			];
 		}
 
-		$headings = ['#','Product','Supplier','O.S','N.S','Sales','C.Rtn','Dumps','S.Rtn','Stock','Cl. Stock','Result'];
+		$headings = ['Product','Supplier','O.S','N.S','Sales','C.Rtn','Dumps','S.Rtn','Stock','Cl. Stock','Result'];
 		$fileName = 'stock_check-' . $date . '.xlsx';
 		return Excel::download($this->makeExport($rows, $headings), $fileName);
 	}
@@ -233,7 +225,6 @@ class ExcelController extends Controller
 		$products = $payload['payload'] ?? [];
 
 		$rows = [];
-		$i = 1;
 		foreach ($products as $p) {
 			$system   = (float)($p['system_stock'] ?? 0);
 			$totalIn  = (float)($p['total_in'] ?? 0);
@@ -252,7 +243,6 @@ class ExcelController extends Controller
 			$productName = ($p['name'] ?? '') . ' (In:' . (int)$totalIn . ' Out:' . (int)$totalOut . ')';
 
 			$rows[] = [
-				$i++,
 				$productName,
 				$p['stock_closing']['remark'] ?? '',
 				$system,
@@ -260,7 +250,7 @@ class ExcelController extends Controller
 			];
 		}
 
-		$headings = ['#','Product','Remark','System Stock','Closing Stock'];
+		$headings = ['Product','Remark','System Stock','Closing Stock'];
 		$fileName = 'stock_closing-' . $tab . '-' . $date . '.xlsx';
 		return Excel::download($this->makeExport($rows, $headings), $fileName);
 	}
@@ -281,10 +271,8 @@ class ExcelController extends Controller
 
 		$currency = env('CURRENCY_SYMBOL', '£');
 		$rows = [];
-		$i = 1;
 		foreach ($products as $p) {
 			$rows[] = [
-				$i++,
 				$p['invoice_id'] ?? '',
 				$p['created_at'] ?? '',
 				$p['product_name'] ?? '',
@@ -295,7 +283,7 @@ class ExcelController extends Controller
 			];
 		}
 
-		$headings = ['#','Invoice #','Date','Product','Customer','Qty','Price','Note'];
+		$headings = ['Invoice','Date','Product','Customer','Qty','Price','Note'];
 		$fileName = 'unassigned_suppliers-' . date('Y-m-d') . '.xlsx';
 		return Excel::download($this->makeExport($rows, $headings), $fileName);
 	}
@@ -316,10 +304,8 @@ class ExcelController extends Controller
 
 		$currency = env('CURRENCY_SYMBOL', '£');
 		$rows = [];
-		$i = 1;
 		foreach ($items as $r) {
 			$rows[] = [
-				$i++,
 				$r['invoice_id'] ?? '',
 				$r['date'] ?? '',
 				$r['customer_name'] ?? '',
@@ -332,7 +318,7 @@ class ExcelController extends Controller
 			];
 		}
 
-		$headings = ['#','Invoice','Date','Customer','Product','Remark','Purchased','Returned','Available','Price'];
+		$headings = ['Invoice','Date','Customer','Product','Remark','Purchased','Returned','Available','Price'];
 		$fileName = 'customer_returnable-' . date('Y-m-d') . '.xlsx';
 		return Excel::download($this->makeExport($rows, $headings), $fileName);
 	}
@@ -370,10 +356,8 @@ class ExcelController extends Controller
 
 		$currency = env('CURRENCY_SYMBOL', '£');
 		$rows = [];
-		$i = 1;
 		foreach ($items as $r) {
 			$rows[] = [
-				$i++,
 				$r['invoice_id'] ?? '',
 				$r['date'] ?? '',
 				$r['supplier_name'] ?? '',
@@ -386,7 +370,7 @@ class ExcelController extends Controller
 			];
 		}
 
-		$headings = ['#','Invoice','Date','Supplier','Product','Remark','Purchased','Returned','Available','Price'];
+		$headings = ['Invoice','Date','Supplier','Product','Remark','Purchased','Returned','Available','Price'];
 		$fileName = 'supplier_returnable-' . date('Y-m-d') . '.xlsx';
 		return Excel::download($this->makeExport($rows, $headings), $fileName);
 	}
@@ -407,10 +391,8 @@ class ExcelController extends Controller
 
 		$currency = env('CURRENCY_SYMBOL', '£');
 		$rows = [];
-		$i = 1;
 		foreach ($items as $r) {
 			$rows[] = [
-				$i++,
 				$r['invoice_id'] ?? '',
 				$r['date'] ?? '',
 				$r['supplier_name'] ?? '',
@@ -422,7 +404,7 @@ class ExcelController extends Controller
 			];
 		}
 
-		$headings = ['#','Invoice','Date','Supplier','Product','Remark','Purchased','Available','Price'];
+		$headings = ['Invoice','Date','Supplier','Product','Remark','Purchased','Available','Price'];
 		$fileName = 'dumpable-' . date('Y-m-d') . '.xlsx';
 		return Excel::download($this->makeExport($rows, $headings), $fileName);
 	}
@@ -464,12 +446,10 @@ class ExcelController extends Controller
 	private function buildReturnsExcel($items, $fileType, $partyKey){
 		$currency = env('CURRENCY_SYMBOL', '£');
 		$rows = [];
-		$i = 1;
 		foreach ($items as $r) {
 			$rows[] = [
-				$i++,
-				isset($r['date']) ? \Carbon\Carbon::parse($r['date'])->format('d M Y') : '',
 				$r['invoice_id'] ?? '',
+				isset($r['date']) ? \Carbon\Carbon::parse($r['date'])->format('d M Y') : '',
 				$r['product_id'] ?? '',
 				$r[$partyKey] ?? '',
 				$r['note'] ?? '',
@@ -479,7 +459,7 @@ class ExcelController extends Controller
 			];
 		}
 		$partyLabel = ucfirst($partyKey);
-		$headings = ['#','Date','Invoice #','Product',$partyLabel,'Note','Qty','Price','Total'];
+		$headings = ['Invoice','Date','Product',$partyLabel,'Note','Qty','Price','Total'];
 		$fileName = $fileType . '-' . date('Y-m-d') . '.xlsx';
 		return Excel::download($this->makeExport($rows, $headings), $fileName);
 	}
@@ -492,19 +472,17 @@ class ExcelController extends Controller
 		$status = $request->input('status') ?: 'all';
 
 		$rows = [];
-		$i = 1;
 		foreach ($products as $p) {
 			if ($status === 'active' && $p->is_active != 1) continue;
 			if ($status === 'inactive' && $p->is_active == 1) continue;
 			$rows[] = [
-				$i++,
 				$p->product_id ?? '',
 				$p->name ?? '',
 				$p->is_active == 1 ? 'Active' : 'Inactive',
 			];
 		}
 
-		$headings = ['#','Product ID','Name','Status'];
+		$headings = ['Product ID','Name','Status'];
 		$fileName = 'stock_manager-' . date('Y-m-d') . '.xlsx';
 		return Excel::download($this->makeExport($rows, $headings), $fileName);
 	}
@@ -545,7 +523,6 @@ class ExcelController extends Controller
 		}
 
 		$rows = [];
-		$i = 1;
 		foreach ($products as $p) {
 			if ($status === 'active' && $p->is_active != 1) continue;
 			if ($status === 'inactive' && $p->is_active == 1) continue;
@@ -563,7 +540,6 @@ class ExcelController extends Controller
 			}
 
 			$rows[] = [
-				$i++,
 				$p->name ?? '',
 				$p->selling_price !== null && $p->selling_price !== '' ? $currency . ' ' . $p->selling_price : '',
 				$p->unit_weight ?? '',
@@ -574,7 +550,7 @@ class ExcelController extends Controller
 			];
 		}
 
-		$headings = ['#','Name','Selling Price','Weight / Unit','Tax / VAT','Date','Status','Profit / Loss'];
+		$headings = ['Name','Selling Price','Weight / Unit','Tax / VAT','Date','Status','Profit / Loss'];
 		$fileName = 'products-' . date('Y-m-d') . '.xlsx';
 		return Excel::download($this->makeExport($rows, $headings), $fileName);
 	}

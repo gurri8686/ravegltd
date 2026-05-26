@@ -168,6 +168,52 @@ Route::middleware(['localization', 'domains'])->group(function () {
     Route::get('/invoicedeletecron', [InvoicecronController::class, 'invoicedeletecron'])->name('invoicedeletecron');
 
     Auth::routes();
+
+    // ── Superadmin panel — separate /admin/login, role-gated (superadmin only) ──
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('login', [\App\Http\Controllers\Admin\AdminAuthController::class, 'showLoginForm'])->name('login');
+        Route::post('login', [\App\Http\Controllers\Admin\AdminAuthController::class, 'login'])->name('login.post');
+        Route::post('logout', [\App\Http\Controllers\Admin\AdminAuthController::class, 'logout'])->name('logout');
+
+        Route::middleware('superadmin')->group(function () {
+            Route::get('/', fn () => redirect()->route('admin.dashboard'));
+
+            // Dashboard — main overview (first screen after login)
+            Route::get('dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
+
+            // Vendors — CRUD of vendor accounts (name, status, subscription action)
+            Route::get('vendors', [\App\Http\Controllers\Admin\VendorController::class, 'index'])->name('vendors.index');
+            Route::get('vendors/create', [\App\Http\Controllers\Admin\VendorController::class, 'create'])->name('vendors.create');
+            Route::post('vendors', [\App\Http\Controllers\Admin\VendorController::class, 'store'])->name('vendors.store');
+            Route::get('vendors/{id}', [\App\Http\Controllers\Admin\VendorController::class, 'show'])->name('vendors.show');
+            Route::get('vendors/{id}/edit', [\App\Http\Controllers\Admin\VendorController::class, 'edit'])->name('vendors.edit');
+            Route::put('vendors/{id}', [\App\Http\Controllers\Admin\VendorController::class, 'update'])->name('vendors.update');
+            Route::post('vendors/{id}/toggle', [\App\Http\Controllers\Admin\VendorController::class, 'toggleStatus'])->name('vendors.toggle');
+            Route::delete('vendors/{id}', [\App\Http\Controllers\Admin\VendorController::class, 'destroy'])->name('vendors.destroy');
+
+            // Domains — subdomain / custom-domain management (sites table)
+            Route::get('domains', [\App\Http\Controllers\Admin\DomainController::class, 'index'])->name('domains.index');
+            Route::get('domains/create', [\App\Http\Controllers\Admin\DomainController::class, 'create'])->name('domains.create');
+            Route::post('domains', [\App\Http\Controllers\Admin\DomainController::class, 'store'])->name('domains.store');
+            Route::get('domains/{id}/edit', [\App\Http\Controllers\Admin\DomainController::class, 'edit'])->name('domains.edit');
+            Route::put('domains/{id}', [\App\Http\Controllers\Admin\DomainController::class, 'update'])->name('domains.update');
+            Route::post('domains/{id}/toggle', [\App\Http\Controllers\Admin\DomainController::class, 'toggleStatus'])->name('domains.toggle');
+            Route::post('domains/{id}/verify', [\App\Http\Controllers\Admin\DomainController::class, 'verify'])->name('domains.verify');
+            Route::delete('domains/{id}', [\App\Http\Controllers\Admin\DomainController::class, 'destroy'])->name('domains.destroy');
+
+            // Subscription — listing + history (per vendor)
+            Route::get('subscriptions', [\App\Http\Controllers\Admin\SubscriptionController::class, 'index'])->name('subscriptions.index');
+            Route::post('subscriptions', [\App\Http\Controllers\Admin\SubscriptionController::class, 'store'])->name('subscriptions.store');
+            Route::delete('subscriptions/{id}', [\App\Http\Controllers\Admin\SubscriptionController::class, 'destroy'])->name('subscriptions.destroy');
+
+
+            // Superadmin's own account
+            Route::get('account', [\App\Http\Controllers\Admin\AccountController::class, 'edit'])->name('account.edit');
+            Route::post('account', [\App\Http\Controllers\Admin\AccountController::class, 'update'])->name('account.update');
+            Route::post('account/password', [\App\Http\Controllers\Admin\AccountController::class, 'updatePassword'])->name('account.password');
+        });
+    });
+
     Route::group(['prefix' => 'company_details', 'as' => 'company_details.'], function(){
         Route::group(['prefix' => 'view', 'as' => 'view.'], function(){
             Route::get('/index', [CompanyDetailController::class, 'index'])->name('index');
@@ -854,7 +900,7 @@ Route::middleware(['localization', 'domains'])->group(function () {
 				// email group.
 				Route::group(['prefix' => 'invoice_email', 'as' => 'invoice_email.'], function(){
                     Route::group(['prefix' => 'send', 'as' => 'send.'], function(){
-						Route::get('/{invoice}', [\App\Http\Controllers\EmailsController::class, 'customerInvoice'])->name('send');
+						Route::match(['get','post'], '/{invoice}', [\App\Http\Controllers\EmailsController::class, 'customerInvoice'])->name('send');
 					});
                 });
 				
@@ -961,6 +1007,12 @@ Route::middleware(['localization', 'domains'])->group(function () {
 				Route::group(['prefix' => 'change_supplier', 'as' => 'change_supplier.'], function(){
 					Route::post('', [\App\Http\Controllers\PurchaseController::class, 'changeSupplier'])->name('update');
 				});
+				// email group (purchase invoice).
+				Route::group(['prefix' => 'invoice_email', 'as' => 'invoice_email.'], function(){
+					Route::group(['prefix' => 'send', 'as' => 'send.'], function(){
+						Route::match(['get','post'], '/{invoice}', [\App\Http\Controllers\EmailsController::class, 'supplierInvoice'])->name('send');
+					});
+				});
 				// payment group.
 				Route::group(['prefix' => 'invoice_payment', 'as' => 'invoice_payment.'], function(){
                     Route::group(['prefix' => 'create', 'as' => 'create.'], function(){
@@ -1048,7 +1100,7 @@ Route::middleware(['localization', 'domains'])->group(function () {
 					Route::get('customers', [SalesController::class, 'customers'])->name('customers');
                     Route::post('list', [SalesController::class, 'list'])->name('list');
                     Route::get('print', [SalesController::class, 'print'])->name('print');
-                    Route::get('email', [SalesController::class, 'emailDailyBookSales'])->name('email');
+                    Route::match(['get','post'], 'email', [SalesController::class, 'emailDailyBookSales'])->name('email');
                     Route::get('statement', [SalesController::class, 'statementDailyBookSales'])->name('statement');
                 });
 
@@ -1064,6 +1116,7 @@ Route::middleware(['localization', 'domains'])->group(function () {
                     Route::post('list', [PurchaseController::class, 'list'])->name('list');
                     Route::get('print', [PurchaseController::class, 'print'])->name('print');
                     Route::get('statement', [PurchaseController::class, 'statementDailyBookPurchase'])->name('statement');
+                    Route::match(['get','post'], 'email', [PurchaseController::class, 'emailDailyBookPurchase'])->name('email');
                 });
                 Route::group(['prefix' => 'ajax', 'as' => 'ajax.'], function(){
                     Route::post('/purchases-list', [PurchaseController::class, 'ajaxDailyBookPurchase'])->name('purchases-list');

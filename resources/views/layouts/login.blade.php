@@ -77,6 +77,12 @@ License: You must have a valid license purchased only from themeforest(the above
       left: 50%;
       transform: translate(-50%, -50%);
     }
+    /* Mobile-only: ensure the brand logo image always renders on mobile login */
+    @media (max-width: 767px) {
+      .card-header .card-title { display: block !important; visibility: visible !important; padding: 0 !important; margin-bottom: 6px !important; }
+      .card-header .card-title a, .card-header .card-title img { display: inline-block !important; visibility: visible !important; }
+      .card-header .card-title img { max-width: 80% !important; height: auto !important; max-height: 110px !important; object-fit: contain !important; }
+    }
     </style>
     <!-- END: Custom CSS-->
 

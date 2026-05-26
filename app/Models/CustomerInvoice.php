@@ -67,7 +67,7 @@ class CustomerInvoice extends Model
 	
 	public static function unpaidInvoices($customer_id, $invoices = []){
 		$query = CustomerInvoice::query();
-		return $query
+		$query = $query
 			->select('customer_invoices.*')
 			->selectSub(function ($query) {
 				$query->from('customer_invoice_products')
@@ -100,8 +100,11 @@ class CustomerInvoice extends Model
 				), 0)
 			) as balance_due')
 			->having('balance_due', '>', 0)
-			->where('customer_id', $customer_id)
-			->whereIn('id',$invoices)->get();
+			->where('customer_id', $customer_id);
+		if (!empty($invoices)) {
+			$query = $query->whereIn('id', $invoices);
+		}
+		return $query->get();
 	}
 	
 	public static function invoiceDetail($customer_invoice_id){

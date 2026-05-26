@@ -39,7 +39,7 @@
 <section class="users-list-wrapper">
 <div class="supp-header-card" style="margin-bottom:0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#fff;border-radius:16px 16px 0 0;padding:18px 24px;box-shadow:none;border:1px solid #eaecf2;border-bottom:none;">
 	<div style="display:flex;align-items:center;gap:14px;">
-		<div class="supp-icon" style="width:48px;height:48px;border-radius:14px;background:#F27420;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(242,116,32,0.25);">
+		<div class="supp-icon" style="width:48px;height:48px;border-radius:14px;background:rgb(234, 88, 12);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(242,116,32,0.25);">
 			<i class="feather icon-users" style="color:#fff;font-size:20px;"></i>
 		</div>
 		<div>
@@ -47,7 +47,7 @@
 			<p style="font-size:12.5px;color:#94a3b8;font-weight:500;margin:2px 0 0;">Manage supplier records</p>
 		</div>
 	</div>
-	<a href="{{route('management.suppliers.create.create')}}" class="supp-create-btn" style="height:40px;padding:0 20px;border-radius:10px;border:none;background:#F27420;color:#fff;font-size:13px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(242,116,32,0.3);">
+	<a href="{{route('management.suppliers.create.create')}}" class="supp-create-btn" style="height:40px;padding:0 20px;border-radius:10px;border:none;background:rgb(234, 88, 12);color:#fff;font-size:13px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(242,116,32,0.3);">
 		<span style="font-size:16px;font-weight:400;line-height:1;">+</span> Create New
 	</a>
 </div>

@@ -193,14 +193,15 @@ class SupplierPayments{
 			"payment_id" => $payment_id,
 			"created_at" => $date . ' ' . now()->format('H:i:s')
 		]);
-		$calc = $amount;
+		$calc = (float)$amount;
 		foreach($payments as $p){
-		
-			if(($calc - $p['balance_due']) > 0){
-				$pay = $p['balance_due'];
-			}else{
-				$pay = $calc;
+			if ($calc <= 0) {
+				break;
 			}
+
+			$balance = (float)$p['balance_due'];
+			$pay = ($calc >= $balance) ? $balance : $calc;
+
 			SupplierPayment::create([
 				'supplier_id' => $supplier_id,
 				'amount' => $pay,
@@ -211,12 +212,12 @@ class SupplierPayments{
 				"payment_id" => $payment_id,
 				"created_at" => $date . ' ' . now()->format('H:i:s')
 			]);
-			$calc = $calc - $p['balance_due'];
+			$calc -= $pay;
 		}
-		
+
 		return $pid;
 	}
-	
+
 	public static function saveOnAccountPayment($supplier_id, $amount_id, $note, $date, $payment_id, $invoices){
 		$payments = SupplierInvoice::unpaidInvoices($supplier_id, $invoices)->toArray();
 		
@@ -235,19 +236,19 @@ class SupplierPayments{
 			throw new \Exception("Invalid On Account Payment!");
 		}
 		
-		$calc = $pid->remaining_amount; 
-		
+		$calc = (float)$pid->remaining_amount;
+
 		if($calc <= 0){
 			throw new \Exception("Invalid On Account Balance is Zero!");
 		}
-		//echo $calc; exit;
 		foreach($payments as $p){
-		
-			if(($calc - $p['balance_due']) > 0){
-				$pay = $p['balance_due'];
-			}else{
-				$pay = $calc;
+			if ($calc <= 0) {
+				break;
 			}
+
+			$balance = (float)$p['balance_due'];
+			$pay = ($calc >= $balance) ? $balance : $calc;
+
 			SupplierPayment::create([
 				'supplier_id' => $supplier_id,
 				'amount' => $pay,
@@ -258,9 +259,9 @@ class SupplierPayments{
 				"payment_id" => $payment_id,
 				"created_at" => $date . ' ' . now()->format('H:i:s')
 			]);
-			$calc = $calc - $p['balance_due'];
+			$calc -= $pay;
 		}
-		
+
 		return $pid;
 	}
 	

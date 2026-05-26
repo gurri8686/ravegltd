@@ -403,6 +403,27 @@ if(!function_exists('routeExist'))
 							}
 						}
 					}
+					// Special-case: Customer History or Customer Return opened from Customers table
+					// (?customer=) should keep the Customers sidebar item active, not the Customer History one.
+					$customerQuery = request()->query('customer');
+					$customerSubPages = ['customer_history.view.index', 'customer_return.view.index'];
+					if (in_array($current_route, $customerSubPages) && !empty($customerQuery)) {
+						if ($item['route'] === 'customer_history.view.index') {
+							$is_active = '';
+						} elseif ($item['route'] === 'management.customers.view.index') {
+							$is_active = ' active ';
+						}
+					}
+					// Same rule for Supplier sub-pages (?supplier=) — keep Suppliers active.
+					$supplierQuery = request()->query('supplier');
+					$supplierSubPages = ['supplier_history.view.index', 'supplier_return.view.index'];
+					if (in_array($current_route, $supplierSubPages) && !empty($supplierQuery)) {
+						if ($item['route'] === 'supplier_history.view.index') {
+							$is_active = '';
+						} elseif ($item['route'] === 'management.suppliers.view.index') {
+							$is_active = ' active ';
+						}
+					}
 					$html .= '
 					<li class="nav-item '.$is_active.'">
 						<a href="'.route($item['route']).'" data-label="'.e($item['title']).'">

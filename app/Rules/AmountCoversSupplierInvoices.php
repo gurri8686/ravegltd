@@ -33,30 +33,12 @@ class AmountCoversSupplierInvoices implements Rule
      */
     public function passes($attribute, $value)
     {
-        $payments = SupplierInvoice::unpaidInvoices($this->supplier_id,$value)->toArray();
-		//print_r($value); print_r($this->supplier_id); print_r($payments); exit;
-		usort($payments, function ($a, $b) {
-			return $a['balance_due'] <=> $b['balance_due']; // ascending order
-		});
-        $invoices = $value;
-		$amount = $this->amount;
-		$negative_counts = [];
-		$total = [];
-		/*print_r($payments);print_r($invoices);print_r($this->amount);*/
-		foreach($payments as $p){
-			$amount -= $p['balance_due'];
-			$total[] = $p['balance_due'];
-			if($amount < 0){
-				$negative_counts[] = $p['id'];
-			}
-		}
-		//print_r(array_sum($total));print_r($payments);print_r($invoices);print_r($this->amount); exit;
-		//var_dump($this->amount > array_sum($total)); exit;
-		if($this->amount > array_sum($total)){
-			return false;
-		}
-		
-		if(sizeof($negative_counts) > $this->negativeInvoiceAllowed){
+		$payments = SupplierInvoice::unpaidInvoices($this->supplier_id, $value)->toArray();
+		$total = array_sum(array_column($payments, 'balance_due'));
+
+		// Block only if amount exceeds the selected invoices total. Partial
+		// payments (amount <= total) are allowed.
+		if ($this->amount > $total) {
 			return false;
 		}
 		return true;

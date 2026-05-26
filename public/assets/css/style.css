@@ -2581,34 +2581,72 @@ form input.orange-datepicker-input:focus,
 }
 
 /* --- Flash Toast Notification --- */
+/* ── App flash toast — white card, colored left bar, circle icon, title + message, close button ── */
 .flash-toast {
   position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 9999;
-  padding: 14px 24px;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 600;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-  transition: all 0.4s ease;
+  top: 68px;
+  right: 16px;
+  z-index: 999999;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 300px;
+  max-width: 380px;
+  padding: 14px 16px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18);
+  overflow: hidden;
+  transition: opacity 0.4s ease, transform 0.4s ease;
   animation: slideInRight 0.4s ease;
 }
-.flash-toast-success {
-  background: #F27420;
-  color: #fff;
+.flash-toast::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 5px;
 }
-.flash-toast-error {
-  background: #dc2626;
+.flash-toast .flash-toast-icon {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: #fff;
+  font-size: 15px;
 }
-.flash-toast-warning {
-  background: #f59e0b;
-  color: #fff;
+.flash-toast .flash-toast-body { flex: 1 1 auto; min-width: 0; padding-top: 1px; }
+.flash-toast .flash-toast-title { font-size: 14px; font-weight: 800; color: #0f172a; line-height: 1.2; margin-bottom: 2px; }
+.flash-toast .flash-toast-msg { font-size: 12.5px; font-weight: 500; color: #64748b; line-height: 1.35; word-break: break-word; }
+.flash-toast .flash-toast-close {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  color: #94a3b8;
+  font-size: 16px;
+  line-height: 1;
+  padding: 2px;
+  margin-left: 4px;
+  transition: color 0.15s;
 }
-.flash-toast-info {
-  background: #F27420;
-  color: #fff;
+.flash-toast .flash-toast-close:hover { color: #0f172a; }
+.flash-toast.flash-hide { opacity: 0; transform: translateX(100%); }
+
+.flash-toast-success::before { background: #22c55e; }
+.flash-toast-success .flash-toast-icon { background: #22c55e; }
+.flash-toast-error::before { background: #ef4444; }
+.flash-toast-error .flash-toast-icon { background: #ef4444; }
+.flash-toast-warning::before { background: #f59e0b; }
+.flash-toast-warning .flash-toast-icon { background: #f59e0b; }
+.flash-toast-info::before { background: #F27420; }
+.flash-toast-info .flash-toast-icon { background: #F27420; }
+
+@media (max-width: 767px) {
+  .flash-toast { top: 56px; right: 8px; left: 8px; min-width: 0; max-width: none; }
 }
 @keyframes slideInRight {
   from { opacity: 0; transform: translateX(100%); }

@@ -40,30 +40,13 @@ class AmountCoversInvoices implements Rule
      */
     public function passes($attribute, $value)
     {
-		$payments = CustomerInvoice::unpaidInvoices($this->customer_id,$value)->toArray();
-		usort($payments, function ($a, $b) {
-			return $a['balance_due'] <=> $b['balance_due']; // ascending order
-		});
-        $invoices = $value;
+		$payments = CustomerInvoice::unpaidInvoices($this->customer_id, $value)->toArray();
 		$effectiveAmount = $this->amount + $this->creditAmount;
-		$amount = $effectiveAmount;
-		$negative_counts = [];
-		$total = [];
+		$total = array_sum(array_column($payments, 'balance_due'));
 
-		foreach($payments as $p){
-			$amount -= $p['balance_due'];
-			$total[] = $p['balance_due'];
-			if($amount < 0){
-				$negative_counts[] = $p['id'];
-			}
-		}
-
-		// allow to spend full amount.
-		if($effectiveAmount > array_sum($total)){
-			return false;
-		}
-
-		if(sizeof($negative_counts) > $this->negativeInvoiceAllowed){
+		// Block only if amount exceeds the selected invoices total. Partial
+		// payments (amount <= total) are allowed.
+		if ($effectiveAmount > $total) {
 			return false;
 		}
 		return true;

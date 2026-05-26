@@ -95,7 +95,7 @@ html { scrollbar-gutter: stable; overflow-y: scroll; }
 }
 .settings-nav-icon {
     width: 42px; height: 42px; border-radius: 11px; flex-shrink: 0;
-    background: #f97316;
+    background: rgb(234, 88, 12);
     display: flex; align-items: center; justify-content: center;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 6px 14px -4px rgba(234,88,12,0.45);
 }
@@ -416,6 +416,18 @@ textarea.sform-control { height: auto; padding: 10px 14px; resize: vertical; }
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     box-shadow: 0 2px 8px rgba(249,115,22,0.2);
 }
+/* Account tab only — solid rgb(234, 88, 12) background on Profile Info + Change Password icons */
+#tab-account .sform-icon {
+    background: rgb(234, 88, 12);
+}
+/* General tab — solid rgb(234, 88, 12) background on General Settings icon */
+#tab-general .sform-icon {
+    background: rgb(234, 88, 12);
+}
+/* Account tab — Save Profile + Update Password buttons */
+#tab-account .sform-btn-save {
+    background: rgb(234, 88, 12);
+}
 .sform-btn-save {
     height: 42px; padding: 0 28px; border-radius: 10px; border: none;
     background: linear-gradient(135deg, #f97316, #ea580c); color: #fff;
@@ -568,7 +580,7 @@ textarea.sform-control { height: auto; padding: 10px 14px; resize: vertical; }
     transition: transform 0.2s;
 }
 .stoggle-switch input:checked + .stoggle-track {
-    background: linear-gradient(135deg, #f97316, #ea580c);
+    background: rgb(234, 88, 12);
 }
 .stoggle-switch input:checked + .stoggle-track::before { transform: translateX(20px); }
 .stoggle-switch input:disabled + .stoggle-track { opacity: 0.55; cursor: not-allowed; }
@@ -597,7 +609,7 @@ button:focus, button:active, .btn:focus, .btn:active,
 }
 .import-type-btn:hover { border-color: #f97316; color: #f97316; }
 .import-type-btn.active {
-    background: #f97316; color: #fff;
+    background: rgb(234, 88, 12); color: #fff;
     border-color: transparent;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 1px 2px rgba(234,88,12,0.4), 0 6px 14px -4px rgba(234,88,12,0.45);
 }
@@ -613,7 +625,7 @@ button:focus, button:active, .btn:focus, .btn:active,
     border-color: #f97316; background: #fff7ed;
 }
 .import-upload-icon { font-size: 36px; color: #94a3b8; margin-bottom: 10px; }
-.import-upload-browse { color: #f97316; font-weight: 700; }
+.import-upload-browse { color: rgb(234, 88, 12); font-weight: 700; }
 /* Mobile-only reference card (hidden by default; shown only at ≤767px) */
 .iuz-mobile { display: none; }
 .irc-mobile { display: none; }
@@ -1536,7 +1548,7 @@ button:focus, button:active, .btn:focus, .btn:active,
         width: 42px !important;
         height: 42px !important;
         border-radius: 11px !important;
-        background: #f97316 !important;
+        background: rgb(234, 88, 12) !important;
         box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 6px 14px -4px rgba(234,88,12,0.45) !important;
         flex-shrink: 0 !important;
         display: flex !important;
@@ -3768,7 +3780,7 @@ button:focus, button:active, .btn:focus, .btn:active,
                         {{-- Desktop/tablet layout — EXACT UI from user spec.
                              Orange-filled 24×24 circle + info icon, "Required columns:" label,
                              code-style mono chips for each required column. --}}
-                        <span class="irc-desktop-only" style="width:24px;height:24px;border-radius:50%;background:#f97316;color:#ffffff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <span class="irc-desktop-only" style="width:24px;height:24px;border-radius:50%;background:rgb(234, 88, 12);color:#ffffff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
                         </span>
                         <span class="irc-desktop-only" style="font-size:12.5px;font-weight:700;color:#F27420;">Required columns:</span>
@@ -3808,7 +3820,7 @@ button:focus, button:active, .btn:focus, .btn:active,
                         <input type="file" id="purchaseFileInput" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleFileSelect(this,'purchase')">
                         {{-- Desktop / tablet — EXACT spec UI: light-peach square icon tile + cloud-upload outline icon, title + browse link, subtitle, 3 footer chips --}}
                         <div class="import-upload-icon iuz-desktop-icon" style="width:56px;height:56px;border-radius:14px;background:#ffe5d0;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgb(234, 88, 12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 {{-- Cloud silhouette (open at bottom so the arrow rises into it) --}}
                                 <path d="M16 16.5h2.5a3.5 3.5 0 0 0 0-7 5 5 0 0 0-9.793-1.5A4 4 0 0 0 6.5 16.5H8"/>
                                 {{-- Up-arrow inside the cloud --}}
@@ -3816,7 +3828,7 @@ button:focus, button:active, .btn:focus, .btn:active,
                                 <line x1="12" y1="10" x2="12" y2="18"/>
                             </svg>
                         </div>
-                        <div class="import-upload-text iuz-desktop-only" style="font-size:18px;font-weight:800;color:#0f1115;letter-spacing:-0.2px;margin-bottom:6px;">Drop your file or <span class="import-upload-browse" style="color:#f97316;text-decoration:underline;text-underline-offset:3px;font-weight:800;">browse</span></div>
+                        <div class="import-upload-text iuz-desktop-only" style="font-size:18px;font-weight:800;color:#0f1115;letter-spacing:-0.2px;margin-bottom:6px;">Drop your file or <span class="import-upload-browse" style="color:rgb(234, 88, 12);text-decoration:underline;text-underline-offset:3px;font-weight:800;">browse</span></div>
                         <div class="import-upload-hint iuz-desktop-only" style="font-size:13px;color:#6b7280;font-weight:500;margin-bottom:18px;">Excel or CSV · .xlsx, .xls, .csv · up to 10 MB · 50,000 rows max</div>
                         <div class="iuz-desktop-only" style="display:flex;align-items:center;justify-content:center;gap:22px;flex-wrap:wrap;font-size:12px;color:#9ca3af;font-weight:500;">
                             <span style="display:inline-flex;align-items:center;gap:6px;">
@@ -3878,7 +3890,7 @@ button:focus, button:active, .btn:focus, .btn:active,
                         {{-- Desktop/tablet layout — EXACT UI from user spec.
                              Orange-filled 24×24 circle + info icon, "Required columns:" label,
                              code-style mono chips for each required column. --}}
-                        <span class="irc-desktop-only" style="width:24px;height:24px;border-radius:50%;background:#f97316;color:#ffffff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <span class="irc-desktop-only" style="width:24px;height:24px;border-radius:50%;background:rgb(234, 88, 12);color:#ffffff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
                         </span>
                         <span class="irc-desktop-only" style="font-size:12.5px;font-weight:700;color:#F27420;">Required columns:</span>
@@ -3918,7 +3930,7 @@ button:focus, button:active, .btn:focus, .btn:active,
                         <input type="file" id="salesFileInput" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleFileSelect(this,'sales')">
                         {{-- Desktop / tablet — EXACT spec UI: light-peach square icon tile + cloud-upload outline icon, title + browse link, subtitle, 3 footer chips --}}
                         <div class="import-upload-icon iuz-desktop-icon" style="width:56px;height:56px;border-radius:14px;background:#ffe5d0;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgb(234, 88, 12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 {{-- Cloud silhouette (open at bottom so the arrow rises into it) --}}
                                 <path d="M16 16.5h2.5a3.5 3.5 0 0 0 0-7 5 5 0 0 0-9.793-1.5A4 4 0 0 0 6.5 16.5H8"/>
                                 {{-- Up-arrow inside the cloud --}}
@@ -3926,7 +3938,7 @@ button:focus, button:active, .btn:focus, .btn:active,
                                 <line x1="12" y1="10" x2="12" y2="18"/>
                             </svg>
                         </div>
-                        <div class="import-upload-text iuz-desktop-only" style="font-size:18px;font-weight:800;color:#0f1115;letter-spacing:-0.2px;margin-bottom:6px;">Drop your file or <span class="import-upload-browse" style="color:#f97316;text-decoration:underline;text-underline-offset:3px;font-weight:800;">browse</span></div>
+                        <div class="import-upload-text iuz-desktop-only" style="font-size:18px;font-weight:800;color:#0f1115;letter-spacing:-0.2px;margin-bottom:6px;">Drop your file or <span class="import-upload-browse" style="color:rgb(234, 88, 12);text-decoration:underline;text-underline-offset:3px;font-weight:800;">browse</span></div>
                         <div class="import-upload-hint iuz-desktop-only" style="font-size:13px;color:#6b7280;font-weight:500;margin-bottom:18px;">Excel or CSV · .xlsx, .xls, .csv · up to 10 MB · 50,000 rows max</div>
                         <div class="iuz-desktop-only" style="display:flex;align-items:center;justify-content:center;gap:22px;flex-wrap:wrap;font-size:12px;color:#9ca3af;font-weight:500;">
                             <span style="display:inline-flex;align-items:center;gap:6px;">
@@ -4074,7 +4086,7 @@ button:focus, button:active, .btn:focus, .btn:active,
                              Orange 42×42 rounded grid-icon tile + "Data Preview" title + green "Auto-mapped N columns" pill
                              + muted subtitle + "Re-map columns" ghost button (right-aligned). --}}
                         <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:0;padding:18px 22px;">
-                            <span style="width:42px;height:42px;border-radius:11px;background:#f97316;color:#ffffff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,0.25),0 6px 14px -4px rgba(234,88,12,0.45);">
+                            <span style="width:42px;height:42px;border-radius:11px;background:rgb(234, 88, 12);color:#ffffff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,0.25),0 6px 14px -4px rgba(234,88,12,0.45);">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
                             </span>
                             <div style="flex:1 1 0%;">

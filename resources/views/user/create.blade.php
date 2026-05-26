@@ -7,7 +7,55 @@
 @push('stylesheets')
 <style>
 .content-header { display: none !important; }
-.pw-wrap{position:relative;display:block;}.pw-input{padding-right:42px!important;}.pw-eye{position:absolute;right:13px;top:50%;transform:translateY(-50%);cursor:pointer;color:#9ca3af;font-size:14px;transition:color 0.15s;user-select:none;}.pw-eye:hover{color:#f97316;}
+.pw-wrap{position:relative;display:block;}.pw-input{padding-right:42px!important;}.pw-eye{position:absolute;right:13px;top:50%;transform:translateY(-50%);cursor:pointer;color:#9ca3af;font-size:14px;transition:color 0.15s;user-select:none;}.pw-eye:hover{color:rgb(234, 88, 12);}
+
+/* Krajee Browse + Remove buttons */
+.btn-file, .fileinput-upload-button, .file-input .btn.btn-primary {
+    background: rgb(234, 88, 12) !important;
+    border: 1.5px solid rgb(234, 88, 12) !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+    font-weight: 700 !important;
+}
+.btn-file:hover, .file-input .btn.btn-primary:hover { background: #c2410c !important; border-color: #c2410c !important; }
+.fileinput-remove, .btn-file-remove, .kv-file-remove, .file-input .btn-default {
+    border: 1.5px solid rgb(234, 88, 12) !important;
+    color: rgb(234, 88, 12) !important;
+    background: #fff !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+}
+.fileinput-remove:hover, .file-input .btn-default:hover { background: rgb(234, 88, 12) !important; color: #fff !important; }
+/* Yes/No toggle — Yes (on) state */
+.switch-on, .switch.has-switch .switch-on, .has-switch span.switch-on, label.btn.switch-on {
+    background: rgb(234, 88, 12) !important;
+    color: #fff !important;
+    border-color: rgb(234, 88, 12) !important;
+}
+/* Krajee file zoom modal — breathing room from navbar + visible close button */
+.kv-fileinput-zoom-modal .modal-dialog, .kv-zoom-modal .modal-dialog, .file-zoom-dialog {
+    margin-top: 100px !important; max-height: calc(100vh - 140px) !important;
+}
+.kv-fileinput-zoom-modal .modal-content, .kv-zoom-modal .modal-content, .file-zoom-dialog .modal-content {
+    border-radius: 14px !important; box-shadow: 0 24px 60px -12px rgba(15,17,21,0.45) !important; overflow: hidden;
+}
+.kv-fileinput-zoom-modal .btn-close, .kv-zoom-modal .btn-close, .file-zoom-dialog .btn-close,
+.kv-fileinput-zoom-modal .close, .kv-zoom-modal .close, .file-zoom-dialog .close {
+    display: inline-flex !important; align-items: center; justify-content: center;
+    position: absolute !important; top: 12px !important; right: 12px !important; z-index: 10;
+    width: 34px; height: 34px; background: #fff !important; border: 1.5px solid #e2e8f0 !important;
+    border-radius: 50% !important; color: #64748b !important; font-size: 20px !important;
+    line-height: 1 !important; opacity: 1 !important; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(15,17,21,0.15); transition: all 0.15s;
+}
+.kv-fileinput-zoom-modal .btn-close::before, .kv-zoom-modal .btn-close::before, .file-zoom-dialog .btn-close::before { content: '\00d7'; font-weight: 400; }
+.kv-fileinput-zoom-modal .btn-close:hover, .kv-zoom-modal .btn-close:hover, .file-zoom-dialog .btn-close:hover,
+.kv-fileinput-zoom-modal .close:hover, .kv-zoom-modal .close:hover, .file-zoom-dialog .close:hover {
+    background: rgb(234, 88, 12) !important; border-color: rgb(234, 88, 12) !important; color: #fff !important;
+}
+.kv-fileinput-zoom-modal .modal-header, .kv-zoom-modal .modal-header, .file-zoom-dialog .modal-header {
+    border-bottom: 1px solid #f1f5f9 !important; padding: 14px 20px !important;
+}
 </style>
 @endpush
 
@@ -20,6 +68,15 @@
 <x-file-uploader.krajee.includes />
 <script>
 $(document).ready(function() {
+    // Force-close Krajee file preview popup when "close" button clicked
+    $(document).on('click', '.kv-zoom-modal .btn-close, .kv-zoom-modal .close, .kv-fileinput-zoom-modal .btn-close, .kv-fileinput-zoom-modal .close, .file-zoom-dialog .btn-close, .file-zoom-dialog .close, [title="Close detailed preview"]', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $(this).closest('.modal').removeClass('show').css('display','none').attr('aria-hidden','true');
+        $('body').removeClass('modal-open').css({overflow:'',paddingRight:''});
+        $('.modal-backdrop').remove();
+    });
+
     $("#image").fileinput({
         maxFileSize: 2000, 
         showCaption: false,
@@ -37,7 +94,7 @@ $(document).ready(function() {
 });
 </script>
 <script>
-function togglePw(fieldId,btn){var input=document.getElementById(fieldId);var icon=btn.querySelector('i');if(input.type==='password'){input.type='text';icon.className='fa fa-eye';btn.style.color='#f97316';}else{input.type='password';icon.className='fa fa-eye-slash';btn.style.color='';}}
+function togglePw(fieldId,btn){var input=document.getElementById(fieldId);var icon=btn.querySelector('i');if(input.type==='password'){input.type='text';icon.className='fa fa-eye';btn.style.color='rgb(234, 88, 12)';}else{input.type='password';icon.className='fa fa-eye-slash';btn.style.color='';}}
 </script>
 @endpush
 
@@ -45,7 +102,7 @@ function togglePw(fieldId,btn){var input=document.getElementById(fieldId);var ic
 <section class="users-list-wrapper">
 <div style="margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#fff;border-radius:16px;padding:18px 24px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border:1px solid #f1f5f9;">
 	<div style="display:flex;align-items:center;gap:14px;">
-		<div style="width:48px;height:48px;border-radius:14px;background:#F27420;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(242,116,32,0.25);">
+		<div style="width:48px;height:48px;border-radius:14px;background:rgb(234, 88, 12);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(242,116,32,0.25);">
 			<i class="fa fa-user-circle-o" style="color:#fff;font-size:20px;"></i>
 		</div>
 		<div>
@@ -213,10 +270,10 @@ function togglePw(fieldId,btn){var input=document.getElementById(fieldId);var ic
                         </div>
 
                         <div style="display:flex;align-items:center;justify-content:flex-end;gap:12px;padding-top:20px;border-top:1px solid #eef2f7;margin-top:20px;">
-                            <a href="{{ route('management.settings.index') }}?tab=users" style="height:44px;padding:0 24px;border-radius:12px;border:1.5px solid #e2e8f0;background:#fff;color:#64748b;font-size:13.5px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all 0.15s;outline:none;" onmouseover="this.style.borderColor='#F27420';this.style.color='#F27420';this.style.background='#FFF8F3';" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b';this.style.background='#fff';">
+                            <a href="{{ route('management.settings.index') }}?tab=users" style="height:44px;padding:0 24px;border-radius:12px;border:1.5px solid #e2e8f0;background:#fff;color:#64748b;font-size:13.5px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all 0.15s;outline:none;" onmouseover="this.style.borderColor='rgb(234, 88, 12)';this.style.color='rgb(234, 88, 12)';this.style.background='#FFF8F3';" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b';this.style.background='#fff';">
                                 <i class="fa fa-times" style="font-size:11px;color:#000;margin-right:4px;"></i> Cancel
                             </a>
-                            <button type="submit" class="btn" style="height:44px;padding:0 28px;border-radius:12px;border:none;background:#F27420;color:#fff;font-size:13.5px;font-weight:700;box-shadow:0 2px 8px rgba(242,116,32,0.3);display:inline-flex;align-items:center;gap:6px;outline:none;transition:all 0.15s;" onmouseover="this.style.background='#e0600e';" onmouseout="this.style.background='#F27420';">
+                            <button type="submit" class="btn" style="height:44px;padding:0 28px;border-radius:12px;border:none;background:rgb(234, 88, 12);color:#fff;font-size:13.5px;font-weight:700;box-shadow:0 2px 8px rgba(242,116,32,0.3);display:inline-flex;align-items:center;gap:6px;outline:none;transition:all 0.15s;" onmouseover="this.style.background='#c2410c';" onmouseout="this.style.background='rgb(234, 88, 12)';">
                                 Save
                             </button>
 

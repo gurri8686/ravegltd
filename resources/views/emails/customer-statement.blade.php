@@ -24,33 +24,6 @@
                     <td style="padding:32px 32px 8px;">
                         <p style="font-size:13.5px;color:#374151;line-height:1.65;margin:0 0 22px;white-space:pre-line;">{{ $data['message'] }}</p>
 
-                        {{-- Statement summary card --}}
-                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e8e8ec;border-radius:10px;margin:0 0 22px;">
-                            <tr>
-                                <td style="background:#fafafb;border-bottom:1px solid #eeeeef;padding:11px 18px;border-radius:10px 10px 0 0;">
-                                    <span style="font-size:11px;font-weight:700;color:#9ca3af;letter-spacing:0.6px;">STATEMENT SUMMARY</span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="padding:16px 18px;">
-                                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-                                        <tr>
-                                            <td style="font-size:12.5px;color:#6b7280;padding:5px 0;">Account</td>
-                                            <td style="font-size:12.5px;color:#0f1115;font-weight:600;text-align:right;padding:5px 0;">{{ $data['customer_name'] }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td style="font-size:12.5px;color:#6b7280;padding:5px 0;border-top:1px solid #f0f0f2;">Statement Period</td>
-                                            <td style="font-size:12.5px;color:#0f1115;font-weight:600;text-align:right;padding:5px 0;border-top:1px solid #f0f0f2;">{{ $data['period'] }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td style="font-size:13px;color:#0f1115;font-weight:700;padding:9px 0 3px;border-top:1px solid #f0f0f2;">Closing Balance</td>
-                                            <td style="font-size:15px;color:#b91c1c;font-weight:700;text-align:right;padding:9px 0 3px;border-top:1px solid #f0f0f2;">{{ $data['closing_balance'] }}</td>
-                                        </tr>
-                                    </table>
-                                </td>
-                            </tr>
-                        </table>
-
                         {{-- Attachment notice --}}
                         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;margin:0 0 8px;">
                             <tr>
@@ -58,7 +31,7 @@
                                     <span style="display:inline-block;width:30px;height:30px;background:#ea580c;border-radius:7px;text-align:center;line-height:30px;color:#ffffff;font-size:14px;">&#128206;</span>
                                 </td>
                                 <td style="padding:13px 16px 13px 0;vertical-align:middle;">
-                                    <div style="font-size:12.5px;font-weight:700;color:#9a3412;">Detailed statement attached (PDF)</div>
+                                    <div style="font-size:12.5px;font-weight:700;color:#9a3412;">Detailed statement attached (Excel)</div>
                                     <div style="font-size:11.5px;color:#c2671f;margin-top:2px;">Open the attachment to view all invoices and balances.</div>
                                 </td>
                             </tr>

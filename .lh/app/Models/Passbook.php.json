@@ -1,0 +1,18 @@
+{
+    "sourceFile": "app/Models/Passbook.php",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1758607337473,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1758607337473,
+            "name": "Commit-0",
+            "content": "<?php\r\n\r\nnamespace App\\Models;\r\n\r\nuse Illuminate\\Database\\Eloquent\\Factories\\HasFactory;\r\nuse Illuminate\\Database\\Eloquent\\Model;\r\n\r\nclass Passbook extends Model\r\n{\r\n    use \\App\\Models\\Traits\\LogsActivityTrait;\r\n    use HasFactory;\r\n    protected $fillable = [\r\n        'user_id',\r\n        'user_type',\r\n        'amount',\r\n        'type',\r\n    ];\r\n\r\n    public function transaction(){\r\n        return $this->hasOne('App\\Models\\Transaction','passbook_id','id');\r\n    } \r\n\r\n    public function customer(){\r\n        return $this->hasOne('App\\Models\\User','id','user_id');\r\n    }\r\n}\r\n"
+        }
+    ]
+}

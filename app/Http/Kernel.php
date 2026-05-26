@@ -69,5 +69,6 @@ class Kernel extends HttpKernel
         'localization' => \App\Http\Middleware\Localization::class,
         'rbac' => \App\Http\Middleware\RbackMiddleware::class,
         'wtpermission' => \App\Http\Middleware\WorkTimePermission::class,
+        'superadmin' => \App\Http\Middleware\SuperadminMiddleware::class,
     ];
 }

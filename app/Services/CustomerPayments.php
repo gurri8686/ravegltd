@@ -871,15 +871,15 @@ class CustomerPayments{
 	
 	public static function saveRunTimePaymentNormal($customer_id, $amount, $note, $date, $payment_id, $invoices){
 		$payments = CustomerInvoice::unpaidInvoices($customer_id, $invoices)->toArray();
-		
+
 		if(sizeof($payments) <= 0){
 			throw new \Exception('No Invoice Found to Pay.');
 		}
-		
+
 		usort($payments, function ($a, $b) {
 			return $a['balance_due'] <=> $b['balance_due']; // ascending order
 		});
-		
+
 		// save base.
 		$pid = CustomerPayment::create([
 			'customer_id' => $customer_id,
@@ -890,14 +890,17 @@ class CustomerPayments{
 			"payment_id" => $payment_id,
 			"created_at" => $date . ' ' . now()->format('H:i:s')
 		]);
-		$calc = $amount;
+		$calc = (float)$amount;
 		foreach($payments as $p){
-		
-			if(($calc - $p['balance_due']) > 0){
-				$pay = $p['balance_due'];
-			}else{
-				$pay = $calc;
+			// Stop allocating once the cash pool is exhausted — never store a
+			// negative or zero payment row (causes balance_due corruption).
+			if ($calc <= 0) {
+				break;
 			}
+
+			$balance = (float)$p['balance_due'];
+			$pay = ($calc >= $balance) ? $balance : $calc;
+
 			CustomerPayment::create([
 				'customer_id' => $customer_id,
 				'amount' => $pay,
@@ -908,9 +911,9 @@ class CustomerPayments{
 				"payment_id" => $payment_id,
 				"created_at" => $date . ' ' . now()->format('H:i:s')
 			]);
-			$calc = $calc - $p['balance_due'];
+			$calc -= $pay;
 		}
-		
+
 		return $pid;
 	}
 	
@@ -932,19 +935,19 @@ class CustomerPayments{
 			throw new \Exception("Invalid On Account Payment!");
 		}
 		
-		$calc = $pid->remaining_amount; 
-		
+		$calc = (float)$pid->remaining_amount;
+
 		if($calc <= 0){
 			throw new \Exception("Invalid On Account Balance is Zero!");
 		}
-		//echo $calc; exit;
 		foreach($payments as $p){
-		
-			if(($calc - $p['balance_due']) > 0){
-				$pay = $p['balance_due'];
-			}else{
-				$pay = $calc;
+			if ($calc <= 0) {
+				break;
 			}
+
+			$balance = (float)$p['balance_due'];
+			$pay = ($calc >= $balance) ? $balance : $calc;
+
 			CustomerPayment::create([
 				'customer_id' => $customer_id,
 				'amount' => $pay,
@@ -955,9 +958,9 @@ class CustomerPayments{
 				"payment_id" => $pid->mode_id,
 				"created_at" => $date . ' ' . now()->format('H:i:s')
 			]);
-			$calc = $calc - $p['balance_due'];
+			$calc -= $pay;
 		}
-		
+
 		return $pid;
 	}
 	
