@@ -27,15 +27,17 @@ return new class extends Migration
         // legacy 0000-00-00 datetime default on this table breaks strict-mode ALTER
         DB::connection($this->conn)->statement("SET SESSION sql_mode=''");
 
+        // Columns are appended (no ->after()) so this works regardless of the
+        // sites table's existing columns — some environments have no `status`.
         $schema->table('sites', function (Blueprint $table) use ($schema) {
             if (!$schema->hasColumn('sites', 'ssl_status')) {
-                $table->string('ssl_status', 20)->nullable()->after('status');
+                $table->string('ssl_status', 20)->nullable();
             }
             if (!$schema->hasColumn('sites', 'dns_verified')) {
-                $table->boolean('dns_verified')->default(false)->after('ssl_status');
+                $table->boolean('dns_verified')->default(false);
             }
             if (!$schema->hasColumn('sites', 'verified_at')) {
-                $table->dateTime('verified_at')->nullable()->after('dns_verified');
+                $table->dateTime('verified_at')->nullable();
             }
         });
     }
