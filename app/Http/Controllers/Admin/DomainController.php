@@ -35,11 +35,20 @@ class DomainController extends Controller
 
     public function index()
     {
-        $sites = $this->org()->table('sites')->orderByDesc('id')->get();
+        // Show only real vendor domains: those with their OWN provisioned
+        // database. Hide the platform/main domain and any domain still on the
+        // main shared DB, plus anything linked to a superadmin.
+        $mainDb = config('database.connections.mysql.database');
+        $superadminSiteIds = User::where('role', 'superadmin')->whereNotNull('site_id')->pluck('site_id')->all();
 
-        // map each site to its linked vendor(s) (users.site_id → sites.id)
-        $vendors = User::whereNotNull('site_id')->get(['id', 'first_name', 'last_name', 'email', 'site_id'])
-            ->groupBy('site_id');
+        $sites = $this->org()->table('sites')
+            ->where('database', '!=', $mainDb)
+            ->when($superadminSiteIds, fn ($q) => $q->whereNotIn('id', $superadminSiteIds))
+            ->orderByDesc('id')->get();
+
+        // map each site to its linked vendor (only admin/vendor users, not superadmin)
+        $vendors = User::whereIn('role', ['admin', 'vendor'])->whereNotNull('site_id')
+            ->get(['id', 'first_name', 'last_name', 'email', 'site_id'])->groupBy('site_id');
         foreach ($sites as $s) {
             $linked = $vendors->get($s->id);
             $first = optional($linked)->first();
@@ -60,12 +69,12 @@ class DomainController extends Controller
         $data = $this->validateDomain($request);
         $vendorId = (int) $request->input('vendor_id');
 
-        // Database-per-tenant: auto-provision a dedicated database for the
-        // linked vendor (create DB + clone schema + RBAC + admin user). If the
-        // admin typed a database name we honour it; if the vendor already has
-        // one we reuse it.
-        $database = $data['database'] ?? null;
-        if (!$database && $vendorId && ($vendor = User::find($vendorId))) {
+        // Database-per-tenant: when a vendor is linked we ALWAYS provision their
+        // dedicated database (create DB + clone schema + RBAC + admin user) and
+        // derive its name ourselves — the form's database field is ignored for
+        // linked vendors. If the vendor already has one, we reuse it.
+        $database = null;
+        if ($vendorId && ($vendor = User::find($vendorId))) {
             try {
                 $provisioner = new TenantProvisioner();
                 $dbName = $provisioner->databaseName($vendor);
@@ -75,6 +84,8 @@ class DomainController extends Controller
                     'subdomain' => 'Could not provision the vendor database: ' . $e->getMessage(),
                 ]);
             }
+        } else {
+            $database = $data['database'] ?? null;
         }
 
         $id = $this->org()->table('sites')->insertGetId([
@@ -103,10 +114,11 @@ class DomainController extends Controller
     public function edit($id)
     {
         $site = $this->findSite($id);
+        $linkedVendorId = optional(User::where('site_id', $id)->first())->id;
 
         return view('admin.domains.edit', [
-            'site' => $site, 'vendors' => $this->vendorOptions(), 'base' => self::BASE_DOMAIN,
-            'linkedVendorId' => optional(User::where('site_id', $id)->first())->id,
+            'site' => $site, 'vendors' => $this->vendorOptions($linkedVendorId), 'base' => self::BASE_DOMAIN,
+            'linkedVendorId' => $linkedVendorId,
         ]);
     }
 
@@ -234,9 +246,21 @@ class DomainController extends Controller
         User::where('id', $vendorId)->update(['site_id' => $siteId]);
     }
 
-    private function vendorOptions()
+    /**
+     * Vendors selectable for a domain: only admin/vendor accounts that don't
+     * already have a domain (site_id is null). On edit, the currently-linked
+     * vendor is included so it stays selected.
+     */
+    private function vendorOptions(?int $includeId = null)
     {
-        return User::whereIn('role', ['admin', 'vendor'])->orderBy('first_name')
+        return User::whereIn('role', ['admin', 'vendor'])
+            ->where(function ($q) use ($includeId) {
+                $q->whereNull('site_id');
+                if ($includeId) {
+                    $q->orWhere('id', $includeId);
+                }
+            })
+            ->orderBy('first_name')
             ->get(['id', 'first_name', 'last_name', 'email']);
     }
 

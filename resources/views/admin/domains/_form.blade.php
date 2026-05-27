@@ -34,12 +34,12 @@
         <div class="text-muted small mt-1">Optional — the vendor's own domain mapped to this site.</div>
     </div>
     <div class="col-md-6">
-        <label class="vf-label">Database</label>
+        <label class="vf-label">Database <span class="text-muted small fw-normal">(auto)</span></label>
         <div class="input-group vf-ig">
             <span class="input-group-text"><i class="bi bi-database"></i></span>
-            <input type="text" name="database" class="form-control" value="{{ old('database', $isEdit ? $site->database : '') }}" placeholder="tenant_db" {{ $isEdit ? '' : '' }}>
+            <input type="text" name="database" id="databaseInput" class="form-control" value="{{ old('database', $isEdit ? $site->database : '') }}" placeholder="auto-created on save" readonly>
         </div>
-        <div class="text-muted small mt-1">The tenant's database name (leave as-is when editing).</div>
+        <div class="text-muted small mt-1">Auto-created for the vendor (<code>slug_id_ravegltd</code>) — no need to type it.</div>
     </div>
     <div class="col-12">
         <div class="form-check form-switch mt-1">
@@ -69,13 +69,27 @@ code{ color:var(--accent); }
     var base = @json($base);
     var sel = document.getElementById('vendorSelect');
     var sub = document.getElementById('subdomainInput');
+    var dbf = document.getElementById('databaseInput');
     var gen = document.getElementById('genBtn');
     function slug(s){ return (s||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
-    if (gen) gen.addEventListener('click', function(){
+
+    // Fill subdomain + database preview from the selected vendor.
+    function fillFromVendor(){
         var opt = sel && sel.options[sel.selectedIndex];
         var name = opt ? (opt.getAttribute('data-name') || '') : '';
-        if (!name) { saToast && saToast('Pick a vendor first to auto-generate.', 'info'); return; }
+        var id   = opt ? opt.value : '';
+        if (!id || !name) return false;
         sub.value = slug(name) + '.' + base;
+        if (dbf) dbf.value = slug(name).replace(/-/g, '_') + '_' + id + '_ravegltd';
+        return true;
+    }
+
+    // Auto-fill the moment a vendor is selected.
+    if (sel) sel.addEventListener('change', fillFromVendor);
+
+    // Magic button does the same (handy if they edit the subdomain then want to reset).
+    if (gen) gen.addEventListener('click', function(){
+        if (!fillFromVendor()) { saToast && saToast('Pick a vendor first to auto-generate.', 'info'); }
     });
 })();
 </script>

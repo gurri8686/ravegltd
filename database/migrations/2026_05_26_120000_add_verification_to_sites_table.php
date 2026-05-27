@@ -30,7 +30,14 @@ return new class extends Migration
         // Columns appended (no ->after()) so this works regardless of the
         // sites table's existing columns — some environments have no `status`.
         $schema->table('sites', function (Blueprint $table) use ($schema) {
-            // some environments' sites table has no `status` column the code expects
+            // some environments' sites table is a minimal schema missing
+            // columns the app expects — add any that are absent.
+            if (!$schema->hasColumn('sites', 'api_key')) {
+                $table->string('api_key', 200)->nullable();
+            }
+            if (!$schema->hasColumn('sites', 'api_secret')) {
+                $table->string('api_secret', 200)->nullable();
+            }
             if (!$schema->hasColumn('sites', 'status')) {
                 $table->tinyInteger('status')->default(1);
             }
