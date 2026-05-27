@@ -81,7 +81,7 @@ class ProductController extends Controller
             }
             else
             {
-                throw new \Exception("That Product name already exists.");
+                return $this->validationErrorResponse(['name' => ['That Product name already exists.']]);
             }
             if (!$record || !$recordUpdate) {
                 throw new \Exception("Error to add");
@@ -148,7 +148,7 @@ class ProductController extends Controller
                     $updateQuery = 1;
                 }else
                 {
-                    throw new \Exception("That Product name already exists.");
+                    return $this->validationErrorResponse(['name' => ['That Product name already exists.']]);
                 }
             }
             if($updateQuery==1)

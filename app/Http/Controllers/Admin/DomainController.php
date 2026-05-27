@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\TenantProvisioner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -57,12 +58,29 @@ class DomainController extends Controller
     public function store(Request $request)
     {
         $data = $this->validateDomain($request);
+        $vendorId = (int) $request->input('vendor_id');
+
+        // Database-per-tenant: auto-provision a dedicated database for the
+        // linked vendor (create DB + clone schema + RBAC + admin user). If the
+        // admin typed a database name we honour it; if the vendor already has
+        // one we reuse it.
+        $database = $data['database'] ?? null;
+        if (!$database && $vendorId && ($vendor = User::find($vendorId))) {
+            try {
+                $provisioner = new TenantProvisioner();
+                $dbName = $provisioner->databaseName($vendor);
+                $database = $this->databaseExists($dbName) ? $dbName : $provisioner->provisionForVendor($vendor);
+            } catch (\Throwable $e) {
+                return back()->withInput()->withErrors([
+                    'subdomain' => 'Could not provision the vendor database: ' . $e->getMessage(),
+                ]);
+            }
+        }
 
         $id = $this->org()->table('sites')->insertGetId([
             'subdomain'  => $data['subdomain'],
             'domain'     => $data['domain'] ?: $data['subdomain'],
-            // sites.database is NOT NULL — derive a placeholder when none given
-            'database'   => $data['database'] ?: str_replace('.', '_', $data['subdomain']),
+            'database'   => $database ?: str_replace('.', '_', $data['subdomain']),
             'api_key'    => $this->apiKey(),
             'api_secret' => $this->apiKey(),
             'status'     => $request->boolean('status') ? 1 : 0,
@@ -72,7 +90,14 @@ class DomainController extends Controller
 
         $this->linkVendor($request, $id);
 
-        return redirect()->route('admin.domains.index')->with('status', 'Domain created.');
+        return redirect()->route('admin.domains.index')
+            ->with('status', 'Domain created' . ($database ? " — database provisioned: {$database}" : '') . '.');
+    }
+
+    /** Does a database with this name already exist on the server? */
+    private function databaseExists(string $name): bool
+    {
+        return DB::table('information_schema.schemata')->where('schema_name', $name)->exists();
     }
 
     public function edit($id)
