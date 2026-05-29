@@ -16,7 +16,7 @@ class AdminAuthController extends Controller
 {
     public function showLoginForm()
     {
-        if (($u = Auth::user()) && $u->role === 'superadmin') {
+        if (($u = Auth::user()) && in_array($u->role, \App\Http\Controllers\Admin\AdminUserController::ADMIN_ROLES, true)) {
             return redirect()->route('admin.dashboard');
         }
 
@@ -35,9 +35,9 @@ class AdminAuthController extends Controller
             ->orWhere('username', $request->email)
             ->first();
 
-        if (!$user || $user->role !== 'superadmin') {
+        if (!$user || !in_array($user->role, \App\Http\Controllers\Admin\AdminUserController::ADMIN_ROLES, true)) {
             return back()
-                ->withErrors(['email' => 'These credentials do not match a superadmin account.'])
+                ->withErrors(['email' => 'These credentials do not match an admin account.'])
                 ->withInput($request->only('email'));
         }
 

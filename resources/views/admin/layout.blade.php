@@ -145,19 +145,46 @@
         <div class="sa-brand">
             <b>R &amp; A Veg</b><br><span class="tag">Platform Control</span>
         </div>
+        @php $can = fn ($s) => \App\Http\Controllers\Admin\AdminUserController::allows(optional(auth()->user())->role, $s); @endphp
         <nav class="sa-nav">
             <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                 <i class="bi bi-grid-1x2"></i> Dashboard
             </a>
+            @if ($can('vendors'))
             <a href="{{ route('admin.vendors.index') }}" class="{{ request()->routeIs('admin.vendors.*') ? 'active' : '' }}">
                 <i class="bi bi-shop"></i> Vendors
             </a>
+            @endif
+            @if ($can('domains'))
             <a href="{{ route('admin.domains.index') }}" class="{{ request()->routeIs('admin.domains.*') ? 'active' : '' }}">
                 <i class="bi bi-globe2"></i> Domains
             </a>
+            @endif
+            @if ($can('plans'))
+            <a href="{{ route('admin.plans.index') }}" class="{{ request()->routeIs('admin.plans.*') ? 'active' : '' }}">
+                <i class="bi bi-box-seam"></i> Plans
+            </a>
+            @endif
+            @if ($can('subscriptions'))
             <a href="{{ route('admin.subscriptions.index') }}" class="{{ request()->routeIs('admin.subscriptions.*') ? 'active' : '' }}">
                 <i class="bi bi-patch-check"></i> Subscription
             </a>
+            @endif
+            @if ($can('analytics'))
+            <a href="{{ route('admin.analytics.index') }}" class="{{ request()->routeIs('admin.analytics.*') ? 'active' : '' }}">
+                <i class="bi bi-graph-up-arrow"></i> Analytics
+            </a>
+            @endif
+            @if ($can('audit'))
+            <a href="{{ route('admin.audit.index') }}" class="{{ request()->routeIs('admin.audit.*') ? 'active' : '' }}">
+                <i class="bi bi-clipboard-data"></i> Audit Logs
+            </a>
+            @endif
+            @if ($can('admin_users'))
+            <a href="{{ route('admin.adminusers.index') }}" class="{{ request()->routeIs('admin.adminusers.*') ? 'active' : '' }}">
+                <i class="bi bi-people"></i> Admin Users
+            </a>
+            @endif
             <a href="{{ route('admin.account.edit') }}" class="{{ request()->routeIs('admin.account.*') ? 'active' : '' }}">
                 <i class="bi bi-person-gear"></i> My Account
             </a>

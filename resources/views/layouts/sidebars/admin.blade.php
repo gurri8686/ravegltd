@@ -2,7 +2,7 @@
 <?php
 $user = \Auth::user();
 $roles = $user->roles->pluck('name')->toarray();
-$GLOBALS['roleName'] = $roles[0];
+$GLOBALS['roleName'] = $roles[0] ?? '';
 $permissions = $user->getAllPermissions()->toarray();
 $GLOBALS['arrayMenuPermission'] = [];
 foreach($permissions as $permission)

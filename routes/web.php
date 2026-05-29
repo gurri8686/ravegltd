@@ -201,6 +201,30 @@ Route::middleware(['localization', 'domains'])->group(function () {
             Route::post('domains/{id}/verify', [\App\Http\Controllers\Admin\DomainController::class, 'verify'])->name('domains.verify');
             Route::delete('domains/{id}', [\App\Http\Controllers\Admin\DomainController::class, 'destroy'])->name('domains.destroy');
 
+            // Plans — subscription plan tiers (price, limits, feature toggles)
+            Route::get('plans', [\App\Http\Controllers\Admin\PlansController::class, 'index'])->name('plans.index');
+            Route::get('plans/create', [\App\Http\Controllers\Admin\PlansController::class, 'create'])->name('plans.create');
+            Route::post('plans', [\App\Http\Controllers\Admin\PlansController::class, 'store'])->name('plans.store');
+            Route::get('plans/{id}/edit', [\App\Http\Controllers\Admin\PlansController::class, 'edit'])->name('plans.edit');
+            Route::put('plans/{id}', [\App\Http\Controllers\Admin\PlansController::class, 'update'])->name('plans.update');
+            Route::post('plans/{id}/toggle', [\App\Http\Controllers\Admin\PlansController::class, 'toggleStatus'])->name('plans.toggle');
+            Route::delete('plans/{id}', [\App\Http\Controllers\Admin\PlansController::class, 'destroy'])->name('plans.destroy');
+
+            // Analytics — platform KPIs + trend charts
+            Route::get('analytics', [\App\Http\Controllers\Admin\AnalyticsController::class, 'index'])->name('analytics.index');
+
+            // Audit Logs — filterable platform/business activity
+            Route::get('audit', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit.index');
+
+            // Admin Users — platform admin accounts + roles/permissions matrix
+            Route::get('admin-users', [\App\Http\Controllers\Admin\AdminUserController::class, 'index'])->name('adminusers.index');
+            Route::get('admin-users/create', [\App\Http\Controllers\Admin\AdminUserController::class, 'create'])->name('adminusers.create');
+            Route::post('admin-users', [\App\Http\Controllers\Admin\AdminUserController::class, 'store'])->name('adminusers.store');
+            Route::post('admin-users/matrix', [\App\Http\Controllers\Admin\AdminUserController::class, 'updateMatrix'])->name('adminusers.matrix');
+            Route::get('admin-users/{id}/edit', [\App\Http\Controllers\Admin\AdminUserController::class, 'edit'])->name('adminusers.edit');
+            Route::put('admin-users/{id}', [\App\Http\Controllers\Admin\AdminUserController::class, 'update'])->name('adminusers.update');
+            Route::delete('admin-users/{id}', [\App\Http\Controllers\Admin\AdminUserController::class, 'destroy'])->name('adminusers.destroy');
+
             // Subscription — listing + history (per vendor)
             Route::get('subscriptions', [\App\Http\Controllers\Admin\SubscriptionController::class, 'index'])->name('subscriptions.index');
             Route::post('subscriptions', [\App\Http\Controllers\Admin\SubscriptionController::class, 'store'])->name('subscriptions.store');
