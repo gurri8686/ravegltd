@@ -1,11 +1,18 @@
+@php
+    $S = \App\Http\Controllers\Admin\SettingsController::class;
+    $platformName = $S::get('platform_name', 'R & A Veg');
+    $accentColor  = $S::get('accent_color');
+    $platformLogo = $S::get('logo');
+    $platformFav  = $S::get('favicon');
+@endphp
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Superadmin — @yield('title', 'Dashboard')</title>
-    <link rel="shortcut icon" type="image/x-icon" href="/app-assets/images/ico/favicon.ico">
+    <title>{{ $platformName }} — @yield('title', 'Dashboard')</title>
+    <link rel="shortcut icon" type="image/x-icon" href="{{ $platformFav && \Illuminate\Support\Str::startsWith($platformFav, 'uploads/') ? asset($platformFav) : '/app-assets/images/ico/favicon.ico' }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     {{-- set theme before paint to avoid flash; default = light (white) --}}
@@ -37,17 +44,22 @@
         /* Sidebar */
         .sa-side{ width:248px; flex:0 0 248px; background:var(--side-bg); color:var(--side-text);
                   border-right:1px solid var(--side-border); display:flex; flex-direction:column; position:sticky; top:0; height:100vh; }
-        .sa-brand{ padding:22px 20px; border-bottom:1px solid var(--side-border); }
+        .sa-brand{ padding:22px 20px; border-bottom:1px solid var(--side-border); flex:0 0 auto; }
         .sa-brand b{ color:var(--side-strong); font-size:18px; letter-spacing:.3px; }
         .sa-brand .tag{ display:inline-block; margin-top:6px; font-size:10px; letter-spacing:.04em; text-transform:uppercase;
                         background:var(--accent-soft); color:var(--accent); font-weight:700; padding:3px 10px; border-radius:999px; }
-        .sa-nav{ padding:14px 12px; flex:1; }
+        /* nav scrolls on its own when items exceed height; brand + footer stay pinned */
+        .sa-nav{ padding:14px 12px; flex:1 1 auto; min-height:0; overflow-y:auto; overscroll-behavior:contain; }
+        .sa-nav::-webkit-scrollbar{ width:7px; }
+        .sa-nav::-webkit-scrollbar-thumb{ background:var(--side-border); border-radius:8px; }
+        .sa-nav::-webkit-scrollbar-thumb:hover{ background:var(--accent); }
+        .sa-nav{ scrollbar-width:thin; scrollbar-color:var(--side-border) transparent; }
         .sa-nav a{ display:flex; align-items:center; gap:12px; padding:11px 14px; border-radius:10px;
                    color:var(--side-text); font-size:14px; font-weight:500; margin-bottom:4px; transition:.15s; }
         .sa-nav a i{ font-size:17px; }
         .sa-nav a:hover{ background:var(--side-hover); color:var(--side-strong); }
         .sa-nav a.active{ background:var(--accent); color:#fff; box-shadow:0 4px 12px rgba(139,92,246,.4); }
-        .sa-side-foot{ padding:12px 14px; border-top:1px solid var(--side-border); }
+        .sa-side-foot{ padding:12px 14px; border-top:1px solid var(--side-border); flex:0 0 auto; }
         .sa-acct{ display:flex; align-items:center; gap:10px; }
         .sa-foot-av{ position:relative; width:34px; height:34px; flex:0 0 34px; border-radius:50%; color:#fff; font-weight:700; font-size:13px;
                      display:flex; align-items:center; justify-content:center;
@@ -138,12 +150,23 @@
         .sa-toast.t-success{ border-left-color:#10b981; } .sa-toast.t-error{ border-left-color:#ef4444; } .sa-toast.t-info{ border-left-color:#6366f1; }
         .sa-toast i{ font-size:18px; }
     </style>
+    @if ($accentColor)
+    {{-- live accent colour from Settings --}}
+    <style>
+        :root, [data-theme="light"], [data-theme="dark"]{
+            --accent: {{ $accentColor }}; --accent-dark: {{ $accentColor }}; --accent-soft: {{ $accentColor }}22;
+        }
+    </style>
+    @endif
 </head>
 <body>
 <div class="sa-shell">
     <aside class="sa-side">
         <div class="sa-brand">
-            <b>R &amp; A Veg</b><br><span class="tag">Platform Control</span>
+            @if ($platformLogo && \Illuminate\Support\Str::startsWith($platformLogo, 'uploads/'))
+                <img src="{{ asset($platformLogo) }}" alt="{{ $platformName }}" style="max-height:32px;max-width:160px;margin-bottom:4px;display:block;">
+            @endif
+            <b>{{ $platformName }}</b><br><span class="tag">Platform Control</span>
         </div>
         @php $can = fn ($s) => \App\Http\Controllers\Admin\AdminUserController::allows(optional(auth()->user())->role, $s); @endphp
         <nav class="sa-nav">
@@ -170,9 +193,19 @@
                 <i class="bi bi-patch-check"></i> Subscription
             </a>
             @endif
+            @if ($can('billing'))
+            <a href="{{ route('admin.billing.index') }}" class="{{ request()->routeIs('admin.billing.*') ? 'active' : '' }}">
+                <i class="bi bi-credit-card"></i> Billing
+            </a>
+            @endif
             @if ($can('analytics'))
             <a href="{{ route('admin.analytics.index') }}" class="{{ request()->routeIs('admin.analytics.*') ? 'active' : '' }}">
                 <i class="bi bi-graph-up-arrow"></i> Analytics
+            </a>
+            @endif
+            @if ($can('notifications'))
+            <a href="{{ route('admin.notifications.index') }}" class="{{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}">
+                <i class="bi bi-megaphone"></i> Notifications
             </a>
             @endif
             @if ($can('audit'))
@@ -183,6 +216,11 @@
             @if ($can('admin_users'))
             <a href="{{ route('admin.adminusers.index') }}" class="{{ request()->routeIs('admin.adminusers.*') ? 'active' : '' }}">
                 <i class="bi bi-people"></i> Admin Users
+            </a>
+            @endif
+            @if ($can('settings'))
+            <a href="{{ route('admin.settings.index') }}" class="{{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
+                <i class="bi bi-gear-wide-connected"></i> Settings
             </a>
             @endif
             <a href="{{ route('admin.account.edit') }}" class="{{ request()->routeIs('admin.account.*') ? 'active' : '' }}">

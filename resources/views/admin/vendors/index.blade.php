@@ -49,9 +49,10 @@
                     <th class="sortable" data-col="0">Vendor <i class="bi bi-arrow-down-up sort-ic"></i></th>
                     <th>Subdomain</th>
                     <th data-col="2">Subscription</th>
-                    <th class="sortable text-end" data-col="3">Sales <i class="bi bi-arrow-down-up sort-ic"></i></th>
+                    <th>Plan</th>
+                    <th class="sortable text-end" data-col="4">Sales <i class="bi bi-arrow-down-up sort-ic"></i></th>
                     <th>Status</th>
-                    <th class="sortable" data-col="5">Created <i class="bi bi-arrow-down-up sort-ic"></i></th>
+                    <th class="sortable" data-col="6">Created <i class="bi bi-arrow-down-up sort-ic"></i></th>
                     <th class="text-end">Actions</th>
                 </tr>
             </thead>
@@ -95,6 +96,13 @@
                             <a href="{{ route('admin.subscriptions.index', ['vendor' => $vendor->id]) }}" class="lnk-accent small"><i class="bi bi-patch-check"></i> Subscribe</a>
                         @endif
                     </td>
+                    <td>
+                        @if ($vendor->plan)
+                            <span class="plan-badge">{{ $vendor->plan }}</span>
+                        @else
+                            <span class="text-muted small">—</span>
+                        @endif
+                    </td>
                     <td class="text-end fw-semibold">£{{ number_format($vendor->sales, 2) }}</td>
                     <td>
                         <div class="form-check form-switch m-0 d-inline-flex align-items-center">
@@ -116,7 +124,7 @@
                     </td>
                 </tr>
             @empty
-                <tr id="emptyRow"><td colspan="7"><div class="text-center py-5"><div style="font-size:42px;color:var(--muted);"><i class="bi bi-people"></i></div><p class="text-muted mb-3 mt-2">No vendors yet.</p><a href="{{ route('admin.vendors.create') }}" class="btn-newvendor d-inline-flex"><i class="bi bi-plus-lg"></i> Add your first vendor</a></div></td></tr>
+                <tr id="emptyRow"><td colspan="8"><div class="text-center py-5"><div style="font-size:42px;color:var(--muted);"><i class="bi bi-people"></i></div><p class="text-muted mb-3 mt-2">No vendors yet.</p><a href="{{ route('admin.vendors.create') }}" class="btn-newvendor d-inline-flex"><i class="bi bi-plus-lg"></i> Add your first vendor</a></div></td></tr>
             @endforelse
             </tbody>
         </table>
@@ -156,6 +164,7 @@
 #vendorTable th .sort-ic{ font-size:11px; color:var(--muted); margin-left:3px; }
 .dom-pill{ display:inline-flex; align-items:center; font-size:12.5px; color:var(--text); background:var(--surface-2); border:1px solid var(--border); border-radius:8px; padding:4px 10px; }
 .pill-warn{ background:rgba(245,158,11,.16); color:#f59e0b; }
+.plan-badge{ display:inline-flex; align-items:center; font-size:12px; font-weight:600; color:var(--accent); background:var(--accent-soft); border:1px solid var(--accent); border-radius:999px; padding:2px 11px; }
 .lnk-accent{ color:var(--accent); font-weight:600; }
 .act-btn{ width:34px; height:34px; border-radius:9px; display:inline-flex; align-items:center; justify-content:center;
           border:1px solid var(--border); background:var(--surface); color:var(--muted); font-size:15px; transition:.15s; }

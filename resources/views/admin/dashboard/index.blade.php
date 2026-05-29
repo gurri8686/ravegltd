@@ -69,8 +69,8 @@
             <div class="ops-value">{{ number_format($pendingApproval) }}</div><span class="ops-sub">inactive vendors</span></div>
     </div>
     <div class="col-6 col-lg-3">
-        <div class="ops-card"><div class="ops-head"><span class="ops-ic ic-green"><i class="bi bi-bar-chart-line-fill"></i></span><span class="ops-label">Avg Revenue / Vendor</span></div>
-            <div class="ops-value">{{ $money($avgPerVendor) }}</div><span class="ops-sub">across {{ number_format($totalVendors) }} vendors</span></div>
+        <div class="ops-card"><div class="ops-head"><span class="ops-ic ic-green"><i class="bi bi-arrow-repeat"></i></span><span class="ops-label">Recurring Revenue</span></div>
+            <div class="ops-value">{{ $money($mrr) }}<small style="font-size:12px;color:var(--muted);font-weight:600;">/mo</small></div><span class="ops-sub">ARR {{ $money($arr) }} · {{ $mrrActive }} active {{ \Illuminate\Support\Str::plural('plan', $mrrActive) }}</span></div>
     </div>
     <div class="col-6 col-lg-3">
         <a href="{{ route('admin.domains.index') }}" class="ops-card d-block kpi-link"><div class="ops-head"><span class="ops-ic ic-violet"><i class="bi bi-shield-check"></i></span><span class="ops-label">Verified Domains</span></div>
@@ -89,8 +89,8 @@
     </div>
     <div class="col-12 col-lg-4">
         <div class="panel h-100">
-            <div class="panel-head"><h6 class="mb-0 fw-semibold">Subscription Distribution</h6></div>
-            <div class="p-3 d-flex align-items-center gap-3 flex-wrap flex-md-nowrap">
+            <div class="panel-head"><h6 class="mb-0 fw-semibold">Subscriptions &amp; Plans</h6></div>
+            <div class="p-3 pb-2 d-flex align-items-center gap-3 flex-wrap flex-md-nowrap">
                 <div class="donut-wrap">
                     <canvas id="subChart"></canvas>
                     <div class="donut-center"><div class="donut-total">{{ $totalVendors }}</div><div class="donut-cap">Total</div></div>
@@ -101,6 +101,20 @@
                     <div class="leg-row"><span class="leg-l"><span class="lg-dot" style="background:#cbd5e1;"></span> None</span><span class="leg-c">{{ $subNone }}</span><span class="leg-p">{{ $pct($subNone) }}%</span></div>
                 </div>
             </div>
+            @if ($planMix->isNotEmpty())
+                <div class="px-3 pb-3">
+                    <div class="pm-divider"></div>
+                    <div class="pm-head">Active plans <span class="ms-auto">{{ $money($mrr) }}/mo</span></div>
+                    @foreach ($planMix as $name => $row)
+                        @php $pmPct = $mrrActive > 0 ? round($row['count'] / $mrrActive * 100) : 0; @endphp
+                        <div class="pm-row">
+                            <span class="pm-name">{{ $name }}</span>
+                            <div class="pm-bar"><span style="width:{{ $pmPct }}%"></span></div>
+                            <span class="pm-val">{{ $row['count'] }}</span>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
         </div>
     </div>
 </div>
@@ -186,6 +200,15 @@
 .leg-row:last-child{ border-bottom:0; }
 .leg-c{ font-weight:700; color:var(--text); } .leg-p{ color:var(--muted); font-size:12px; min-width:44px; text-align:right; }
 .lg-dot{ display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; }
+.pm-divider{ height:1px; background:var(--border); margin:2px 0 12px; }
+.pm-head{ display:flex; align-items:center; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin-bottom:11px; }
+.pm-head span{ color:var(--accent); font-size:12px; letter-spacing:0; }
+.pm-row{ display:flex; align-items:center; gap:10px; margin-bottom:9px; }
+.pm-row:last-child{ margin-bottom:0; }
+.pm-name{ flex:0 0 92px; font-size:12.5px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pm-bar{ flex:1; height:7px; border-radius:999px; background:var(--surface-2); overflow:hidden; }
+.pm-bar span{ display:block; height:100%; border-radius:999px; background:var(--accent); }
+.pm-val{ flex:0 0 24px; text-align:right; font-size:12.5px; font-weight:700; color:var(--text); }
 
 .ops-card{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:15px 16px; box-shadow:var(--shadow); height:100%; transition:.15s; }
 a.ops-card:hover{ border-color:var(--accent); box-shadow:0 4px 14px var(--accent-soft); }

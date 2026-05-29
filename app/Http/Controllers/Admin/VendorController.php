@@ -47,10 +47,16 @@ class VendorController extends Controller
             ? DB::connection('organizations')->table('sites')->whereIn('id', $siteIds)->pluck('domain', 'id')
             : collect();
 
+        // plan tiers live in the control-plane (organizations) DB; the current
+        // subscription carries the plan_tier_id, resolved to a name here.
+        $planNames = DB::connection('organizations')->table('plan_tiers')->pluck('name', 'id');
+
         foreach ($vendors as $v) {
             $v->subscription = optional($subs->get($v->id))->first();
             $v->sales = (float) ($sales[$v->id] ?? 0);
             $v->domain = $v->site_id ? ($domains[$v->site_id] ?? null) : null;
+            $v->plan = ($v->subscription && $v->subscription->plan_tier_id)
+                ? ($planNames[$v->subscription->plan_tier_id] ?? null) : null;
         }
 
         return view('admin.vendors.index', compact('vendors'));

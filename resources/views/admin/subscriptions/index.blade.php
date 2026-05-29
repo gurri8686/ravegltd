@@ -32,7 +32,7 @@
     </div>
     <div class="table-responsive">
         <table class="table align-middle mb-0">
-            <thead><tr><th>Vendor</th><th>Current period</th><th>Status</th><th>Periods</th><th class="text-end">Actions</th></tr></thead>
+            <thead><tr><th>Vendor</th><th>Current period</th><th>Plan</th><th>Status</th><th>Periods</th><th class="text-end">Actions</th></tr></thead>
             <tbody>
             @forelse ($vendors as $v)
                 @php
@@ -49,6 +49,13 @@
                         </div>
                     </td>
                     <td class="text-muted">{{ $cur ? Carbon::parse($cur->start)->format('d M Y').' → '.Carbon::parse($cur->expire)->format('d M Y') : '—' }}</td>
+                    <td>
+                        @if ($cur && $cur->plan_tier_id && isset($planNames[$cur->plan_tier_id]))
+                            <span class="plan-badge">{{ $planNames[$cur->plan_tier_id] }}</span>
+                        @else
+                            <span class="text-muted small">—</span>
+                        @endif
+                    </td>
                     <td>
                         @if ($cur)
                             <span class="pill {{ $active ? 'pill-on' : 'pill-off' }}">{{ $active ? 'Active' : 'Expired' }}</span>
@@ -78,7 +85,7 @@
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="5" class="text-center text-muted py-4">No vendors yet.</td></tr>
+                <tr><td colspan="6" class="text-center text-muted py-4">No vendors yet.</td></tr>
             @endforelse
             </tbody>
         </table>
@@ -114,7 +121,9 @@
                                     <div class="sub-tl-card">
                                         <div class="d-flex justify-content-between align-items-start">
                                             <div>
-                                                <div class="fw-semibold">{{ Carbon::parse($h->start)->format('d M Y') }} <i class="bi bi-arrow-right text-muted"></i> {{ Carbon::parse($h->expire)->format('d M Y') }}</div>
+                                                <div class="fw-semibold d-flex align-items-center gap-2">{{ Carbon::parse($h->start)->format('d M Y') }} <i class="bi bi-arrow-right text-muted"></i> {{ Carbon::parse($h->expire)->format('d M Y') }}
+                                                    @if ($h->plan_tier_id && isset($planNames[$h->plan_tier_id]))<span class="plan-badge">{{ $planNames[$h->plan_tier_id] }}</span>@endif
+                                                </div>
                                                 <div class="text-muted small mt-1"><i class="bi bi-hourglass-split"></i> {{ $dur }}{{ $ha ? ' · '.Carbon::parse($h->expire)->diffForHumans(null, true).' left' : '' }}</div>
                                             </div>
                                             <div class="d-flex align-items-center gap-2">
@@ -147,6 +156,15 @@
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="vendor_id" id="addSubVendor">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Plan</label>
+                        <select name="plan_tier_id" class="form-select">
+                            <option value="">No plan</option>
+                            @foreach ($plans as $p)
+                                <option value="{{ $p->id }}">{{ $p->name }} — {{ $p->currency === 'GBP' ? '£' : ($p->currency.' ') }}{{ number_format($p->price, 2) }}/{{ $p->billing_cycle === 'yearly' ? 'yr' : 'mo' }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div class="row g-2">
                         <div class="col-6"><label class="form-label fw-semibold">Start <span class="text-danger">*</span></label><input type="date" name="start" class="form-control" value="{{ now()->format('Y-m-d') }}" required></div>
                         <div class="col-6"><label class="form-label fw-semibold">Expire <span class="text-danger">*</span></label><input type="date" name="expire" class="form-control" value="{{ now()->addYear()->format('Y-m-d') }}" required></div>
@@ -170,6 +188,7 @@
 .sub-tl-dot.on{ background:#10b981; box-shadow:0 0 0 1px #10b981, 0 0 0 4px rgba(16,185,129,.18); }
 .sub-tl-dot.off{ background:#cbd5e1; }
 .sub-tl-card{ background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:12px 14px; }
+.plan-badge{ display:inline-flex; align-items:center; font-size:12px; font-weight:600; color:var(--accent); background:var(--accent-soft); border:1px solid var(--accent); border-radius:999px; padding:2px 11px; }
 </style>
 @endsection
 

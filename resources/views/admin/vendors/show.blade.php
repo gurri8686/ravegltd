@@ -50,31 +50,52 @@
     <div class="col-6 col-lg-3"><div class="mini-card"><i class="bi bi-box-seam"></i><div><div class="mini-v">{{ number_format($itemsSold) }}</div><div class="mini-l">Items sold · avg £{{ number_format($avgSale, 0) }}/inv</div></div></div></div>
 </div>
 
-{{-- Monthly comparison: sales vs purchases --}}
-<div class="panel">
-    <div class="panel-head">
-        <h6 class="mb-0 fw-semibold"><i class="bi bi-bar-chart-line me-1"></i> Monthly — Sales vs Purchases</h6>
-        <div class="ms-auto d-flex gap-3 small">
-            <span><span class="lg-dot" style="background:#10b981;"></span> Sales</span>
-            <span><span class="lg-dot" style="background:var(--accent);"></span> Purchases</span>
-        </div>
-    </div>
-    <div class="p-3">
-        @forelse ($months as $m)
-            <div class="cmp-row">
-                <div class="cmp-month">{{ $m->label }}</div>
-                <div class="cmp-side">
-                    <div class="cmp-bar-wrap"><div class="cmp-bar" style="width:{{ $peak > 0 ? max(round(($m->sales / $peak) * 100), $m->sales > 0 ? 3 : 0) : 0 }}%;background:#10b981;"></div></div>
-                    <div class="cmp-val">£{{ number_format($m->sales, 2) }} <span class="text-muted">· {{ $m->salesInv }}</span></div>
-                </div>
-                <div class="cmp-side">
-                    <div class="cmp-bar-wrap"><div class="cmp-bar" style="width:{{ $peak > 0 ? max(round(($m->purchases / $peak) * 100), $m->purchases > 0 ? 3 : 0) : 0 }}%;background:var(--accent);"></div></div>
-                    <div class="cmp-val">£{{ number_format($m->purchases, 2) }} <span class="text-muted">· {{ $m->purchInv }}</span></div>
+{{-- Monthly comparison: sales vs purchases (chart + table) --}}
+@php
+    $asc = collect($months)->reverse()->values(); // chronological (oldest → newest)
+@endphp
+<div class="row g-3">
+    <div class="col-12 col-xl-7">
+        <div class="panel h-100">
+            <div class="panel-head">
+                <h6 class="mb-0 fw-semibold"><i class="bi bi-bar-chart-line me-1"></i> Monthly — Sales vs Purchases</h6>
+                <div class="ms-auto d-flex gap-3 small">
+                    <span><span class="lg-dot" style="background:#10b981;"></span> Sales</span>
+                    <span><span class="lg-dot" style="background:var(--accent);"></span> Purchases</span>
+                    <span><span class="lg-dot" style="background:#f59e0b;"></span> Net</span>
                 </div>
             </div>
-        @empty
-            <div class="text-muted text-center py-4">No sales or purchases recorded.</div>
-        @endforelse
+            <div class="p-3">
+                @if ($asc->count())
+                    <canvas id="spChart" height="150"></canvas>
+                @else
+                    <div class="text-muted text-center py-4">No sales or purchases recorded.</div>
+                @endif
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-xl-5">
+        <div class="panel h-100">
+            <div class="panel-head"><h6 class="mb-0 fw-semibold">Monthly breakdown</h6></div>
+            <div class="table-responsive">
+                <table class="table align-middle mb-0 mth-table">
+                    <thead><tr><th>Month</th><th class="text-end">Sales</th><th class="text-end">Purchases</th><th class="text-end">Net</th></tr></thead>
+                    <tbody>
+                    @forelse ($months as $m)
+                        @php $net = $m->sales - $m->purchases; @endphp
+                        <tr>
+                            <td class="fw-semibold">{{ $m->label }}</td>
+                            <td class="text-end" style="color:#10b981;">£{{ number_format($m->sales, 0) }}</td>
+                            <td class="text-end" style="color:var(--accent);">£{{ number_format($m->purchases, 0) }}</td>
+                            <td class="text-end fw-semibold" style="color:{{ $net >= 0 ? '#10b981' : '#ef4444' }};">£{{ number_format($net, 0) }}</td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="4" class="text-center text-muted py-4">No data.</td></tr>
+                    @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -84,13 +105,50 @@
 .mini-v{ font-weight:700; font-size:17px; color:var(--text); }
 .mini-l{ font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; }
 .lg-dot{ display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:4px; }
-.cmp-row{ display:grid; grid-template-columns:96px 1fr 1fr; align-items:center; gap:14px; padding:9px 6px; border-bottom:1px solid var(--border); }
-.cmp-row:last-child{ border-bottom:0; }
-.cmp-month{ font-weight:600; font-size:13px; }
-.cmp-side{ display:grid; grid-template-columns:1fr auto; align-items:center; gap:10px; }
-.cmp-bar-wrap{ background:var(--surface-2); border-radius:999px; height:9px; overflow:hidden; }
-.cmp-bar{ height:100%; border-radius:999px; }
-.cmp-val{ font-weight:600; font-size:12.5px; white-space:nowrap; }
-@media (max-width:768px){ .cmp-row{ grid-template-columns:1fr; gap:6px; } }
+.h-100{ height:100%; }
+.mth-table thead th{ font-size:10.5px; }
+.mth-table tbody td{ padding:9px 16px; border-color:var(--border); font-size:13px; }
+.mth-table tbody tr:hover{ background:var(--surface-2); }
 </style>
+@endsection
+
+@section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+(function(){
+    var el = document.getElementById('spChart'); if (!el) return;
+    var css = getComputedStyle(document.documentElement);
+    var accent = (css.getPropertyValue('--accent') || '#8b5cf6').trim();
+    var muted  = (css.getPropertyValue('--muted') || '#6b7280').trim();
+    var border = (css.getPropertyValue('--border') || '#e5e7eb').trim();
+    Chart.defaults.color = muted; Chart.defaults.font.family = "'Segoe UI',system-ui,sans-serif";
+
+    var labels = @json($asc->pluck('label'));
+    var sales  = @json($asc->pluck('sales'));
+    var purch  = @json($asc->pluck('purchases'));
+    var net    = @json($asc->map(fn ($m) => round($m->sales - $m->purchases, 2))->values());
+    var gbp = function (v) { return '£' + Intl.NumberFormat('en').format(v); };
+
+    new Chart(el, {
+        data: {
+            labels: labels,
+            datasets: [
+                { type: 'bar', label: 'Sales', data: sales, backgroundColor: '#10b981', borderRadius: 5, maxBarThickness: 22, order: 2 },
+                { type: 'bar', label: 'Purchases', data: purch, backgroundColor: accent, borderRadius: 5, maxBarThickness: 22, order: 2 },
+                { type: 'line', label: 'Net', data: net, borderColor: '#f59e0b', backgroundColor: '#f59e0b', borderWidth: 2.5, tension: .35, pointRadius: 3, pointBackgroundColor: '#f59e0b', order: 1 }
+            ]
+        },
+        options: {
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: function (c) { return c.dataset.label + ': ' + gbp(c.parsed.y); } } }
+            },
+            scales: {
+                y: { beginAtZero: true, grid: { color: border }, ticks: { callback: function (v) { return '£' + Intl.NumberFormat('en', { notation: 'compact' }).format(v); } } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+})();
+</script>
 @endsection

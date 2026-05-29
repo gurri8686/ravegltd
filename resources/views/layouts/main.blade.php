@@ -974,6 +974,7 @@
 
             </div>
             <div class="content-body">
+                @include('layouts.partials.vendor-announcements')
                 @include('helpers.flash-message')
                 @hasSection('content')
                     @yield('content')

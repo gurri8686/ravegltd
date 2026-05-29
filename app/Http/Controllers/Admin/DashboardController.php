@@ -85,6 +85,31 @@ class DashboardController extends Controller
         }
         $subNone = max(0, $totalVendors - $latestSubs->count());
 
+        // ── plan mix + MRR (the real platform recurring revenue) ──────────
+        // MRR = sum of each active subscription's plan price, normalised to a
+        // month (yearly plans / 12). This is the platform's OWN income from
+        // subscriptions — distinct from $revenue, which is the vendors' trade
+        // (customer sales). Plan prices live in the org-DB plan_tiers table.
+        $planTiers = DB::connection('organizations')->table('plan_tiers')->get()->keyBy('id');
+        $mrr = 0.0;
+        $planMix = []; // plan name => ['count' => active subs, 'mrr' => monthly £]
+        foreach ($latestSubs as $rows) {
+            $cur = $rows->first();
+            $active = $cur && $cur->expire && Carbon::parse($cur->expire)->gte($today);
+            if (!$active || !$cur->plan_tier_id || !$planTiers->has($cur->plan_tier_id)) {
+                continue;
+            }
+            $tier = $planTiers->get($cur->plan_tier_id);
+            $monthly = (float) $tier->price / (($tier->billing_cycle ?? 'monthly') === 'yearly' ? 12 : 1);
+            $mrr += $monthly;
+            $planMix[$tier->name] ??= ['count' => 0, 'mrr' => 0.0];
+            $planMix[$tier->name]['count']++;
+            $planMix[$tier->name]['mrr'] += $monthly;
+        }
+        $arr = $mrr * 12;
+        $mrrActive = array_sum(array_column($planMix, 'count')); // active subs carrying a plan
+        $planMix = collect($planMix)->sortByDesc('count');
+
         // Note: customer_payments holds almost no real amounts (~£8 total), so
         // there is no reliable "receivables / failed payment" figure to show.
 
@@ -143,6 +168,7 @@ class DashboardController extends Controller
             'revenue', 'revenueMonth', 'revenueTrend', 'vendorTrend', 'vendorsThisMonth', 'trialExpiring',
             'totalDomains', 'activeDomains', 'verifiedDomains', 'avgPerVendor',
             'subActive', 'subExpired', 'subNone', 'newestVendors',
+            'mrr', 'arr', 'mrrActive', 'planMix',
             'subscriptionFeed', 'chartLabels', 'revenueSeries', 'growthSeries'
         ));
     }
