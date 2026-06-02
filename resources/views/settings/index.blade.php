@@ -30,6 +30,10 @@ html { scrollbar-gutter: stable; overflow-y: scroll; }
 /* Each tab section sits flush against the nav card above it. */
 .tab-content-section.active { margin-top: 0; }
 
+/* Import Data header icon: desktop/tablet shows the default icon; the mobile-only
+   variant is hidden here and revealed inside the ≤767px media query. */
+#tab-importdata .sform-card-header .sform-icon .sform-icon-mobile { display: none; }
+
 /* Blade-rendered tabs (Account / General / Delete Data / Import Data) get the
    unified card-bottom treatment, so they sit flush below the Settings nav card. */
 #tab-account.tab-content-section,
@@ -173,21 +177,24 @@ html { scrollbar-gutter: stable; overflow-y: scroll; }
     /* Allow the dropdown panel to escape the card + match bottom card radius.
        Inner nav-bar has its own gradient background — give it the same radius so the visible
        corners aren't squared off when overflow:visible exposes the inner element's edges. */
-    .settings-nav-card { overflow: visible !important; border-radius: 16px !important; padding: 12px 14px !important; }
+    .settings-nav-card { overflow: visible !important; border-radius: 16px !important; padding: 12px 14px !important; position: relative !important; }
     .settings-nav-bar {
         flex-direction: row !important;
         align-items: center !important;
         justify-content: space-between !important;
         gap: 10px !important;
-        margin-bottom: 10px !important;
+        margin-bottom: 0 !important;
         flex-wrap: nowrap !important;
         overflow: visible !important;
+        min-height: 36px !important;
     }
     /* Compact the left side: small icon + just "Settings" text on one line, hide subtitle */
     .settings-nav-left {
         gap: 8px !important;
         flex-shrink: 0 !important;
         min-width: 0 !important;
+        display: flex !important;
+        align-items: center !important;
     }
     .settings-nav-icon {
         width: 32px !important;
@@ -211,10 +218,93 @@ html { scrollbar-gutter: stable; overflow-y: scroll; }
     /* Hide the original horizontal tabs pill row */
     .settings-tabs-wrap { display: none !important; }
 
-    /* Tab strip on mobile — transparent; the card already provides padding, only the dropdown shows inside. */
+    /* Gap between the Settings header card and the Roles/Permissions/Users card
+       (these tabs render as their own standalone card on mobile). */
+    #tab-roles.tab-content-section.active,
+    #tab-permissions.tab-content-section.active,
+    #tab-users.tab-content-section.active {
+        margin-top: 14px !important;
+    }
+
+    /* Account + General + Delete Data tabs — un-merge from the Settings header card:
+       give a gap and full rounded standalone cards (like Roles/Users/Permissions). */
+    #tab-account.tab-content-section.active,
+    #tab-general.tab-content-section.active,
+    #tab-deletedata.tab-content-section.active {
+        margin-top: 14px !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        overflow: visible !important;
+    }
+
+    /* Delete Data tab — split into separate cards with gaps:
+       header card · warning card · recommended-order card · delete cards. */
+    #tab-deletedata .sdd-spec-card {
+        background: transparent !important; border: none !important; box-shadow: none !important;
+        border-radius: 0 !important; overflow: visible !important;
+    }
+    #tab-deletedata .sform-card-header {
+        background: #fff !important; border: 1px solid #eaecf2 !important; border-radius: 16px !important;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important; padding: 16px !important; margin-bottom: 12px !important;
+    }
+    #tab-deletedata .sform-card-body { padding: 0 !important; }
+    #tab-deletedata .sdd-warning-banner,
+    #tab-deletedata .sdd-order-banner {
+        box-shadow: 0 1px 4px rgba(0,0,0,0.05) !important;
+        margin-bottom: 12px !important;
+    }
+    /* Description aligns under the heading text (not under the icon):
+       indent it by the icon width (36px) + the row gap (11px). */
+    #tab-deletedata .sdd-card-desc { padding-left: 47px !important; }
+
+    /* General tab — TWO standalone cards: header (gear) + Show Suppliers (truck + toggle) */
+    #tab-general .sg-header-card {
+        background: transparent !important; border: none !important; box-shadow: none !important;
+        display: flex !important; flex-direction: column !important; gap: 12px !important;
+    }
+    #tab-general .sg-header-card .sform-card-header {
+        background: #fff !important; border: 1px solid #eaecf2 !important; border-radius: 16px !important;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important; padding: 16px !important;
+        border-bottom: 1px solid #eaecf2 !important;
+    }
+    #tab-general .sg-body {
+        background: #fff !important; border: 1px solid #eaecf2 !important; border-radius: 16px !important;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important; padding: 16px !important;
+    }
+    #tab-general .stoggle-row { display: flex !important; align-items: center !important; gap: 12px !important; }
+    #tab-general .sg-toggle-icon {
+        width: 38px !important; height: 38px !important; border-radius: 10px !important;
+        background: #f1f5f9 !important; color: #64748b !important; flex-shrink: 0 !important;
+        display: inline-flex !important; align-items: center !important; justify-content: center !important;
+    }
+    /* The profile card inside becomes the visible white card */
+    #tab-account .sa-profile-card {
+        background: #fff !important;
+        border: 1px solid #eaecf2 !important;
+        border-radius: 16px !important;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+        overflow: hidden !important;
+    }
+
+    /* Tab strip on mobile — transparent; pulled up into the header row so the
+       "Roles" dropdown sits on the SAME line as the Settings title (right-aligned). */
+    /* Absolutely centre the dropdown on the right edge of the header card so it stays
+       perfectly inline (vertically centred) with the Settings title, regardless of
+       the title's exact height. */
     .settings-tabs-strip {
         padding: 0 !important;
         background: transparent !important;
+        margin: 0 !important;
+        position: absolute !important;
+        top: 50% !important;
+        right: 14px !important;
+        transform: translateY(-50%) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        z-index: 5 !important;
     }
 
     /* Dropdown wrapper — compact, sized to content (not full row) */
@@ -244,13 +334,19 @@ html { scrollbar-gutter: stable; overflow-y: scroll; }
     }
     .stmdd-trigger:focus,
     .stmdd-trigger:focus-visible,
-    .stmdd-trigger:active {
+    .stmdd-trigger:active,
+    .stmdd-trigger:hover {
         outline: none !important;
         box-shadow: none !important;
+        border-color: #f97316 !important;
     }
-    .stmdd-trigger.open {
+    .stmdd-trigger.open,
+    .stmdd-trigger.open:focus,
+    .stmdd-trigger.open:active {
         background: #fff7ed;
-        border-color: #f97316;
+        border-color: #f97316 !important;
+        outline: none !important;
+        box-shadow: none !important;
     }
     .stmdd-trigger .stmdd-label {
         font-size: 13px;
@@ -475,17 +571,19 @@ textarea.sform-control { height: auto; padding: 10px 14px; resize: vertical; }
         letter-spacing: 0.5px !important; font-weight: 700 !important;
     }
 
-    /* Inputs */
+    /* Inputs — white background (not grey) */
     .sform-control {
         height: 46px !important; font-size: 13px !important;
         border-radius: 11px !important; padding: 0 14px !important;
-        background: #f8fafc !important; border-color: #e2e8f0 !important;
+        background: #fff !important; border-color: #e2e8f0 !important;
     }
     .sform-control:focus { background: #fff !important; border-color: #f97316 !important; }
-    .sform-control:disabled { background: #f1f5f9 !important; color: #94a3b8 !important; }
+    .sform-control:disabled { background: #fff !important; color: #94a3b8 !important; }
 
     /* 2-col grid */
     .sa-grid-2 { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
+    /* Email + Username — stacked (Email full width on top, Username below) */
+    .sa-grid-email-user { grid-template-columns: 1fr !important; }
     .sa-field { margin-bottom: 0 !important; }
 
     /* Row spacing between field groups */
@@ -537,19 +635,44 @@ textarea.sform-control { height: auto; padding: 10px 14px; resize: vertical; }
     .sa-profile-card { border-radius: 16px !important; box-shadow: 0 2px 12px rgba(0,0,0,0.07) !important; }
     .sa-inline-pw-trigger { display: inline-flex !important; }
 
+    /* Profile card header — title + subtitle on their own lines (no wrap), and the
+       Change Password button drops to a new line when there isn't room beside it. */
+    #tab-account .sform-card-header {
+        align-items: center !important; gap: 10px !important; flex-wrap: wrap !important;
+    }
+    #tab-account .sform-card-header > div:first-child { min-width: 0 !important; flex: 1 1 auto !important; }
+    /* "Profile Information" title — single line */
+    #tab-account .sform-card-header > div:first-child > div > div:first-child {
+        white-space: nowrap !important;
+    }
+    .sa-inline-pw-trigger {
+        height: 32px !important; padding: 0 12px !important; font-size: 10.5px !important;
+        white-space: nowrap !important; flex-shrink: 0 !important;
+    }
+
     /* Modal password fields */
     .sa-pw-fields { gap: 0 !important; }
+    /* Un-boxed fields (reference UI): just label + input, no grey wrapper box */
     .sa-pw-field {
-        padding: 14px !important; background: #fafafa !important;
-        border: 1px solid #f0f0f0 !important; border-radius: 11px !important;
-        margin-bottom: 10px !important;
+        padding: 0 !important; background: transparent !important;
+        border: none !important; border-radius: 0 !important;
+        margin-bottom: 16px !important;
     }
     .sa-pw-field:last-of-type { margin-bottom: 0 !important; }
-    .sa-pw-field .sform-label { color: #64748b !important; margin-bottom: 6px !important; }
-    .sa-pw-field .sform-control {
-        background: #fff !important; border-color: #e2e8f0 !important; height: 44px !important;
+    .sa-pw-field .sform-label {
+        color: #64748b !important; margin-bottom: 7px !important;
+        font-size: 10.5px !important; font-weight: 700 !important;
+        letter-spacing: 0.5px !important; text-transform: uppercase !important;
     }
-    #pwStrengthWrap, #mobPwStrengthWrap { margin-top: 6px !important; }
+    .sa-pw-field .sform-control {
+        background: #fff !important; border: 1.5px solid #e2e8f0 !important;
+        border-radius: 11px !important; height: 46px !important; font-size: 13.5px !important;
+    }
+    .sa-pw-field .sform-control:focus {
+        border-color: rgb(234, 88, 12) !important;
+        box-shadow: 0 0 0 3px rgba(234,88,12,0.1) !important; outline: none !important;
+    }
+    #pwStrengthWrap { margin-top: 6px !important; }
 }
 
 /* ── General tab: toggle rows ──────────────────── */
@@ -562,6 +685,8 @@ textarea.sform-control { height: auto; padding: 10px 14px; resize: vertical; }
 }
 .stoggle-row:last-child { border-bottom: none; padding-bottom: 0; }
 .stoggle-info { flex: 1; min-width: 0; }
+/* Show-Suppliers truck icon — mobile reference only; hidden on desktop/tablet */
+.sg-toggle-icon { display: none; }
 .stoggle-label { font-size: 14px; font-weight: 600; color: #0f172a; }
 .stoggle-desc { font-size: 12px; color: #94a3b8; margin-top: 3px; line-height: 1.45; }
 .stoggle-switch {
@@ -615,8 +740,8 @@ button:focus, button:active, .btn:focus, .btn:active,
 }
 .import-type-btn:hover.active { color: #fff; }
 .import-type-btn.active i { color: #fff; }
-.import-section { display: none; }
-.import-section.active { display: block; }
+.import-section { display: none !important; }
+.import-section.active { display: block !important; }
 .import-upload-zone {
     border: 2px dashed #cbd5e1; border-radius: 14px; padding: 40px 20px;
     text-align: center; cursor: pointer; transition: all 0.2s; background: #f8fafc;
@@ -1560,6 +1685,20 @@ button:focus, button:active, .btn:focus, .btn:active,
     #tab-importdata .sform-card-body { padding: 0 !important; }
     /* Upload section content (banner + drop zone + file pill) — no extra padding; the card already pads. */
     #tab-importdata .import-section { padding: 0 !important; }
+    /* Stack the children (Required-columns banner, then Drop-file zone) vertically,
+       never side-by-side. */
+    #tab-importdata .import-section.active {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 14px !important;
+        width: 100% !important;
+    }
+    #tab-importdata .import-section .irc-banner,
+    #tab-importdata .import-section .import-upload-zone {
+        width: 100% !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+    }
     /* Preview area — small top gap from the section above. */
     #tab-importdata #importPreviewArea { padding: 0 !important; margin-top: 18px !important; }
 
@@ -1800,70 +1939,121 @@ button:focus, button:active, .btn:focus, .btn:active,
         border: none !important;
         box-shadow: none !important;
     }
-    /* Header row: icon + title block */
-    #tab-importdata .sform-card-header {
-        padding: 18px 18px 14px !important;
-        gap: 14px !important;
-        border-bottom: none !important;
-        align-items: center !important;
+    /* ── Separate the Import Data card from the Settings nav card above with a gap.
+         The two are normally merged into one card (the content card has no top
+         border/radius and sits flush below the nav card). For the Import Data tab
+         only, give the content card its own top border + full rounding and push it
+         down with a margin so a clear gap shows between the two cards. The nav card
+         above is already fully rounded on mobile, so it isn't touched. ── */
+    #tab-importdata.tab-content-section {
+        background: #ffffff !important;
+        border: 1px solid #eaecf2 !important;          /* full border all around the card */
+        border-radius: 16px !important;                /* round all 4 corners */
+        box-shadow: 0 4px 16px rgba(0,0,0,0.05) !important;
+        margin: 12px 14px 0 !important;                /* gap above + on both sides so the white card floats on the grey page */
+        overflow: hidden !important;
     }
-    /* Orange rounded-square upload icon */
+    /* ── Preview-active: split the Import-Data block and the Data-Preview block into
+       two separate floating cards with a clear gap. Normally both live inside the one
+       outer white card (.tab-content-section); during preview we neutralise that outer
+       card and give the inner .sform-card its own card look, so the Data Preview
+       (#importPreviewArea — already has its own wrapper card) sits below with a gap.
+       Placed AFTER the base .tab-content-section rule so it wins on order + specificity. ── */
+    body.import-preview-active #tab-importdata.tab-content-section {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+    }
+    body.import-preview-active #tab-importdata .sform-card {
+        background: #ffffff !important;
+        border: 1px solid #eaecf2 !important;
+        border-radius: 16px !important;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.05) !important;
+        overflow: hidden !important;
+    }
+    body.import-preview-active #tab-importdata #importPreviewArea {
+        margin-top: 14px !important;   /* the gap between the two cards */
+    }
+    /* Header row: icon + title block — reference: pad 16px 16px 12px, gap 12px, top-aligned */
+    #tab-importdata .sform-card-header {
+        padding: 16px 16px 12px !important;
+        gap: 12px !important;
+        border-bottom: none !important;
+        align-items: flex-start !important;
+    }
+    /* Orange rounded-square upload icon — reference: 36×36, radius 10px, inset+drop shadow */
     #tab-importdata .sform-card-header .sform-icon {
-        width: 44px !important;
-        height: 44px !important;
-        border-radius: 12px !important;
-        background: #f97316 !important;
-        box-shadow: 0 2px 6px rgba(249,115,22,0.25) !important;
+        width: 36px !important;
+        height: 36px !important;
+        border-radius: 10px !important;
+        background: rgb(234, 88, 12) !important;
+        box-shadow: rgba(255,255,255,0.25) 0 1px 0 inset, rgba(234,88,12,0.5) 0 4px 10px -3px !important;
+        flex-shrink: 0 !important;
     }
     #tab-importdata .sform-card-header .sform-icon i {
-        font-size: 17px !important;
+        font-size: 16px !important;
         color: #fff !important;
     }
-    /* Title — "Import data" */
+    /* Mobile: show the reference upload icon, hide the desktop one */
+    #tab-importdata .sform-card-header .sform-icon .sform-icon-desktop { display: none !important; }
+    #tab-importdata .sform-card-header .sform-icon .sform-icon-mobile { display: block !important; width: 18px !important; height: 18px !important; color: #ffffff !important; stroke: #ffffff !important; }
+    /* Title — "Import Data" — reference: 16px/800, ink, -0.2px */
     #tab-importdata .sform-card-header div:last-child > div:first-child {
-        font-size: 17px !important;
+        font-size: 16px !important;
         font-weight: 800 !important;
-        color: #0f172a !important;
+        color: #0f1115 !important;
         letter-spacing: -0.2px !important;
         line-height: 1.2 !important;
     }
-    /* Subtitle — "Upload Excel files for Sales or Purchases" */
+    /* Subtitle — reference: 12.5px, muted, line-height 1.4 */
     #tab-importdata .sform-card-header div:last-child > div:last-child {
-        font-size: 12px !important;
-        color: #0f172a !important;
+        font-size: 12.5px !important;
+        color: #6b7280 !important;
         font-weight: 500 !important;
-        margin-top: 3px !important;
-        line-height: 1.35 !important;
+        margin-top: 2px !important;
+        line-height: 1.4 !important;
     }
     /* Body padding */
     #tab-importdata .sform-card-body { padding: 0 18px 18px !important; }
 
-    /* ── Segmented toggle (Purchase / Sales) — sits inside a soft grey pill container ── */
-    #tab-importdata .sform-card-body > div:first-child {
-        background: #f1f5f9 !important;
-        border-radius: 12px !important;
+    /* ── Segmented toggle (Purchase / Sales) — reference: grey tray rgb(241,241,244),
+         radius 14px, pad 5px, gap 6px, 1px border.
+         NOTE: the toggle bar is #importTabBar, which sits BEFORE .sform-card-body
+         (not its first child) and carries inline background:transparent — so target
+         it directly and override the inline style with !important. ── */
+    #tab-importdata #importTabBar.import-tab-bar {
+        background: rgb(241, 241, 244) !important;
+        border: 1px solid #eaecf2 !important;
+        border-radius: 14px !important;
         padding: 5px !important;
-        gap: 4px !important;
-        margin-bottom: 18px !important;
+        gap: 6px !important;
+        /* 18px side margin matches .sform-card-body's horizontal padding, so the toggle
+           tray lines up exactly with the banner + upload card below it (same width). */
+        margin: 0 18px 18px !important;
         display: flex !important;
     }
     .import-type-btn {
-        flex: 1 !important;
+        flex: 1 1 0 !important;
+        min-width: 0 !important;            /* allow the button to shrink so text never overflows */
         justify-content: center !important;
-        height: 44px !important;
-        padding: 0 12px !important;
-        font-size: 14px !important;
+        height: 46px !important;
+        padding: 0 8px !important;
+        font-size: 13px !important;
         font-weight: 700 !important;
-        border-radius: 9px !important;
+        letter-spacing: -0.2px !important;
+        border-radius: 12px !important;
         border: none !important;
         background: transparent !important;
-        color: #64748b !important;
-        gap: 8px !important;
+        color: #0f1115 !important;
+        gap: 6px !important;
+        white-space: nowrap !important;
         box-shadow: none !important;
     }
     .import-type-btn i {
         font-size: 13px !important;
-        color: #94a3b8 !important;
+        flex-shrink: 0 !important;
+        color: currentColor !important;
     }
     /* Active segment — pure BLACK across EVERY state (hover, focus, :active, tap-highlight, after-click).
        Order matters: cover all interaction pseudo-classes with !important so no other rule wins. */
@@ -1874,12 +2064,12 @@ button:focus, button:active, .btn:focus, .btn:active,
     .import-type-btn.active:active,
     .import-type-btn.active:active:hover,
     .import-type-btn.active:focus:hover {
-        background: #000000 !important;
-        background-color: #000000 !important;
+        background: rgb(15, 17, 21) !important;
+        background-color: rgb(15, 17, 21) !important;
         background-image: none !important;
         color: #ffffff !important;
-        border-color: #000000 !important;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.20) !important;
+        border-color: rgb(15, 17, 21) !important;
+        box-shadow: rgba(255,255,255,0.08) 0 1px 0 inset, rgba(15,17,21,0.18) 0 4px 14px !important;
         opacity: 1 !important;
         filter: none !important;
         -webkit-tap-highlight-color: transparent !important;
@@ -1898,18 +2088,20 @@ button:focus, button:active, .btn:focus, .btn:active,
         -webkit-user-select: none !important;
         user-select: none !important;
     }
-    /* Hide " Import" suffix on mobile — labels become just "Purchase" / "Sales" */
-    .import-type-btn .itb-suffix { display: none !important; }
+    /* Reference keeps the full "Purchase Import" / "Sales Import" labels on mobile */
+    .import-type-btn .itb-suffix { display: inline !important; }
 
     /* ── Required Columns banner (mobile) — pixel-exact match of reference:
          Cool light-grey card, slightly visible grey border, slate label + black-circle "7" + orange Template,
          chips row with bigger padding, monospace text, slate color. ── */
+    /* ── Required-columns banner — reference: bg rgb(250,250,251), DASHED border,
+         radius 14px, padding 12px 14px ── */
     .irc-banner {
-        background: #f1f5f9 !important;          /* cool light grey, slightly bluer */
-        border: 1px solid #cbd5e1 !important;    /* visible grey border */
-        border-radius: 12px !important;
-        padding: 18px 18px !important;
-        margin-bottom: 16px !important;
+        background: rgb(250, 250, 251) !important;
+        border: 1px dashed #eaecf2 !important;
+        border-radius: 14px !important;
+        padding: 12px 14px !important;
+        margin: 0 0 14px !important;
         display: block !important;
         gap: 0 !important;
         box-shadow: none !important;
@@ -1918,82 +2110,102 @@ button:focus, button:active, .btn:focus, .btn:active,
     .irc-desktop-only { display: none !important; }
     /* Show mobile structure */
     .irc-mobile { display: block !important; width: 100%; }
+    /* Head row: label+pill on the left, Template button pushed right (space-between) */
     .irc-mobile-head {
         display: flex !important;
         align-items: center !important;
-        gap: 10px !important;
-        margin-bottom: 16px !important;
+        justify-content: space-between !important;
+        gap: 8px !important;
+        margin-bottom: 8px !important;
     }
-    /* "REQUIRED COLUMNS" label — dark slate, uppercase, weight 800, tight letter-spacing */
+    /* Left cluster wrapper — label + count pill, gap 6px */
+    .irc-mobile-head-left {
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+    }
+    /* "REQUIRED COLUMNS" label — reference: 10.5px/800, muted, UPPERCASE, letter-spacing 0.8px */
     .irc-mobile-title {
-        font-size: 13px !important;
+        font-size: 10.5px !important;
         font-weight: 800 !important;
-        color: #334155 !important;
+        color: #6b7280 !important;
         text-transform: uppercase !important;
-        letter-spacing: 0.4px !important;
-        line-height: 1 !important;
+        letter-spacing: 0.8px !important;
+        line-height: 1.4 !important;
     }
-    /* Count pill — solid black perfect circle with white "7" */
+    /* Count pill — reference: dark rgb(15,17,21) pill, white "7", radius 999px, pad 1px 6px, 10px/700 */
     .irc-mobile-count-pill {
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
-        width: 26px !important;
-        height: 26px !important;
-        min-width: 26px !important;
-        padding: 0 !important;
-        border-radius: 50% !important;
-        background: #0f172a !important;
+        width: auto !important;
+        height: auto !important;
+        min-width: 0 !important;
+        padding: 1px 6px !important;
+        border-radius: 999px !important;
+        background: rgb(15, 17, 21) !important;
+        border: 1px solid rgb(15, 17, 21) !important;
         color: #ffffff !important;
-        font-size: 13px !important;
-        font-weight: 800 !important;
-        line-height: 1 !important;
+        font-size: 10px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.1px !important;
+        line-height: 1.4 !important;
         font-variant-numeric: tabular-nums !important;
     }
-    /* Template link — orange, with download arrow icon */
+    /* Template button — reference: transparent, orange-deep text, 12px/700, icon 12px, no bg/border */
     .irc-mobile-template {
         margin-left: auto !important;
-        font-size: 14px !important;
+        height: auto !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        border: none !important;
+        font-size: 12px !important;
         font-weight: 700 !important;
-        color: #f97316 !important;
+        color: #c2410c !important;                 /* --orange-deep */
         text-decoration: none !important;
         white-space: nowrap !important;
         display: inline-flex !important;
         align-items: center !important;
-        gap: 6px !important;
+        gap: 4px !important;
     }
-    .irc-mobile-template:hover { color: #ea580c !important; }
-    .irc-tpl-icon { width: 15px !important; height: 15px !important; color: #f97316 !important; }
+    .irc-mobile-template:hover { background: transparent !important; color: #c2410c !important; }
+    .irc-tpl-icon { width: 12px !important; height: 12px !important; color: currentColor !important; }
 
-    /* Chips row — flex wrap with spacing */
+    /* Chips row — flex wrap, gap 5px */
     .irc-mobile-chips {
         display: flex !important;
         flex-wrap: wrap !important;
-        gap: 8px !important;
+        gap: 5px !important;
     }
-    /* Individual chip — white, light grey border, monospace, bigger padding */
+    /* Chip (code.mono) — reference: white bg, border, radius 7px, pad 3px 7px, 11px/600, ink-2 */
     .irc-chip {
         display: inline-flex !important;
         align-items: center !important;
-        height: 34px !important;
-        padding: 0 14px !important;
+        height: auto !important;
+        padding: 3px 7px !important;
         background: #ffffff !important;
-        border: 1px solid #e2e8f0 !important;
-        border-radius: 8px !important;
+        border: 1px solid #eaecf2 !important;
+        border-radius: 7px !important;
         font-family: 'SFMono-Regular','Menlo','Monaco','Consolas','Liberation Mono','Courier New',monospace !important;
-        font-size: 13px !important;
-        font-weight: 500 !important;
-        color: #334155 !important;
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        color: #475569 !important;                 /* --ink-2 */
         line-height: 1 !important;
         white-space: nowrap !important;
         letter-spacing: -0.2px !important;
     }
 
-    /* ── When preview is active, hide upload zone + file pill ONLY.
-       The Required-columns banner (.irc-banner) stays visible at all times (upload + preview).
-       JS toggles `body.import-preview-active` whenever #importPreviewArea is shown/hidden. ── */
+    /* ── When preview is active on MOBILE, hide the upload zone, the Required-columns
+       banner (.irc-banner) AND the uploaded file-info pill (.import-file-pill) so only
+       the data-preview table is shown. JS toggles `body.import-preview-active` on
+       #importPreviewArea show/hide. ── */
     body.import-preview-active #import-section-purchase .import-upload-zone,
-    body.import-preview-active #import-section-sales .import-upload-zone {
+    body.import-preview-active #import-section-sales .import-upload-zone,
+    body.import-preview-active #import-section-purchase .irc-banner,
+    body.import-preview-active #import-section-sales .irc-banner,
+    body.import-preview-active #import-section-purchase .import-file-pill,
+    body.import-preview-active #import-section-sales .import-file-pill {
         display: none !important;
     }
 
@@ -2001,15 +2213,15 @@ button:focus, button:active, .btn:focus, .btn:active,
          White card, dashed orange-tinted border, document icon with orange "+" badge,
          title/subtitle, solid orange "Choose file" CTA pill. ── */
     .import-upload-zone {
-        border: 1.5px dashed #fdba74 !important;
-        background: #ffffff !important;
-        border-radius: 14px !important;
-        padding: 28px 20px 24px !important;
+        border: 1.5px dashed rgb(242, 179, 136) !important;
+        background: rgb(255, 252, 250) !important;
+        border-radius: 16px !important;
+        padding: 22px 14px 18px !important;
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
         justify-content: center !important;
-        gap: 0 !important;
+        gap: 10px !important;
         text-align: center !important;
         cursor: pointer !important;
     }
@@ -2028,77 +2240,78 @@ button:focus, button:active, .btn:focus, .btn:active,
         gap: 10px !important;
         width: 100%;
     }
-    /* Document icon tile — soft peach square with solid-orange document SVG.
-       Plus badge sits at BOTTOM-RIGHT with a white outline ring (matches reference). */
+    /* Document icon tile — reference: 54×54, radius 14px, peach gradient, inset+drop shadow.
+       Plus badge sits at BOTTOM-RIGHT with a 3px white ring. */
     .iuz-doc-icon {
         position: relative;
-        width: 76px;
-        height: 76px;
-        border-radius: 18px;
-        background: #ffedd5;            /* soft peach */
+        width: 54px;
+        height: 54px;
+        border-radius: 14px;
+        background: linear-gradient(rgb(255, 228, 209), rgb(255, 208, 174));
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 6px;
-        box-shadow: 0 4px 10px rgba(249,115,22,0.08);
+        margin-bottom: 0;
+        box-shadow: rgba(255,255,255,0.7) 0 1px 0 inset, rgba(234,88,12,0.4) 0 6px 14px -6px;
     }
     .iuz-doc-svg {
-        width: 36px;
-        height: 40px;
+        width: 22px;
+        height: 22px;
     }
     .iuz-doc-plus {
         position: absolute;
-        bottom: -6px;
-        right: -6px;
-        width: 28px;
-        height: 28px;
+        bottom: -4px;
+        right: -4px;
+        width: 22px;
+        height: 22px;
         border-radius: 50%;
-        background: #f97316;
+        background: rgb(234, 88, 12);
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 2px 6px rgba(249,115,22,0.35);
         /* White outer ring — gives the badge that "punched-out" lift against the peach tile */
-        border: 3px solid #ffffff;
+        box-shadow: rgb(255,255,255) 0 0 0 3px;
     }
     .iuz-doc-plus svg {
-        width: 14px;
-        height: 14px;
+        width: 13px;
+        height: 13px;
     }
 
-    /* Title — bold, centered */
+    /* Title — reference: 15px/800, ink, centered */
     .iuz-mobile-title {
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 800;
-        color: #0f172a;
+        color: #0f1115;
         line-height: 1.3;
-        letter-spacing: -0.2px;
+        letter-spacing: -0.1px;
         text-align: center;
-        margin-top: 2px;
+        margin-top: 0;
     }
-    /* Subtitle — black text, includes file-type and size hint */
+    /* Subtitle — reference: 12.5px, muted, centered */
     .iuz-mobile-sub {
-        font-size: 12px;
+        font-size: 12.5px;
         font-weight: 500;
-        color: #0f172a;
+        color: #6b7280;
         text-align: center;
-        margin-bottom: 6px;
+        margin-top: 3px;
+        margin-bottom: 0;
         line-height: 1.4;
     }
-    /* CTA pill button — solid orange, white text, centered */
+    /* CTA button — reference: solid orange, white, radius 11px, pad 9px 14px, 13px/700, inset+drop shadow */
     .iuz-mobile-btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        height: 42px;
-        padding: 0 26px;
-        border-radius: 9999px;
-        background: #f97316;
+        gap: 6px;
+        height: auto;
+        padding: 9px 14px;
+        border-radius: 11px;
+        background: rgb(234, 88, 12);
         color: #ffffff;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 700;
-        letter-spacing: -0.1px;
-        box-shadow: 0 4px 12px rgba(249,115,22,0.30);
+        letter-spacing: 0;
+        box-shadow: rgba(255,255,255,0.3) 0 1px 0 inset, rgba(234,88,12,0.45) 0 6px 14px -4px;
         white-space: nowrap;
         margin-top: 4px;
         pointer-events: none; /* parent zone handles the click */
@@ -2199,6 +2412,11 @@ button:focus, button:active, .btn:focus, .btn:active,
         background: #ffffff !important;
         border-bottom: none !important;
     }
+    /* ── Mobile: swap the 4 colored stat cards for the Stock-Check–style collapsible
+         "STOCK SUMMARY" card (matches Stock Check page). Hide the grid, show #importSummaryMobile. ── */
+    #importSummaryCardsWrap { display: none !important; }
+    #importSummaryMobile { display: block !important; }
+
     #importSummaryCards {
         display: grid !important;
         grid-template-columns: 1fr 1fr !important;
@@ -2456,10 +2674,20 @@ button:focus, button:active, .btn:focus, .btn:active,
     }
     #importErrorDashboard > div > div:first-child {
         display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 12px !important;
-        align-items: stretch !important;
+        /* Row 2: "All Rows" + "Select all" each as wide as their content (max-content),
+           24px gap, then an empty filler column for the rest of the row. */
+        grid-template-columns: max-content max-content minmax(0,1fr) !important;
+        column-gap: 24px !important;
+        row-gap: 12px !important;
+        align-items: center !important;
+        justify-items: start !important;
+        min-width: 0 !important;
     }
+    /* All Rows — content-width box (wrapper + button both shrink to fit) */
+    #importErrorDashboard #importFilterDDWrap { width: max-content !important; min-width: 0 !important; max-width: 100% !important; }
+    #importErrorDashboard #importFilterDDBtn  { width: max-content !important; min-width: 0 !important; }
+    /* Select all — content-width box too */
+    #importErrorDashboard #importSelectAllBtn { width: max-content !important; min-width: 0 !important; max-width: 100% !important; white-space: nowrap !important; }
 
     /* Row 1 — Search input — pixel-exact match: white pill with light grey border, no fill */
     #importSearchWrap {
@@ -2467,28 +2695,28 @@ button:focus, button:active, .btn:focus, .btn:active,
         grid-column: 1 / -1 !important;
         width: 100% !important;
         background: #ffffff !important;
-        border-radius: 14px !important;
-        border: 1px solid #e2e8f0 !important;
-        height: 48px !important;
-        padding: 0 16px 0 46px !important;
+        border-radius: 12px !important;                /* reference: 12px */
+        border: 1.5px solid #e2e8f0 !important;        /* reference: 1.5px */
+        height: 40px !important;                       /* reference: 40px */
+        padding: 0 10px 0 34px !important;             /* tighter, icon 15px @ ~10px left */
         position: relative !important;
         display: flex !important;
         align-items: center !important;
-        box-shadow: 0 1px 2px rgba(15,23,42,0.02) !important;
+        box-shadow: none !important;
     }
     #importSearchWrap .imptb-search-icon {
         position: absolute !important;
-        left: 18px !important;
+        left: 11px !important;
         top: 50% !important;
         transform: translateY(-50%) !important;
         color: #94a3b8 !important;
-        width: 16px !important;
-        height: 16px !important;
+        width: 15px !important;
+        height: 15px !important;
         pointer-events: none !important;
     }
     #importSearchInput {
         height: 100% !important;
-        font-size: 14.5px !important;
+        font-size: 13.5px !important;
         font-weight: 400 !important;
         background: transparent !important;
         border: none !important;
@@ -2519,7 +2747,7 @@ button:focus, button:active, .btn:focus, .btn:active,
     }
     #importSearchWrap:focus-within {
         border-color: #f97316 !important;
-        box-shadow: 0 0 0 3px rgba(249,115,22,0.08) !important;
+        box-shadow: none !important;
     }
 
     /* Row 2 — All Rows filter (left) + Select all (right) */
@@ -2531,19 +2759,19 @@ button:focus, button:active, .btn:focus, .btn:active,
     }
     #importFilterDDBtn {
         width: 100% !important;
-        height: 48px !important;
+        height: 38px !important;                    /* reference: 38px */
         background: #ffffff !important;
         border: 1px solid #e5e7eb !important;
-        border-radius: 12px !important;
-        padding: 0 14px 0 14px !important;
-        font-size: 14.5px !important;
+        border-radius: 11px !important;             /* reference: 11px */
+        padding: 0 10px !important;                 /* reference: 0 10px */
+        font-size: 12.5px !important;               /* reference: 12.5px */
         font-weight: 700 !important;
-        color: #0f172a !important;
+        color: #0f1115 !important;
         display: flex !important;
         align-items: center !important;
-        gap: 10px !important;
+        gap: 6px !important;
         -webkit-tap-highlight-color: transparent !important;
-        box-shadow: 0 1px 2px rgba(15,23,42,0.02) !important;
+        box-shadow: none !important;
     }
     /* Kill the orange focus ring after tap on mobile — keep border neutral grey */
     #importFilterDDBtn:focus,
@@ -2553,31 +2781,34 @@ button:focus, button:active, .btn:focus, .btn:active,
         box-shadow: 0 1px 2px rgba(15,23,42,0.02) !important;
         outline: none !important;
     }
-    /* Funnel icon — slate, fixed size */
-    .imptb-funnel-ico { width: 16px !important; height: 16px !important; flex-shrink: 0 !important; }
-    /* Chevron — slate, fixed size, pushed to far right via margin-left:auto */
-    .imptb-chev-ico { width: 14px !important; height: 14px !important; flex-shrink: 0 !important; margin-left: auto !important; }
-    /* Label — bold black, sits next to funnel */
+    /* Funnel icon — slate, reference 13px */
+    .imptb-funnel-ico { width: 13px !important; height: 13px !important; flex-shrink: 0 !important; }
+    /* Chevron — slate, reference 13px, pushed to far right via margin-left:auto */
+    .imptb-chev-ico { width: 13px !important; height: 13px !important; flex-shrink: 0 !important; margin-left: auto !important; }
+    /* Label — bold ink, sits next to funnel */
     .imptb-filter-label {
-        font-size: 14.5px !important;
+        font-size: 12.5px !important;
         font-weight: 700 !important;
-        color: #0f172a !important;
+        color: #0f1115 !important;
         white-space: nowrap !important;
     }
-    /* Count chip — light grey oval pill with slate text (matches reference exactly) */
+    /* Count chip — light grey pill rgb(244,244,246), slate text (reference exact) */
     .imptb-filter-count {
         border-radius: 999px !important;
-        padding: 4px 12px !important;
-        font-size: 12px !important;
+        padding: 1px 7px !important;
+        font-size: 11px !important;
         font-weight: 700 !important;
-        line-height: 1.2 !important;
+        line-height: 1.4 !important;
         font-variant-numeric: tabular-nums !important;
-        min-width: 38px !important;
+        min-width: 0 !important;
         text-align: center !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
         letter-spacing: 0.1px !important;
+        background: rgb(244, 244, 246) !important;
+        color: rgb(55, 65, 81) !important;
+        border: 1px solid #e5e7eb !important;
     }
     /* When filter is active (Valid/Invalid/Duplicates selected), the trigger button border + bg lift */
     #importFilterDDBtn.is-active {
@@ -2586,12 +2817,16 @@ button:focus, button:active, .btn:focus, .btn:active,
         box-shadow: 0 1px 3px rgba(15,23,42,0.05) !important;
     }
 
-    /* Dropdown menu — opens beneath the filter trigger */
+    /* Dropdown menu — opens beneath the (now content-width) "All Rows" trigger.
+       At least as wide as the trigger, with a sensible minimum so the options read well. */
     .imptb-filter-menu {
         position: absolute !important;
         top: calc(100% + 6px) !important;
         left: 0 !important;
-        right: 0 !important;
+        right: auto !important;
+        width: 100% !important;       /* exactly as wide as the "All Rows" trigger button */
+        min-width: 0 !important;      /* override the desktop base min-width:220px so it matches the button */
+        max-width: 100% !important;
         background: #ffffff !important;
         border: 1px solid #e5e7eb !important;
         border-radius: 12px !important;
@@ -2644,16 +2879,19 @@ button:focus, button:active, .btn:focus, .btn:active,
     #importErrorDashboard label[title*="Select or deselect"].is-filter-active span {
         color: #ea580c !important;
     }
-    #importErrorDashboard label[title*="Select or deselect"] {
+    /* Select all — it's a <button id="importSelectAllBtn"> (NOT a label). Sits in Row 2,
+       right column, next to the All Rows filter. Reference: h38, radius 11px, font 12.5px. */
+    #importErrorDashboard #importSelectAllBtn {
         order: 3 !important;
         grid-column: 2 !important;
         flex: 0 0 auto !important;
-        height: 48px !important;
-        padding: 0 14px !important;
+        width: 100% !important;
+        height: 38px !important;                    /* reference: 38px */
+        padding: 0 10px !important;
         justify-content: center !important;
-        gap: 10px !important;
+        gap: 6px !important;
         border: 1px solid #e5e7eb !important;
-        border-radius: 12px !important;
+        border-radius: 11px !important;             /* reference: 11px */
         background: #ffffff !important;
         display: flex !important;
         align-items: center !important;
@@ -2661,23 +2899,16 @@ button:focus, button:active, .btn:focus, .btn:active,
         transition: background 0.15s, border-color 0.15s !important;
         -webkit-tap-highlight-color: transparent !important;
     }
-    #importErrorDashboard label[title*="Select or deselect"] .import-cb {
-        width: 18px !important;
-        height: 18px !important;
-        border: 1.5px solid #cbd5e1 !important;
+    #importErrorDashboard #importSelectAllBtn .imp-selall-box {
+        width: 16px !important;
+        height: 16px !important;
         border-radius: 5px !important;
-        background: #ffffff !important;
-        appearance: none !important;
-        -webkit-appearance: none !important;
-        cursor: pointer !important;
-        position: relative !important;
         flex-shrink: 0 !important;
-        transition: background 0.15s, border-color 0.15s !important;
     }
-    #importErrorDashboard label[title*="Select or deselect"] span {
-        font-size: 14.5px !important;
+    #importErrorDashboard #importSelectAllBtn > span:not(.imp-selall-box) {
+        font-size: 12.5px !important;               /* reference: 12.5px */
         font-weight: 700 !important;
-        color: #0f172a !important;
+        color: #0f1115 !important;
     }
     /* ── Active "Select all" state — when checkbox is checked, whole pill turns peach + orange.
        This matches the reference: peach bg, orange border, orange-filled check icon, orange text. */
@@ -2709,7 +2940,8 @@ button:focus, button:active, .btn:focus, .btn:active,
         box-sizing: content-box !important;
     }
 
-    /* Row 3 — Fix Errors (content-width peach pill) + Import (flex-grow primary CTA) */
+    /* Row 3 — Fix Errors + Import side by side (inline) on one row. Fix Errors sizes to its
+       content; Import grows to fill the rest so "Import 456 Rows" still shows in full. */
     #importErrorDashboard .imptb-right-cluster {
         order: 4 !important;
         grid-column: 1 / -1 !important;
@@ -2717,28 +2949,38 @@ button:focus, button:active, .btn:focus, .btn:active,
         margin-top: 0 !important;
         width: 100% !important;
         display: flex !important;
-        justify-content: stretch !important;
+        flex-direction: row !important;
         align-items: center !important;
-        gap: 10px !important;
+        gap: 8px !important;
         flex-wrap: nowrap !important;
+        min-width: 0 !important;
     }
-    /* Fix Errors button — peach pill with orange wrench icon, orange label, dark count text (matches reference) */
+    /* Fix Errors button — reference: peach pill rgb(254,246,231), text rgb(154,74,7),
+       border rgb(246,206,139), h42, radius 12px, font 14px, flex:1, count badge inside.
+       min-width:0 so it can shrink and never push the Import button off-screen. */
+    /* Fix Errors button — COMPACT on mobile: wrench icon + count only ("Fix Errors" text
+       hidden) so the Import CTA gets the full remaining width and its label never truncates. */
     #importErrorDashboard .imptb-right-cluster .imptb-fix-errors-btn {
-        flex: 0 0 auto !important;
-        height: 48px !important;
-        padding: 0 18px !important;
-        gap: 10px !important;
-        font-size: 14px !important;
+        flex: 0 0 auto !important;            /* fixed to its (compact) content width */
+        min-width: 0 !important;
+        height: 42px !important;
+        padding: 0 9px !important;
+        gap: 5px !important;
+        font-size: 12px !important;
         font-weight: 700 !important;
-        color: #ea580c !important;
-        background: #fff7ed !important;
-        border: 1.5px solid #fed7aa !important;
+        letter-spacing: -0.3px !important;
+        color: rgb(154, 74, 7) !important;
+        background: rgb(254, 246, 231) !important;
+        border: 1px solid rgb(246, 206, 139) !important;
         border-radius: 12px !important;
         display: inline-flex !important;
         align-items: center !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
     }
+    #importErrorDashboard .imptb-right-cluster .imptb-fix-errors-btn svg { flex-shrink: 0 !important; }
     #importErrorDashboard .imptb-right-cluster .imptb-fix-errors-btn svg {
-        stroke: #f97316 !important;
+        stroke: currentColor !important;
         width: 16px !important;
         height: 16px !important;
         flex-shrink: 0 !important;
@@ -2746,19 +2988,20 @@ button:focus, button:active, .btn:focus, .btn:active,
     #importErrorDashboard .imptb-right-cluster .imptb-fix-errors-btn > span:not(.imptb-fix-errors-count) {
         font-size: 14px !important;
         font-weight: 700 !important;
-        color: #ea580c !important;
+        color: rgb(154, 74, 7) !important;
     }
-    /* Count — plain dark text, not a colored pill (matches reference) */
+    /* Count — small rounded badge with translucent-white bg (reference) */
     #importErrorDashboard .imptb-right-cluster .imptb-fix-errors-count {
-        background: transparent !important;
-        color: #0f172a !important;
-        border-radius: 0 !important;
-        padding: 0 !important;
-        margin-left: 2px !important;
-        min-width: 0 !important;
-        height: auto !important;
-        font-size: 14px !important;
-        font-weight: 700 !important;
+        min-width: 18px !important;
+        height: 18px !important;
+        padding: 0 5px !important;
+        margin-left: 0 !important;
+        border-radius: 9px !important;
+        background: rgba(255, 255, 255, 0.55) !important;
+        color: rgb(154, 74, 7) !important;
+        font-size: 11px !important;
+        font-weight: 800 !important;
+        line-height: 1 !important;
         font-variant-numeric: tabular-nums !important;
         display: inline-flex !important;
         align-items: center !important;
@@ -2783,23 +3026,33 @@ button:focus, button:active, .btn:focus, .btn:active,
     }
     /* Import button — primary CTA, solid orange with shadow, flex-grow to fill remaining width */
     #importErrorDashboard .imptb-right-cluster #importConfirmBtnTop {
-        flex: 1 1 auto !important;
+        flex: 1 1 auto !important;                  /* grow to fill the row so the label fits */
         min-width: 0 !important;
-        height: 48px !important;
-        padding: 0 18px !important;
-        font-size: 14.5px !important;
-        font-weight: 800 !important;
-        background: linear-gradient(135deg, #f97316, #ea580c) !important;
+        height: 42px !important;                    /* reference: 42px */
+        padding: 0 10px !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        background: rgb(234, 88, 12) !important;     /* reference: solid orange (not gradient) */
         color: #ffffff !important;
-        border: none !important;
+        border: 1px solid transparent !important;
         border-radius: 12px !important;
-        box-shadow: 0 6px 16px rgba(249, 115, 22, 0.32) !important;
+        box-shadow: rgba(255,255,255,0.3) 0 1px 0 inset, rgba(234,88,12,0.4) 0 1px 2px, rgba(234,88,12,0.45) 0 6px 14px -4px !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
-        gap: 10px !important;
-        letter-spacing: 0.1px !important;
+        gap: 6px !important;
+        letter-spacing: -0.1px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
     }
+    /* Import label — keep on one line, ellipsis if truly too narrow (never clip past the edge) */
+    #importErrorDashboard .imptb-right-cluster #importConfirmBtnTop > span {
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        min-width: 0 !important;
+    }
+    #importErrorDashboard .imptb-right-cluster #importConfirmBtnTop svg { flex-shrink: 0 !important; }
     #importErrorDashboard .imptb-right-cluster #importConfirmBtnTop svg {
         stroke: #ffffff !important;
         width: 16px !important;
@@ -3200,55 +3453,59 @@ button:focus, button:active, .btn:focus, .btn:active,
 }
 @media (max-width: 991px) { .sdd-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 575px) { .sdd-grid { grid-template-columns: 1fr; } }
-/* Card — soft rose surface, red hairline border, radius 14px, padding 18px 18px 16px, vertical stack */
+/* Card — white surface, red hairline border, radius 14px (reference spec) */
 .sdd-card {
-    padding: 18px 18px 16px;
+    padding: 14px;
     border-radius: 14px;
-    background: #fef7f7;
+    background: #ffffff;
     border: 1px solid #fbc7c7;
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
-/* Top row — icon tile on the left, count pill on the right */
+/* Top row — icon tile + title inline on the left, count pill on the right */
 .sdd-card-top {
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 10px;
+    align-items: center;
+    gap: 11px;
 }
+/* Title sits inline beside the icon and pushes the count pill to the far right */
+.sdd-card-top .sdd-card-title { flex: 1 1 auto; min-width: 0; font-size: 14.5px; }
 /* Icon tile — white 38×38, red stroke, red hairline border */
 .sdd-card-icon {
-    width: 38px; height: 38px; border-radius: 10px;
-    background: #ffffff;
-    border: 1px solid #fbc7c7;
+    width: 36px; height: 36px; border-radius: 10px;
+    background: #fef4f4;
+    border: 1px solid #f5c6c6;
     color: #dc2626;
     display: inline-flex; align-items: center; justify-content: center;
     flex-shrink: 0;
 }
 .sdd-card-icon i { font-size: 16px; }
-/* Count pill — white capsule, red hairline border, mono uppercase-ish text */
+/* Count pill — soft-red capsule, red hairline border */
 .sdd-card-count {
-    padding: 3px 9px;
+    height: 22px;
+    padding: 0 9px;
     border-radius: 99px;
-    background: #ffffff;
-    border: 1px solid #fbc7c7;
+    background: #fef4f4;
+    border: 1px solid #f5c6c6;
     color: #b11212;
-    font-size: 10.5px;
+    font-size: 11px;
     font-weight: 800;
-    letter-spacing: 0.4px;
-    font-family: 'JetBrains Mono','SFMono-Regular','Menlo','Consolas',monospace;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
     white-space: nowrap;
 }
-.sdd-card-title { font-size: 15px; font-weight: 800; color: #0f1115; letter-spacing: -0.1px; }
-.sdd-card-desc { font-size: 12px; color: #6b7280; margin-top: 3px; line-height: 1.45; }
+.sdd-card-title { font-size: 14.5px; font-weight: 800; color: #0f1115; letter-spacing: -0.1px; }
+.sdd-card-desc { font-size: 11.5px; color: #6b7280; font-weight: 500; margin-top: 6px; line-height: 1.4; }
 /* Delete button — full-width white pill, red text + red hairline border, trash icon */
 .sdd-delete-btn {
-    height: 34px; padding: 0 12px; border-radius: 10px;
-    background: #ffffff; color: #b11212;
-    border: 1px solid #fbc7c7;
-    font-weight: 700; font-size: 12.5px; letter-spacing: -0.1px;
-    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    height: 38px; padding: 0 12px; border-radius: 10px;
+    background: #ffffff; color: #dc2626;
+    border: 1.5px solid #fbc7c7;
+    font-weight: 800; font-size: 12.5px; letter-spacing: -0.1px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     box-shadow: none; width: 100%; cursor: pointer;
     transition: transform 0.04s, filter 0.15s;
 }
@@ -3465,10 +3722,15 @@ button:focus, button:active, .btn:focus, .btn:active,
                                 </div>
                             </div>
                             {{-- Email + Username --}}
-                            <div class="sa-grid-2 row g-3" style="margin-top:10px;">
+                            <div class="sa-grid-2 sa-grid-email-user row g-3" style="margin-top:10px;">
                                 <div class="col-md-6 sa-field">
                                     <label class="sform-label">Email</label>
-                                    <input type="email" class="sform-control" value="{{ $adminData->email ?? '' }}" disabled>
+                                    <div style="position:relative;">
+                                        <input type="email" class="sform-control" value="{{ $adminData->email ?? '' }}" style="padding-right:40px;" disabled>
+                                        <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#94a3b8;display:flex;align-items:center;pointer-events:none;">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                        </span>
+                                    </div>
                                     <div style="font-size:10px;color:#94a3b8;margin-top:3px;">Email cannot be changed</div>
                                 </div>
                                 <div class="col-md-6 sa-field">
@@ -3618,20 +3880,20 @@ button:focus, button:active, .btn:focus, .btn:active,
             </div>
             <div class="sform-card-body" style="padding:4px 22px 22px;">
                 {{-- Warning banner — red --}}
-                <div style="padding:14px 16px;border-radius:11px;background:#fef4f4;border:1px solid #fbc7c7;display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+                <div class="sdd-warning-banner" style="padding:14px 16px;border-radius:11px;background:#fef4f4;border:1px solid #fbc7c7;display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
-                    <span style="font-size:13px;color:#b11212;line-height:1.45;"><b>Warning:</b> This action is <b>irreversible</b>. All selected data will be permanently deleted from the database. Please ensure you have a backup before proceeding.</span>
+                    <span style="font-size:13px;color:#6b7280;line-height:1.5;"><b style="color:#dc2626;">This action is irreversible.</b> All selected data will be permanently deleted from the database. Please ensure you have a backup before proceeding.</span>
                 </div>
                 {{-- Recommended delete order banner — amber --}}
-                <div style="padding:14px 16px;border-radius:11px;background:#fffaeb;border:1px solid #fde68a;display:flex;align-items:flex-start;gap:10px;margin-bottom:18px;">
+                <div class="sdd-order-banner" style="padding:14px 16px;border-radius:11px;background:#fffaeb;border:1px solid #fde68a;display:flex;align-items:flex-start;gap:10px;margin-bottom:18px;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                    <div style="font-size:13px;color:#7a4f09;line-height:1.6;">
-                        <b>Recommended delete order</b> <span style="color:#6b7280;">(to avoid orphaned data):</span>
-                        <ul style="margin:6px 0 0;padding-left:18px;list-style:none;">
-                            <li><b style="color:#F27420;">&#9312; Sales Data</b> first — clears all customer invoices, payments &amp; consumed stock</li>
-                            <li style="margin-top:2px;"><b style="color:#F27420;">&#9313; Purchases Data</b> next — clears supplier invoices, payments, supplier-returns, dumps &amp; added stock</li>
-                            <li style="margin-top:2px;">Then <b style="color:#F27420;">&#9314; Products / Customers / Suppliers</b> — master data cleanup</li>
-                        </ul>
+                    <div style="font-size:13px;line-height:1.6;">
+                        <div style="color:#b45309;font-weight:700;margin-bottom:3px;">Recommended delete order</div>
+                        <div style="color:#7a4f09;">
+                            <b style="color:#d97706;">&#9312; Sales</b> clears invoices, payments &amp; consumed stock first &middot;
+                            <b style="color:#d97706;">&#9313; Purchases</b> next &middot;
+                            <b style="color:#d97706;">&#9314; Products / Customers / Suppliers</b> &mdash; master data cleanup last.
+                        </div>
                     </div>
                 </div>
                 {{-- Delete cards grid — 3 columns. Same 5 active sections + same onclick handlers. --}}
@@ -3642,10 +3904,10 @@ button:focus, button:active, .btn:focus, .btn:active,
                             <span class="sdd-card-icon">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M7 17V11M12 17V7M17 17v-4"/></svg>
                             </span>
+                            <span class="sdd-card-title">Sales Data</span>
                             <span class="sdd-card-count" id="sddCount-sales" data-suffix="records">{{ number_format($deleteCounts['sales'] ?? 0) }} records</span>
                         </div>
                         <div>
-                            <div class="sdd-card-title">Sales Data</div>
                             <div class="sdd-card-desc">Customer invoices, payments &amp; consumed stock</div>
                         </div>
                         <button class="sdd-delete-btn" onclick="openDeleteConfirm('sales','Sales Data')">
@@ -3659,10 +3921,10 @@ button:focus, button:active, .btn:focus, .btn:active,
                             <span class="sdd-card-icon">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
                             </span>
+                            <span class="sdd-card-title">Purchases Data</span>
                             <span class="sdd-card-count" id="sddCount-purchases" data-suffix="records">{{ number_format($deleteCounts['purchases'] ?? 0) }} records</span>
                         </div>
                         <div>
-                            <div class="sdd-card-title">Purchases Data</div>
                             <div class="sdd-card-desc">Supplier invoices, payments, supplier-returns, dumps &amp; added stock</div>
                         </div>
                         <button class="sdd-delete-btn" onclick="openDeleteConfirm('purchases','Purchases Data')">
@@ -3676,10 +3938,10 @@ button:focus, button:active, .btn:focus, .btn:active,
                             <span class="sdd-card-icon">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 9.4l-9-5.2M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12"/></svg>
                             </span>
+                            <span class="sdd-card-title">Products</span>
                             <span class="sdd-card-count" id="sddCount-products" data-suffix="records">{{ number_format($deleteCounts['products'] ?? 0) }} records</span>
                         </div>
                         <div>
-                            <div class="sdd-card-title">Products</div>
                             <div class="sdd-card-desc">Product master records</div>
                         </div>
                         <button class="sdd-delete-btn" onclick="openDeleteConfirm('products','Products')">
@@ -3693,10 +3955,10 @@ button:focus, button:active, .btn:focus, .btn:active,
                             <span class="sdd-card-icon">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
                             </span>
+                            <span class="sdd-card-title">Customers</span>
                             <span class="sdd-card-count" id="sddCount-customers" data-suffix="records">{{ number_format($deleteCounts['customers'] ?? 0) }} records</span>
                         </div>
                         <div>
-                            <div class="sdd-card-title">Customers</div>
                             <div class="sdd-card-desc">Customer master records</div>
                         </div>
                         <button class="sdd-delete-btn" onclick="openDeleteConfirm('customers','Customers')">
@@ -3710,10 +3972,10 @@ button:focus, button:active, .btn:focus, .btn:active,
                             <span class="sdd-card-icon">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14"/><path d="M9 9h.01M9 13h.01M9 17h.01M15 9h.01M15 13h.01M15 17h.01"/></svg>
                             </span>
+                            <span class="sdd-card-title">Suppliers</span>
                             <span class="sdd-card-count" id="sddCount-suppliers" data-suffix="records">{{ number_format($deleteCounts['suppliers'] ?? 0) }} records</span>
                         </div>
                         <div>
-                            <div class="sdd-card-title">Suppliers</div>
                             <div class="sdd-card-desc">Supplier master records</div>
                         </div>
                         <button class="sdd-delete-btn" onclick="openDeleteConfirm('suppliers','Suppliers')">
@@ -3756,7 +4018,10 @@ button:focus, button:active, .btn:focus, .btn:active,
             {{-- Header — EXACT spec: icon tile + title + subtitle (left) --}}
             <div class="sform-card-header">
                 <span class="sform-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+                    {{-- Desktop/tablet — original header icon (unchanged) --}}
+                    <svg class="sform-icon-desktop" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+                    {{-- Mobile-only (≤767px) — reference upload icon: up-arrow into tray --}}
+                    <svg class="sform-icon-mobile" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 9 12 4 17 9"/><line x1="12" y1="4" x2="12" y2="16"/></svg>
                 </span>
                 <div style="flex:1 1 0%;">
                     <h2 style="margin:0;font-size:18px;font-weight:800;color:#0f1115;letter-spacing:-0.2px;">Import Data</h2>
@@ -3796,9 +4061,11 @@ button:focus, button:active, .btn:focus, .btn:active,
                         {{-- Mobile-only reference design — shown via CSS at ≤767px (unchanged) --}}
                         <div class="irc-mobile">
                             <div class="irc-mobile-head">
-                                <span class="irc-mobile-title">REQUIRED COLUMNS</span><span class="irc-mobile-count-pill">7</span>
+                                <span class="irc-mobile-head-left">
+                                    <span class="irc-mobile-title">Required columns</span><span class="irc-mobile-count-pill">7</span>
+                                </span>
                                 <a href="#" onclick="event.preventDefault();" class="irc-mobile-template">
-                                    <svg class="irc-tpl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    <svg class="irc-tpl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
                                     Template
                                 </a>
                             </div>
@@ -3847,25 +4114,20 @@ button:focus, button:active, .btn:focus, .btn:active,
                         {{-- Mobile-only reference design — shown via CSS at ≤767px --}}
                         <div class="iuz-mobile">
                             <div class="iuz-doc-icon">
-                                {{-- Document body with text lines — solid orange on peach tile --}}
-                                <svg class="iuz-doc-svg" viewBox="0 0 32 36" fill="none" aria-hidden="true">
-                                    {{-- Document outline (rounded rectangle with folded corner) --}}
-                                    <path d="M5 4a3 3 0 0 1 3-3h12l8 8v23a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V4z" fill="#f97316"/>
-                                    {{-- Folded corner highlight (slightly lighter overlay) --}}
-                                    <path d="M20 1v6a2 2 0 0 0 2 2h6" fill="#fb923c" opacity="0.9"/>
-                                    {{-- Text lines on the document --}}
-                                    <rect x="10" y="15" width="12" height="2" rx="1" fill="#fff7ed"/>
-                                    <rect x="10" y="20" width="14" height="2" rx="1" fill="#fff7ed"/>
-                                    <rect x="10" y="25" width="9"  height="2" rx="1" fill="#fff7ed"/>
+                                {{-- File-text icon — orange stroke, no fill (reference lucide icon) --}}
+                                <svg class="iuz-doc-svg" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <path d="M14 2v6h6"/>
+                                    <path d="M8 13h8M8 17h8M10 9h.01"/>
                                 </svg>
                                 {{-- Plus badge at the BOTTOM-RIGHT with white ring --}}
                                 <span class="iuz-doc-plus" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="6" x2="12" y2="18"/><line x1="6" y1="12" x2="18" y2="12"/></svg>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
                                 </span>
                             </div>
                             <div class="iuz-mobile-title">Drop your Excel file</div>
                             <div class="iuz-mobile-sub">or tap below to choose · .xlsx, .xls, .csv · 10 MB max</div>
-                            <span class="iuz-mobile-btn">Choose file&nbsp;&nbsp;&rarr;</span>
+                            <span class="iuz-mobile-btn">Choose file <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
                         </div>
                     </div>
                     {{-- Uploaded file pill — EXACT spec: green card, white file-icon tile, name + meta line, Replace button --}}
@@ -3906,9 +4168,11 @@ button:focus, button:active, .btn:focus, .btn:active,
                         {{-- Mobile-only reference design --}}
                         <div class="irc-mobile">
                             <div class="irc-mobile-head">
-                                <span class="irc-mobile-title">REQUIRED COLUMNS</span><span class="irc-mobile-count-pill">7</span>
+                                <span class="irc-mobile-head-left">
+                                    <span class="irc-mobile-title">Required columns</span><span class="irc-mobile-count-pill">7</span>
+                                </span>
                                 <a href="#" onclick="event.preventDefault();" class="irc-mobile-template">
-                                    <svg class="irc-tpl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    <svg class="irc-tpl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
                                     Template
                                 </a>
                             </div>
@@ -3957,25 +4221,20 @@ button:focus, button:active, .btn:focus, .btn:active,
                         {{-- Mobile-only reference design — shown via CSS at ≤767px --}}
                         <div class="iuz-mobile">
                             <div class="iuz-doc-icon">
-                                {{-- Document body with text lines — solid orange on peach tile --}}
-                                <svg class="iuz-doc-svg" viewBox="0 0 32 36" fill="none" aria-hidden="true">
-                                    {{-- Document outline (rounded rectangle with folded corner) --}}
-                                    <path d="M5 4a3 3 0 0 1 3-3h12l8 8v23a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V4z" fill="#f97316"/>
-                                    {{-- Folded corner highlight (slightly lighter overlay) --}}
-                                    <path d="M20 1v6a2 2 0 0 0 2 2h6" fill="#fb923c" opacity="0.9"/>
-                                    {{-- Text lines on the document --}}
-                                    <rect x="10" y="15" width="12" height="2" rx="1" fill="#fff7ed"/>
-                                    <rect x="10" y="20" width="14" height="2" rx="1" fill="#fff7ed"/>
-                                    <rect x="10" y="25" width="9"  height="2" rx="1" fill="#fff7ed"/>
+                                {{-- File-text icon — orange stroke, no fill (reference lucide icon) --}}
+                                <svg class="iuz-doc-svg" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <path d="M14 2v6h6"/>
+                                    <path d="M8 13h8M8 17h8M10 9h.01"/>
                                 </svg>
                                 {{-- Plus badge at the BOTTOM-RIGHT with white ring --}}
                                 <span class="iuz-doc-plus" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="6" x2="12" y2="18"/><line x1="6" y1="12" x2="18" y2="12"/></svg>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
                                 </span>
                             </div>
                             <div class="iuz-mobile-title">Drop your Excel file</div>
                             <div class="iuz-mobile-sub">or tap below to choose · .xlsx, .xls, .csv · 10 MB max</div>
-                            <span class="iuz-mobile-btn">Choose file&nbsp;&nbsp;&rarr;</span>
+                            <span class="iuz-mobile-btn">Choose file <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
                         </div>
                     </div>
                     {{-- Uploaded file pill — EXACT spec: green card, white file-icon tile, name + meta line, Replace button --}}
@@ -4097,10 +4356,13 @@ button:focus, button:active, .btn:focus, .btn:active,
                             </div>
                         </div>
 
-                        {{-- 2. Summary Cards --}}
-                        <div style="padding:16px 22px 0;background:#ffffff;">
+                        {{-- 2. Summary Cards (desktop/tablet — 4 colored stat cards) --}}
+                        <div id="importSummaryCardsWrap" style="padding:16px 22px 0;background:#ffffff;">
                             <div id="importSummaryCards" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;"></div>
                         </div>
+                        {{-- 2-mobile. Stock-Check–style collapsible STOCK SUMMARY card (≤767px only).
+                             Filled by renderImportSummaryMobile(); toggled via toggleImportSummary(). --}}
+                        <div id="importSummaryMobile" style="display:none;padding:10px 16px 0;background:#ffffff;"></div>
 
                         {{-- 2b. Error Dashboard & Filter --}}
                         <div id="importErrorDashboard" style="display:none;"></div>
@@ -4268,16 +4530,19 @@ button:focus, button:active, .btn:focus, .btn:active,
 
     {{-- ── General Tab ─────────────────────────────── --}}
     <div id="tab-general" class="tab-content-section">
-        <div class="sform-card">
+        <div class="sform-card sg-header-card">
             <div class="sform-card-header">
-                <div class="sform-icon"><i class="fa fa-sliders" style="font-size:13px;color:#fff;"></i></div>
+                <div class="sform-icon">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </div>
                 <div>
                     <div style="font-size:14px;font-weight:800;color:#0f172a;">General Settings</div>
                     <div style="font-size:11px;color:#94a3b8;margin-top:1px;">Configure application-wide options</div>
                 </div>
             </div>
-            <div class="sform-card-body">
+            <div class="sform-card-body sg-body">
                 <div class="stoggle-row">
+                    <span class="sg-toggle-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span>
                     <div class="stoggle-info">
                         <div class="stoggle-label">Show Suppliers</div>
                         <div class="stoggle-desc">Enable or disable the Suppliers section across the application</div>
@@ -4317,12 +4582,12 @@ button:focus, button:active, .btn:focus, .btn:active,
 
 {{-- ── Mobile Change Password Modal ──────────────────── --}}
 <div id="pwModal" class="sa-pw-modal-overlay" style="display:none;" onclick="closePwModalOverlay(event)">
-    <div class="sa-pw-modal-box">
+    <div class="sa-pw-modal-box" onclick="event.stopPropagation()">
         {{-- Modal Header --}}
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">
             <div style="display:flex;align-items:center;gap:10px;">
-                <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#f97316,#fb923c);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(249,115,22,0.3);">
-                    <i class="fa fa-lock" style="font-size:14px;color:#fff;"></i>
+                <div style="width:36px;height:36px;border-radius:10px;background:#fff1e6;border:1px solid #f6c9a8;display:flex;align-items:center;justify-content:center;">
+                    <i class="fa fa-lock" style="font-size:14px;color:rgb(234, 88, 12);"></i>
                 </div>
                 <div>
                     <div style="font-size:16px;font-weight:800;color:#0f172a;line-height:1.2;">Change Password</div>
@@ -4350,6 +4615,18 @@ button:focus, button:active, .btn:focus, .btn:active,
                         <input type="password" name="new_password" id="mob_new_password" class="sform-control pw-input" placeholder="Min. 6 characters">
                         <span class="pw-eye" onclick="togglePw('mob_new_password',this)"><i class="fa fa-eye-slash"></i></span>
                     </div>
+                    {{-- Segmented strength meter — directly below New Password (reference UI) --}}
+                    <div id="mobPwStrengthWrap" style="display:none;margin-top:8px;">
+                        <div style="display:flex;gap:5px;">
+                            <div class="mob-pw-seg" style="flex:1;height:5px;border-radius:99px;background:#e5e7eb;transition:all 0.25s;"></div>
+                            <div class="mob-pw-seg" style="flex:1;height:5px;border-radius:99px;background:#e5e7eb;transition:all 0.25s;"></div>
+                            <div class="mob-pw-seg" style="flex:1;height:5px;border-radius:99px;background:#e5e7eb;transition:all 0.25s;"></div>
+                        </div>
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">
+                            <span id="mobPwStrengthLabel" style="font-size:12px;font-weight:700;color:#16a34a;"></span>
+                            <span id="mobPwStrengthHint" style="font-size:11px;color:#94a3b8;font-weight:500;"></span>
+                        </div>
+                    </div>
                     <div data-validate="new_password" style="font-size:11px;color:#dc2626;margin-top:3px;"></div>
                 </div>
                 <div class="sa-pw-field">
@@ -4359,13 +4636,6 @@ button:focus, button:active, .btn:focus, .btn:active,
                         <span class="pw-eye" onclick="togglePw('mob_confirm_password',this)"><i class="fa fa-eye-slash"></i></span>
                     </div>
                     <div data-validate="confirm_password" style="font-size:11px;color:#dc2626;margin-top:3px;"></div>
-                </div>
-                {{-- Strength bar --}}
-                <div id="mobPwStrengthWrap" style="display:none;">
-                    <div style="font-size:11px;color:#64748b;margin-bottom:5px;">Strength: <span id="mobPwStrengthLabel" style="font-weight:700;"></span></div>
-                    <div style="height:4px;background:#e2e8f0;border-radius:10px;overflow:hidden;">
-                        <div id="mobPwStrengthBar" style="height:100%;width:0;border-radius:10px;transition:all 0.3s;"></div>
-                    </div>
                 </div>
                 <button type="submit" id="mobPwSubmitBtn"
                     style="width:100%;height:50px;border:none;border-radius:14px;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-top:6px;box-shadow:0 4px 14px rgba(249,115,22,0.3);">
@@ -4723,8 +4993,45 @@ function calcPwStrength(pw, barId, lblId, wrapId) {
     lbl.textContent=l.text; lbl.style.color=l.color;
 }
 
+// Segmented strength meter for the mobile Change Password modal (reference UI):
+// 3 colour-coded segments + a label ("Strong password") + a hint ("12 chars · A1!").
+function calcPwStrengthSeg(pw) {
+    var wrap = document.getElementById('mobPwStrengthWrap');
+    var segs = document.querySelectorAll('#mobPwStrengthWrap .mob-pw-seg');
+    var lbl  = document.getElementById('mobPwStrengthLabel');
+    var hint = document.getElementById('mobPwStrengthHint');
+    if (!wrap) return;
+    if (!pw) { wrap.style.display='none'; return; }
+    wrap.style.display='block';
+
+    var hasUpper = /[A-Z]/.test(pw);
+    var hasNum   = /[0-9]/.test(pw);
+    var hasSym   = /[^a-zA-Z0-9]/.test(pw);
+
+    // 1 = weak, 2 = fair, 3 = strong
+    var level = 1;
+    if (pw.length >= 8 && (hasUpper || hasNum)) level = 2;
+    if (pw.length >= 10 && hasUpper && hasNum) level = 3;
+
+    var map = {
+        1: { color:'#dc2626', text:'Weak password' },
+        2: { color:'#f59e0b', text:'Fair password' },
+        3: { color:'#16a34a', text:'Strong password' },
+    };
+    var m = map[level];
+    segs.forEach(function(s, i){ s.style.background = (i < level) ? m.color : '#e5e7eb'; });
+    if (lbl)  { lbl.textContent = m.text; lbl.style.color = m.color; }
+
+    // Hint: "<len> chars · A1!" — show only the composition pieces present
+    var comp = '';
+    if (hasUpper) comp += 'A';
+    if (hasNum)   comp += '1';
+    if (hasSym)   comp += '!';
+    if (hint) hint.textContent = pw.length + ' chars' + (comp ? ' · ' + comp : '');
+}
+
 document.getElementById('mob_new_password') && document.getElementById('mob_new_password').addEventListener('input', function(){
-    calcPwStrength(this.value,'mobPwStrengthBar','mobPwStrengthLabel','mobPwStrengthWrap');
+    calcPwStrengthSeg(this.value);
 });
 
 document.getElementById('new_password') && document.getElementById('new_password').addEventListener('input', function(){
@@ -4734,6 +5041,38 @@ document.getElementById('new_password') && document.getElementById('new_password
 /* ── Import Data ─────────────────────────────────── */
 var _importType = 'purchase';
 var _importFile = { sales: null, purchase: null };
+
+// On load, force only the default (purchase) section visible — guards against the
+// non-active section showing if any CSS/cache leaves both displayed.
+// Also force the active section to stack its children vertically on mobile
+// (Required-columns banner first, then the Drop-file zone) — inline so it works
+// even if the stylesheet is served stale from cache.
+function _applyImportSectionLayout() {
+    var isMobile = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
+    document.querySelectorAll('.import-section').forEach(function(s){
+        var on = s.classList.contains('active');
+        if (!on) { s.style.display = 'none'; return; }
+        if (isMobile) {
+            s.style.display = 'flex';
+            s.style.flexDirection = 'column';
+            s.style.gap = '14px';
+            s.style.width = '100%';
+            var kids = s.querySelectorAll(':scope > .irc-banner, :scope > .import-upload-zone');
+            kids.forEach(function(k){ k.style.width = '100%'; k.style.margin = '0'; k.style.boxSizing = 'border-box'; });
+        } else {
+            s.style.display = '';
+            s.style.flexDirection = '';
+            s.style.gap = '';
+        }
+    });
+}
+document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('.import-section').forEach(function(s){
+        s.classList.toggle('active', s.id === ('import-section-' + _importType));
+    });
+    _applyImportSectionLayout();
+});
+window.addEventListener('resize', _applyImportSectionLayout);
 
 // ─── Per-type state buckets ────────────────────────────────────────────────
 // Sales and Purchase imports keep independent state. When user clicks the
@@ -5091,13 +5430,16 @@ function _restoreImportSession(type) {
 
 function switchImportType(type, btn) {
     if (_importType === type) return; // no-op
-    // Snapshot the type we're leaving so user can come back to the same state
-    _captureImportSession(_importType);
-    _importType = type;
+    // Toggle the visible section FIRST so a failure later can't leave both showing.
     document.querySelectorAll('.import-type-btn').forEach(function(b){ b.classList.remove('active'); });
-    btn.classList.add('active');
-    document.querySelectorAll('.import-section').forEach(function(s){ s.classList.remove('active'); });
-    document.getElementById('import-section-' + type).classList.add('active');
+    if (btn) btn.classList.add('active');
+    document.querySelectorAll('.import-section').forEach(function(s){
+        s.classList.toggle('active', s.id === ('import-section-' + type));
+    });
+    _applyImportSectionLayout();
+    // Snapshot the type we're leaving so user can come back to the same state
+    try { _captureImportSession(_importType); } catch(e) {}
+    _importType = type;
     // Restore (or clear) the target type's saved state
     _restoreImportSession(type);
 }
@@ -5541,6 +5883,8 @@ function clearFile(type) {
         if (stale && stale.parentNode) stale.parentNode.removeChild(stale);
         var summaryCards = document.getElementById('importSummaryCards');
         if (summaryCards) summaryCards.innerHTML = '';
+        var summaryMobile = document.getElementById('importSummaryMobile');
+        if (summaryMobile) summaryMobile.innerHTML = '';
         var errDash = document.getElementById('importErrorDashboard');
         if (errDash) { errDash.innerHTML = ''; errDash.style.display = 'none'; }
         var filterBar = document.getElementById('importFilterBar');
@@ -5748,6 +6092,8 @@ function uploadPreview(type, file) {
     _setPreviewVisible(true);
     document.getElementById('importPreviewTable').innerHTML = '<div style="text-align:center;padding:30px;color:#94a3b8;"><i class="fa fa-spinner fa-spin" style="font-size:24px;"></i><div style="margin-top:8px;font-size:13px;">Loading file...</div></div>';
     document.getElementById('importSummaryCards').innerHTML = '';
+    var _ismEl = document.getElementById('importSummaryMobile');
+    if (_ismEl) _ismEl.innerHTML = '';
     document.getElementById('importErrors').style.display = 'none';
 
     $.ajax({
@@ -6092,6 +6438,9 @@ function renderPreview(res, isRefresh) {
 
     document.getElementById('importSummaryCards').innerHTML = cardsHtml;
 
+    // ── Mobile (≤767px): Stock-Check–style collapsible "STOCK SUMMARY" card ──
+    renderImportSummaryMobile(res, validPct);
+
     // ── Data Preview header — green "Auto-mapped N columns" pill (single badge, exact spec UI) ──
     var _mappingBadge = document.getElementById('importMappingBadge');
     var _mappingBadgeText = document.getElementById('importMappingBadgeText');
@@ -6152,7 +6501,7 @@ function renderPreview(res, isRefresh) {
     // Inline styles match the spec verbatim. Label + count populated dynamically from preview data.
     var _filterActive = (_filterMode && _filterMode !== 'all');
     dashHtml += '<div class="imptb-filter-wrap" id="importFilterDDWrap" data-active="' + (_filterActive ? '1' : '0') + '">';
-    dashHtml += '<button type="button" onclick="toggleImportFilterDD(event)" id="importFilterDDBtn" class="imptb-filter-btn' + (_filterActive ? ' is-active' : '') + '" style="height:40px;padding:0 12px;border-radius:10px;background:#ffffff;border:1px solid #e7e7eb;display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:13px;color:#0f1115;">';
+    dashHtml += '<button type="button" onclick="toggleImportFilterDD(event)" id="importFilterDDBtn" class="imptb-filter-btn' + (_filterActive ? ' is-active' : '') + '" style="height:38px;padding:0 10px;border-radius:11px;background:#ffffff;border:1px solid #e5e7eb;display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:700;font-size:12.5px;color:#0f1115;">';
     // Funnel icon — slate stroke, fixed slate color (no orange leak)
     dashHtml += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>';
     // Label — dynamic (All Rows / Valid / Invalid / Duplicates)
@@ -6184,8 +6533,8 @@ function renderPreview(res, isRefresh) {
     //    Pill-shaped button with custom 18×18 square checkbox + "Select all" label.
     //    Click toggles allChecked state. Custom checkbox visually fills orange when checked
     //    (data-checked attribute drives the CSS so we don't depend on a native <input>).
-    dashHtml += '<button type="button" id="importSelectAllBtn" data-checked="' + (allChecked ? '1' : '0') + '" onclick="toggleSelectAllGlobal(!(this.getAttribute(\'data-checked\')===\'1\'))" title="Select or deselect all rows" style="height:40px;padding:0 14px;border-radius:10px;background:' + (allChecked ? '#fff1e6' : '#ffffff') + ';border:1px solid ' + (allChecked ? '#f6c9a8' : '#e7e7eb') + ';display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:13px;color:' + (allChecked ? '#F27420' : '#0f1115') + ';transition:0.12s;">';
-    dashHtml += '<span class="imp-selall-box" style="width:18px;height:18px;border-radius:5px;background:' + (allChecked ? '#f97316' : '#ffffff') + ';border:1.5px solid ' + (allChecked ? '#f97316' : '#c9cdd3') + ';display:inline-flex;align-items:center;justify-content:center;cursor:inherit;padding:0;opacity:1;transition:0.12s;flex-shrink:0;">';
+    dashHtml += '<button type="button" id="importSelectAllBtn" data-checked="' + (allChecked ? '1' : '0') + '" onclick="toggleSelectAllGlobal(!(this.getAttribute(\'data-checked\')===\'1\'))" title="Select or deselect all rows" style="height:38px;padding:0 10px;border-radius:11px;background:' + (allChecked ? '#fff1e6' : '#ffffff') + ';border:1px solid ' + (allChecked ? '#f6c9a8' : '#e5e7eb') + ';display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:700;font-size:12.5px;color:' + (allChecked ? '#F27420' : '#0f1115') + ';transition:0.12s;">';
+    dashHtml += '<span class="imp-selall-box" style="width:16px;height:16px;border-radius:5px;background:' + (allChecked ? '#f97316' : '#ffffff') + ';border:1.5px solid ' + (allChecked ? '#f97316' : '#c9cdd3') + ';display:inline-flex;align-items:center;justify-content:center;cursor:inherit;padding:0;opacity:1;transition:0.12s;flex-shrink:0;">';
     if (allChecked) {
         dashHtml += '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
     }
@@ -6201,18 +6550,18 @@ function renderPreview(res, isRefresh) {
     // border, broken-link icon, solid orange count chip with white text. Data (count, disabled
     // state, onclick) still comes from existing logic so functionality is unchanged.
     var _fixDisabled = !hasErrors;
-    var _fxBg = _fixDisabled ? '#f8fafc' : '#fff5ec';      // orange-soft
-    var _fxBd = _fixDisabled ? '#e5e7eb' : '#fed7aa';      // orange-line
-    var _fxFg = _fixDisabled ? '#94a3b8' : '#F27420';      // orange-deep
-    var _fxChip = _fixDisabled ? '#cbd5e1' : '#f97316';    // orange
+    var _fxBg = _fixDisabled ? '#f8fafc' : 'rgb(254, 246, 231)';   // reference peach
+    var _fxBd = _fixDisabled ? '#e5e7eb' : 'rgb(246, 206, 139)';   // reference border
+    var _fxFg = _fixDisabled ? '#94a3b8' : 'rgb(154, 74, 7)';      // reference amber-brown text
+    var _fxChip = _fixDisabled ? '#cbd5e1' : 'rgba(255, 255, 255, 0.55)'; // reference translucent badge
     var _fxCursor = _fixDisabled ? 'not-allowed' : 'pointer';
-    var _fxStyle = 'height:42px;padding:0 16px;border-radius:10px;background:' + _fxBg + ';color:' + _fxFg + ';border:1px solid ' + _fxBd + ';font-weight:700;font-size:13.5px;letter-spacing:-0.1px;display:inline-flex;align-items:center;justify-content:center;gap:7px;box-shadow:none;width:auto;cursor:' + _fxCursor + ';transition:transform 0.04s, filter 0.15s;';
+    var _fxStyle = 'height:42px;padding:0 14px;border-radius:12px;background:' + _fxBg + ';color:' + _fxFg + ';border:1px solid ' + _fxBd + ';font-weight:700;font-size:14px;letter-spacing:-0.1px;display:inline-flex;align-items:center;justify-content:center;gap:7px;box-shadow:none;width:auto;cursor:' + _fxCursor + ';transition:transform 0.04s, filter 0.15s;flex:1 1 0;';
     dashHtml += '<button type="button" onclick="' + (_fixDisabled ? 'return false;' : 'openErrorFixerModal()') + '"' + (_fixDisabled ? ' disabled' : '') + ' class="imptb-fix-errors-btn' + (_filterActive ? ' is-filter-active' : '') + (_fixDisabled ? ' is-disabled' : '') + '" style="' + _fxStyle + '" title="' + (_fixDisabled ? 'No errors to fix' : 'Review and resolve all import errors') + '">';
     dashHtml += '<svg width="15.5" height="15.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
     dashHtml +=   '<path d="M14.7 6.3a4.5 4.5 0 0 0-6 6L3 18l3 3 5.7-5.7a4.5 4.5 0 0 0 6-6L15 12l-3-3 2.7-2.7z"/>';
     dashHtml += '</svg>';
     dashHtml += '<span>Fix Errors</span>';
-    dashHtml += '<span class="imptb-fix-errors-count" style="min-width:22px;height:20px;padding:0 6px;border-radius:10px;background:' + _fxChip + ';color:#ffffff;font-size:11.5px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;">' + (res.invalid || 0).toLocaleString() + '</span>';
+    dashHtml += '<span class="imptb-fix-errors-count" style="min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:' + _fxChip + ';color:' + _fxFg + ';font-size:11px;font-weight:800;line-height:1;display:inline-flex;align-items:center;justify-content:center;">' + (res.invalid || 0).toLocaleString() + '</span>';
     dashHtml += '</button>';
 
     // ── Primary CTA: Import button — solid orange pill with check icon ──
@@ -7115,6 +7464,81 @@ function closeImportFilterDD() {
     if (menu) menu.style.display = 'none';
     document.removeEventListener('click', closeImportFilterDD);
 }
+// ── Mobile STOCK-SUMMARY–style collapsible card (matches Stock Check page UI) ──
+// Renders into #importSummaryMobile using the same preview stats as the desktop cards:
+// Total Rows · Ready · Skipped · Duplicates, plus a "Ready Rate" progress bar.
+var _importSummaryOpen = false;
+function renderImportSummaryMobile(res, validPct) {
+    var el = document.getElementById('importSummaryMobile');
+    if (!el) return;
+    var total = res.total || 0;
+    var ready = res.valid || 0;
+    var skipped = res.invalid || 0;
+    var dups = res.duplicates || 0;
+    var rate = total > 0 ? Math.round((ready / total) * 100) : 0;
+    // colours echo the desktop cards: total=ink, ready=green, skipped=red, dup=blue
+    var cTotal = '#111827', cReady = '#16a34a', cSkip = '#dc2626', cDup = '#1e6bce';
+    var open = _importSummaryOpen;
+
+    var h = '';
+    // Collapsed header bar — bar-chart icon + "STOCK SUMMARY" + the 4 counts + chevron
+    h += '<div onclick="toggleImportSummary()" style="border-radius:' + (open ? '16px 16px 0 0' : '16px') + ';border:1px solid #e5e7eb;border-bottom:' + (open ? '1px solid #f0f0f0' : '1px solid #e5e7eb') + ';background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.05);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:' + (open ? '0' : '8px') + ';">';
+    h +=   '<div style="display:flex;align-items:center;gap:6px;">';
+    h +=     '<i class="fa fa-bar-chart" style="font-size:11px;color:rgb(234, 88, 12);"></i>';
+    h +=     '<span style="font-size:10px;font-weight:800;color:#374151;letter-spacing:0.6px;text-transform:uppercase;">Stock Summary</span>';
+    h +=   '</div>';
+    h +=   '<div style="display:flex;align-items:center;gap:10px;">';
+    h +=     '<div style="display:flex;gap:8px;">';
+    h +=       '<span style="font-size:12px;font-weight:700;color:' + cTotal + ';">' + total + '</span>';
+    h +=       '<span style="font-size:12px;font-weight:700;color:' + cReady + ';">' + ready + '</span>';
+    h +=       '<span style="font-size:12px;font-weight:700;color:' + cSkip + ';">' + skipped + '</span>';
+    h +=       '<span style="font-size:12px;font-weight:700;color:' + cDup + ';">' + dups + '</span>';
+    h +=     '</div>';
+    h +=     '<i class="fa fa-chevron-' + (open ? 'up' : 'down') + '" style="font-size:9px;color:#9ca3af;"></i>';
+    h +=   '</div>';
+    h += '</div>';
+
+    // Expanded body — Total/Ready/Skipped/Duplicates columns + Ready-rate bar
+    if (open) {
+        var cols = [
+            {label:'Total',   value:total,   color:cTotal},
+            {label:'Ready',   value:ready,   color:cReady},
+            {label:'Skipped', value:skipped, color:cSkip},
+            {label:'Dupes',   value:dups,    color:cDup},
+        ];
+        h += '<div style="border-radius:0 0 16px 16px;border:1px solid #e5e7eb;border-top:none;background:#fff;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:8px;">';
+        h +=   '<div style="display:flex;padding:10px 16px 12px;">';
+        cols.forEach(function(c, i) {
+            h += '<div style="flex:1;">';
+            h +=   '<div style="font-size:9px;color:#9ca3af;font-weight:700;letter-spacing:0.7px;text-transform:uppercase;margin-bottom:4px;">' + c.label + '</div>';
+            h +=   '<div style="font-size:24px;font-weight:700;color:' + c.color + ';line-height:1;letter-spacing:-1px;">' + c.value + '</div>';
+            h += '</div>';
+            if (i < cols.length - 1) h += '<div style="width:1px;background:#e5e7eb;margin:0 8px;align-self:stretch;"></div>';
+        });
+        h +=   '</div>';
+        h +=   '<div style="height:1px;background:#e5e7eb;margin:0 16px;"></div>';
+        h +=   '<div style="padding:8px 16px;">';
+        h +=     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
+        h +=       '<span style="font-size:9px;color:#9ca3af;font-weight:700;letter-spacing:0.7px;text-transform:uppercase;">Ready Rate</span>';
+        h +=       '<span style="font-size:10px;color:#9ca3af;font-weight:600;">' + rate + '%</span>';
+        h +=     '</div>';
+        h +=     '<div style="height:3px;border-radius:99px;background:#e5e7eb;overflow:hidden;">';
+        h +=       '<div style="height:100%;width:' + rate + '%;border-radius:99px;background:rgb(234, 88, 12);"></div>';
+        h +=     '</div>';
+        h +=   '</div>';
+        h += '</div>';
+    }
+    el.innerHTML = h;
+}
+function toggleImportSummary() {
+    _importSummaryOpen = !_importSummaryOpen;
+    if (typeof _previewData !== 'undefined' && _previewData) {
+        var total = _previewData.total || 0;
+        var validPct = total > 0 ? Math.round(((_previewData.valid || 0) / total) * 100) : 0;
+        renderImportSummaryMobile(_previewData, validPct);
+    }
+}
+
 function selectImportFilter(value) {
     closeImportFilterDD();
     setFilterMode(value);

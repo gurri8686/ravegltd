@@ -108,9 +108,22 @@ class VendorController extends Controller
         krsort($months);
         $months = array_values($months);
 
+        // ── Domain & Subscription are sub-resources of a vendor (shown as tabs) ──
+        // Linked domain (site) lives in the control-plane organizations DB.
+        $site = $vendor->site_id
+            ? DB::connection('organizations')->table('sites')->where('id', $vendor->site_id)->first()
+            : null;
+
+        // This vendor's subscription periods (latest first) + selectable plans.
+        $subs = DB::table('subscriptions')->where('vendor_id', $vendor->id)->orderByDesc('expire')->get();
+        $plans = DB::connection('organizations')->table('plan_tiers')->where('is_active', 1)
+            ->orderBy('sort_order')->orderBy('id')->get(['id', 'name', 'price', 'currency', 'billing_cycle']);
+        $planNames = DB::connection('organizations')->table('plan_tiers')->pluck('name', 'id');
+
         return view('admin.vendors.show', compact(
             'vendor', 'sales', 'salesInvoices', 'purchases', 'purchaseInvoices',
-            'customers', 'suppliers', 'itemsSold', 'lastSale', 'months'
+            'customers', 'suppliers', 'itemsSold', 'lastSale', 'months',
+            'site', 'subs', 'plans', 'planNames'
         ));
     }
 

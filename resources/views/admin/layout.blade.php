@@ -1,9 +1,8 @@
 @php
-    $S = \App\Http\Controllers\Admin\SettingsController::class;
-    $platformName = $S::get('platform_name', 'R & A Veg');
-    $accentColor  = $S::get('accent_color');
-    $platformLogo = $S::get('logo');
-    $platformFav  = $S::get('favicon');
+    $platformName = 'R & A Veg';
+    $accentColor  = null;
+    $platformLogo = null;
+    $platformFav  = null;
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -178,29 +177,9 @@
                 <i class="bi bi-shop"></i> Vendors
             </a>
             @endif
-            @if ($can('domains'))
-            <a href="{{ route('admin.domains.index') }}" class="{{ request()->routeIs('admin.domains.*') ? 'active' : '' }}">
-                <i class="bi bi-globe2"></i> Domains
-            </a>
-            @endif
             @if ($can('plans'))
             <a href="{{ route('admin.plans.index') }}" class="{{ request()->routeIs('admin.plans.*') ? 'active' : '' }}">
                 <i class="bi bi-box-seam"></i> Plans
-            </a>
-            @endif
-            @if ($can('subscriptions'))
-            <a href="{{ route('admin.subscriptions.index') }}" class="{{ request()->routeIs('admin.subscriptions.*') ? 'active' : '' }}">
-                <i class="bi bi-patch-check"></i> Subscription
-            </a>
-            @endif
-            @if ($can('billing'))
-            <a href="{{ route('admin.billing.index') }}" class="{{ request()->routeIs('admin.billing.*') ? 'active' : '' }}">
-                <i class="bi bi-credit-card"></i> Billing
-            </a>
-            @endif
-            @if ($can('analytics'))
-            <a href="{{ route('admin.analytics.index') }}" class="{{ request()->routeIs('admin.analytics.*') ? 'active' : '' }}">
-                <i class="bi bi-graph-up-arrow"></i> Analytics
             </a>
             @endif
             @if ($can('notifications'))
@@ -216,11 +195,6 @@
             @if ($can('admin_users'))
             <a href="{{ route('admin.adminusers.index') }}" class="{{ request()->routeIs('admin.adminusers.*') ? 'active' : '' }}">
                 <i class="bi bi-people"></i> Admin Users
-            </a>
-            @endif
-            @if ($can('settings'))
-            <a href="{{ route('admin.settings.index') }}" class="{{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
-                <i class="bi bi-gear-wide-connected"></i> Settings
             </a>
             @endif
             <a href="{{ route('admin.account.edit') }}" class="{{ request()->routeIs('admin.account.*') ? 'active' : '' }}">

@@ -7,6 +7,28 @@
 @push('stylesheets')
 <style>
 .content-header { display: none !important; }
+
+/* ── Mobile-only (≤767px) reference UI — header card + Role Information card. Desktop untouched. ── */
+@media (max-width: 767px) {
+    .er-header {
+        margin-bottom: 12px !important;
+        padding: 16px !important;
+        background: #fff !important;
+        border: 1px solid #eaecf2 !important;
+        border-radius: 16px !important;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+    }
+    .er-header-icon { width: 42px !important; height: 42px !important; border-radius: 12px !important; }
+    .er-header h1 { font-size: 18px !important; }
+    .er-header p { font-size: 12.5px !important; }
+    .er-card { padding: 16px !important; border: 1px solid #eaecf2 !important; box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important; }
+    /* Show the Role Information heading on mobile (reference) */
+    .er-section-title { display: flex !important; }
+    /* Input — white bg + orange asterisk to match reference */
+    .er-card .rf-input { height: 46px !important; background: #fff !important; }
+    .er-card .rf-label { margin-bottom: 7px !important; }
+}
+
 .rf-label { font-size:11px; font-weight:700; color:#64748b; letter-spacing:0.6px; text-transform:uppercase; margin-bottom:6px; display:block; }
 .rf-input { height:42px; width:100%; border:1.5px solid #e2e8f0; border-radius:10px; font-size:13px; background:#f8fafc; padding:0 14px; outline:none; color:#1e293b; transition:all 0.2s; box-sizing:border-box; }
 .rf-input:focus { border-color:rgb(234, 88, 12); background:#fff; box-shadow:none; }
@@ -84,20 +106,24 @@ function showRoleEditToast(msg, type) {
 <section>
 
     {{-- Page heading --}}
-    <div style="margin-bottom:20px;display:flex;align-items:center;gap:14px;">
-        <div style="width:44px;height:44px;border-radius:12px;background:rgb(234, 88, 12);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(234,88,12,0.3);">
-            <i class="fa fa-shield" style="font-size:17px;color:#fff;"></i>
+    <div class="er-header" style="margin-bottom:20px;display:flex;align-items:center;gap:14px;">
+        <div class="er-header-icon" style="width:44px;height:44px;border-radius:12px;background:rgb(234, 88, 12);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(234,88,12,0.3);">
+            <i class="fa fa-pencil" style="font-size:17px;color:#fff;"></i>
         </div>
         <div>
-            <h1 style="font-size:20px;font-weight:800;color:#0f172a;margin:0 0 2px;">Edit <span style="color:rgb(234, 88, 12);">Role</span></h1>
-            <p style="font-size:12px;color:#94a3b8;margin:0;">Update role name — #{{ $data->id }}</p>
+            <h1 style="font-size:20px;font-weight:800;color:#0f172a;margin:0 0 2px;">Edit Role</h1>
+            <p style="font-size:12px;color:#94a3b8;margin:0;">Update role information — #{{ $data->id }}</p>
         </div>
     </div>
 
-    <div style="background:#fff;border-radius:16px;border:1px solid #e5e7eb;box-shadow:0 2px 10px rgba(0,0,0,0.05);padding:28px 32px;">
+    <div class="er-card" style="background:#fff;border-radius:16px;border:1px solid #e5e7eb;box-shadow:0 2px 10px rgba(0,0,0,0.05);padding:28px 32px;">
         <form id="updateRoleForm" name="updateRoleForm">
         @csrf
         @method('PUT')
+            <div class="er-section-title" style="display:none;align-items:center;gap:9px;padding-bottom:12px;margin-bottom:18px;border-bottom:1px solid #f0f1f4;">
+                <i class="fa fa-user" style="color:rgb(234, 88, 12);font-size:16px;"></i>
+                <span style="font-size:16px;font-weight:800;color:#0f1115;">Role Information</span>
+            </div>
             <div style="margin-bottom:24px;">
                 <label class="rf-label">Role Name <span style="color:rgb(234, 88, 12);">*</span></label>
                 <input type="text" class="rf-input" id="name" name="name" placeholder="Enter role name" value="{{ $data->name }}">

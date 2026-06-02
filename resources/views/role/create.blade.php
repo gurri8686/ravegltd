@@ -7,6 +7,65 @@
     @push('stylesheets')
     <style>
     .content-header { display: none !important; }
+
+    /* ── Mobile-only (≤767px) reference UI — header card + Role Information card.
+       Desktop layout untouched. ── */
+    @media (max-width: 767px) {
+        section { display: block !important; }
+        /* Header card (icon + Add New Role + subtitle) */
+        section > div:first-child {
+            margin-bottom: 12px !important;
+            padding: 16px !important;
+            border-radius: 16px !important;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+            border: 1px solid #eaecf2 !important;
+        }
+        section > div:first-child > div > div:first-child {
+            width: 42px !important; height: 42px !important; border-radius: 12px !important;
+        }
+        section > div:first-child > div > div:first-child i { font-size: 17px !important; }
+        section > div:first-child h1 { font-size: 18px !important; }
+        section > div:first-child p { font-size: 12.5px !important; }
+
+        /* Role Information card — strip the bootstrap card chrome, rebuild as clean white card */
+        .row.match-height, .row.match-height > .col-md-12 { margin: 0 !important; padding: 0 !important; }
+        .row.match-height .card {
+            height: auto !important;
+            border: 1px solid #eaecf2 !important;
+            border-radius: 16px !important;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+            margin: 0 !important;
+        }
+        .card-content, .card-body { padding: 16px !important; }
+        /* "Role Information" heading — orange person icon + bold text + divider */
+        .form-section {
+            display: flex !important; align-items: center !important; gap: 9px !important;
+            font-size: 16px !important; font-weight: 800 !important; color: #0f1115 !important;
+            padding-bottom: 12px !important; margin-bottom: 18px !important;
+            border-bottom: 1px solid #f0f1f4 !important; text-transform: none !important;
+        }
+        .form-section i { color: rgb(234, 88, 12) !important; font-size: 16px !important; }
+        /* Label — uppercase, orange asterisk */
+        .form-group label {
+            font-size: 11px !important; font-weight: 700 !important; color: #64748b !important;
+            letter-spacing: 0.6px !important; text-transform: uppercase !important;
+            margin-bottom: 7px !important; display: block !important;
+        }
+        .form-group label .text-danger { color: rgb(234, 88, 12) !important; }
+        /* Input — clean, rounded, orange focus */
+        .form-group .form-control {
+            height: 46px !important; border: 1.5px solid #e2e8f0 !important; border-radius: 10px !important;
+            font-size: 14px !important; padding: 0 14px !important; background: #fff !important;
+            color: #1e293b !important; box-shadow: none !important; width: 100% !important;
+        }
+        .form-group .form-control:focus {
+            border-color: rgb(234, 88, 12) !important;
+            box-shadow: 0 0 0 3px rgba(234,88,12,0.1) !important; outline: none !important;
+        }
+        /* Buttons row — full width, Cancel + Save */
+        .form-btn-cancel, .form-btn-save { flex: 1 !important; height: 46px !important; justify-content: center !important; }
+    }
+
     .form-btn-cancel {
         display: inline-flex; align-items: center; gap: 7px;
         height: 42px; padding: 0 22px; border-radius: 10px;
@@ -83,8 +142,8 @@
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <label for="name">Name<span class="text-danger">*</span></label>
-                                            <input type="text" id="name" class="form-control" placeholder="Role Name" name="name">
+                                            <label for="name">Role Name <span class="text-danger">*</span></label>
+                                            <input type="text" id="name" class="form-control" placeholder="e.g. Sales Representative" name="name">
                                             <div class="row"><div class="col-sm-12" data-validate="name"></div></div>
                                         </div>
                                     </div>

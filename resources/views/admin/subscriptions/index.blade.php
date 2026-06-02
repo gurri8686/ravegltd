@@ -158,8 +158,7 @@
                     <input type="hidden" name="vendor_id" id="addSubVendor">
                     <div class="mb-2">
                         <label class="form-label fw-semibold">Plan</label>
-                        <select name="plan_tier_id" class="form-select">
-                            <option value="">No plan</option>
+                        <select name="plan_tier_id" class="form-select" required>
                             @foreach ($plans as $p)
                                 <option value="{{ $p->id }}">{{ $p->name }} — {{ $p->currency === 'GBP' ? '£' : ($p->currency.' ') }}{{ number_format($p->price, 2) }}/{{ $p->billing_cycle === 'yearly' ? 'yr' : 'mo' }}</option>
                             @endforeach

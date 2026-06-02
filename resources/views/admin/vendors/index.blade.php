@@ -91,9 +91,9 @@
                             <div class="text-muted small mt-1">until {{ Carbon::parse($sub->expire)->format('d M Y') }}</div>
                         @elseif ($sub)
                             <span class="pill pill-warn">Expired</span>
-                            <a href="{{ route('admin.subscriptions.index', ['vendor' => $vendor->id]) }}" class="lnk-accent small ms-1">Renew</a>
+                            <a href="{{ route('admin.vendors.show', $vendor->id) }}#subscription" class="lnk-accent small ms-1">Renew</a>
                         @else
-                            <a href="{{ route('admin.subscriptions.index', ['vendor' => $vendor->id]) }}" class="lnk-accent small"><i class="bi bi-patch-check"></i> Subscribe</a>
+                            <a href="{{ route('admin.vendors.show', $vendor->id) }}#subscription" class="lnk-accent small"><i class="bi bi-patch-check"></i> Subscribe</a>
                         @endif
                     </td>
                     <td>

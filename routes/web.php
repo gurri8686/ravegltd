@@ -210,12 +210,6 @@ Route::middleware(['localization', 'domains'])->group(function () {
             Route::post('plans/{id}/toggle', [\App\Http\Controllers\Admin\PlansController::class, 'toggleStatus'])->name('plans.toggle');
             Route::delete('plans/{id}', [\App\Http\Controllers\Admin\PlansController::class, 'destroy'])->name('plans.destroy');
 
-            // Billing — revenue, invoices, subscription payments
-            Route::get('billing', [\App\Http\Controllers\Admin\BillingController::class, 'index'])->name('billing.index');
-
-            // Analytics — platform KPIs + trend charts
-            Route::get('analytics', [\App\Http\Controllers\Admin\AnalyticsController::class, 'index'])->name('analytics.index');
-
             // Audit Logs — filterable platform/business activity
             Route::get('audit', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit.index');
 
@@ -238,10 +232,6 @@ Route::middleware(['localization', 'domains'])->group(function () {
             Route::get('notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('notifications.index');
             Route::post('notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'store'])->name('notifications.store');
             Route::delete('notifications/{id}', [\App\Http\Controllers\Admin\NotificationController::class, 'destroy'])->name('notifications.destroy');
-
-            // Settings — platform branding / SMTP / payments / security
-            Route::get('settings', [\App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('settings.index');
-            Route::post('settings', [\App\Http\Controllers\Admin\SettingsController::class, 'update'])->name('settings.update');
 
             // Superadmin's own account
             Route::get('account', [\App\Http\Controllers\Admin\AccountController::class, 'edit'])->name('account.edit');

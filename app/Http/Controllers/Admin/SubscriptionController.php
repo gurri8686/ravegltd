@@ -37,21 +37,20 @@ class SubscriptionController extends Controller
     {
         $data = $request->validate([
             'vendor_id'    => 'required|integer|exists:users,id',
-            'plan_tier_id' => 'nullable|integer',
+            'plan_tier_id' => 'required|integer',
             'start'        => 'required|date',
             'expire'       => 'required|date|after:start',
         ]);
 
         // guard the plan id against the org-DB plan_tiers (cross-connection, so
         // we can't use the exists: rule which only checks the default connection)
-        $planId = $data['plan_tier_id'] ?? null;
-        if ($planId && ! $this->plansTable()->where('id', $planId)->exists()) {
-            $planId = null;
+        if (! $this->plansTable()->where('id', $data['plan_tier_id'])->exists()) {
+            return back()->withErrors(['plan_tier_id' => 'Please choose a valid plan.'])->withInput();
         }
 
         DB::table('subscriptions')->insert([
             'vendor_id'    => $data['vendor_id'],
-            'plan_tier_id' => $planId,
+            'plan_tier_id' => $data['plan_tier_id'],
             'start'        => $data['start'],
             'expire'       => $data['expire'],
             'created_at'   => now(),

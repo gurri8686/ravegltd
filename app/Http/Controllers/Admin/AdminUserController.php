@@ -28,12 +28,9 @@ class AdminUserController extends Controller
         'domains'       => 'Domains',
         'plans'         => 'Plans',
         'subscriptions' => 'Subscriptions',
-        'billing'       => 'Billing',
-        'analytics'     => 'Analytics',
         'notifications' => 'Notifications',
         'audit'         => 'Audit Logs',
         'admin_users'   => 'Admin Users',
-        'settings'      => 'Settings',
     ];
 
     public function index()
@@ -172,12 +169,9 @@ class AdminUserController extends Controller
             'admin.domains.'       => 'domains',
             'admin.plans.'         => 'plans',
             'admin.subscriptions.' => 'subscriptions',
-            'admin.billing.'       => 'billing',
-            'admin.analytics.'     => 'analytics',
             'admin.notifications.' => 'notifications',
             'admin.audit.'         => 'audit',
             'admin.adminusers.'    => 'admin_users',
-            'admin.settings.'      => 'settings',
         ];
         foreach ($map as $prefix => $section) {
             if ($routeName === rtrim($prefix, '.') || str_starts_with($routeName, $prefix)) {
