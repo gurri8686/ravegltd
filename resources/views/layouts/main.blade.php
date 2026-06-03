@@ -217,21 +217,48 @@
         .ph-table-wrap { overflow-x: scroll !important; -webkit-overflow-scrolling: touch !important; }
         .rdt_TableCell, .rdt_TableCol { padding: 0 8px !important; }
         .rdt_TableCell { font-size: 12px !important; }
-        /* ── Mobile sidebar: scrollable with fixed logout at bottom ── */
-        .main-menu {
+        /* ── Mobile sidebar scroll — SINGLE clean rule ──────────────────
+           The sidebar (.main-menu) itself is the scroll container. Highest-specificity
+           selectors (body html …) so this wins over every theme rule, regardless of
+           the vertical-overlay-menu class. The content area is forced to its natural
+           height with overflow:visible so the OUTER .main-menu does the scrolling —
+           no flexbox min-height trap, no PerfectScrollbar dependency. */
+        /* NOTE: do NOT set position/top/left here — the drawer's own slide-in/out
+           (left:-280px + transform) in style.css must stay intact, otherwise the
+           hamburger can't close. We only control height + scroll. */
+        /* Mobile sidebar scroll — flex column approach (bullet-proof).
+           Outer .main-menu = full-viewport flex column. The content (.main-menu-content) flexes
+           to fill the space and scrolls itself, while .sidebar-logout sits as a non-shrinking
+           footer at the bottom. Specificity bumped with body.vertical-overlay-menu so we
+           beat the theme's `.main-menu.menu-fixed .main-menu-content { height: calc(100% - 55px) }`. */
+        html body.vertical-overlay-menu .main-menu,
+        html body.vertical-overlay-menu .main-menu.menu-fixed {
             display: flex !important;
             flex-direction: column !important;
             height: 100vh !important;
             height: 100dvh !important;
+            max-height: 100vh !important;
+            max-height: 100dvh !important;
+            overflow: hidden !important;
         }
-        .main-menu .main-menu-content {
-            flex: 1 !important;
+        html body.vertical-overlay-menu .main-menu .main-menu-content,
+        html body.vertical-overlay-menu .main-menu.menu-fixed .main-menu-content {
+            flex: 1 1 auto !important;
+            min-height: 0 !important;
+            height: auto !important;
+            max-height: none !important;
             overflow-y: auto !important;
             overflow-x: hidden !important;
             -webkit-overflow-scrolling: touch !important;
+            touch-action: pan-y !important;
+            overscroll-behavior: contain !important;
+            padding-bottom: 0 !important;
         }
-        .main-menu .sidebar-logout {
+        html body.vertical-overlay-menu .main-menu .ps__rail-y,
+        html body.vertical-overlay-menu .main-menu .ps__rail-x { display: none !important; }
+        html body.vertical-overlay-menu .main-menu .sidebar-logout {
             flex-shrink: 0 !important;
+            position: static !important;
             border-top: 1px solid #f1f5f9 !important;
         }
     }
@@ -1070,6 +1097,7 @@
 		document.cookie = "menu_state=" + newState + "; path=/; max-age=31536000";
 	}
 
+
 	// Collapsed sidebar fly-out menu (tablet + mobile, max 1024px)
 	$(document).ready(function() {
 		// Inject fly-out container
@@ -1119,6 +1147,73 @@
 	});
 
 	// Desktop sidebar scroll is handled in app-menu.js (document capture wheel handler)
+
+	// Mobile sidebar scroll — same approach as desktop (app-menu.js line 56-82): set an
+	// explicit max-height on the navigation <ul> with overflow-y:auto so it scrolls
+	// independently while the logout button stays in flow underneath. Inline styles
+	// guarantee we win against every theme rule.
+	(function() {
+		var MQ = '(max-width: 767px)';
+		function isMobile() { return window.matchMedia && window.matchMedia(MQ).matches; }
+		function applyMobileSidebarScroll() {
+			var menu = document.querySelector('.main-menu');
+			if (!menu) return;
+			var content = menu.querySelector('.main-menu-content');
+			var navEl   = menu.querySelector('.navigation-main') || menu.querySelector('.navigation');
+			var logout  = menu.querySelector('.sidebar-logout');
+			var brandEl = menu.querySelector('.sidebar-brand-logo, .sidebar-brand');
+			if (isMobile() && navEl) {
+				// Flex-column drawer: brand (top, fixed) + scrolling content + logout footer
+				// (bottom, fixed). NO manual height math — the footer auto-stays visible no matter
+				// how long the menu is or how the mobile address bar resizes the viewport. (The old
+				// window.innerHeight-vs-100dvh calc mis-sized the list and pushed the logout off the
+				// bottom, where overflow:hidden clipped it.)
+				menu.style.setProperty('display',        'flex',   'important');
+				menu.style.setProperty('flex-direction', 'column', 'important');
+				menu.style.setProperty('height',         '100dvh', 'important');
+				menu.style.setProperty('max-height',     '100dvh', 'important');
+				menu.style.setProperty('overflow',       'hidden', 'important');
+				if (content) {
+					// The content is the scroller; flex:1 makes it fill the gap between brand & logout.
+					content.style.setProperty('flex',       '1 1 auto', 'important');
+					content.style.setProperty('min-height', '0',        'important');
+					content.style.setProperty('height',     'auto',     'important');
+					content.style.setProperty('max-height', 'none',     'important');
+					content.style.setProperty('overflow-y', 'auto',     'important');
+					content.style.setProperty('overflow-x', 'hidden',   'important');
+					content.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
+					content.style.setProperty('padding-bottom', '0',    'important');
+				}
+				// The <ul> is no longer the scroller in this model — let it size naturally.
+				navEl.style.setProperty('max-height', 'none',    'important');
+				navEl.style.setProperty('overflow',   'visible', 'important');
+				if (logout) {
+					// Footer that never shrinks/scrolls away. Override any theme position:absolute.
+					logout.style.setProperty('position',    'static', 'important');
+					logout.style.setProperty('bottom',      'auto',   'important');
+					logout.style.setProperty('flex-shrink', '0',      'important');
+				}
+			} else if (!isMobile()) {
+				// Wipe inline overrides on desktop/tablet so the original theme rules apply.
+				['display','flex-direction','height','max-height','overflow'].forEach(function(p){ menu.style.removeProperty(p); });
+				if (content) ['flex','min-height','height','max-height','overflow-y','overflow-x','-webkit-overflow-scrolling','padding-bottom'].forEach(function(p){ content.style.removeProperty(p); });
+				if (navEl)   ['max-height','overflow'].forEach(function(p){ navEl.style.removeProperty(p); });
+				if (logout)  ['position','bottom','flex-shrink'].forEach(function(p){ logout.style.removeProperty(p); });
+			}
+		}
+		if (document.readyState !== 'loading') applyMobileSidebarScroll();
+		else document.addEventListener('DOMContentLoaded', applyMobileSidebarScroll);
+		window.addEventListener('resize', applyMobileSidebarScroll);
+		window.addEventListener('orientationchange', applyMobileSidebarScroll);
+		// Re-apply whenever body class flips (menu-open / menu-collapsed etc.).
+		try {
+			new MutationObserver(applyMobileSidebarScroll)
+				.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+		} catch(e) {}
+		// Late-mount safety.
+		setTimeout(applyMobileSidebarScroll, 300);
+		setTimeout(applyMobileSidebarScroll, 1000);
+	})();
 	</script>
     @stack('scripts')
     <script type="text/javascript" src="{{env('CDN_DOMAIN')}}/js/manifest.js?v={{time()}}"></script>

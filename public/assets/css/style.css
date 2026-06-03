@@ -2012,24 +2012,56 @@ body.vertical-layout.vertical-menu.menu-collapsed .main-menu ul.menu-popout li.a
 
 @media only screen and (max-width: 767px) {
 
-  /* ── Sidebar container: full-height drawer — above navbar ── */
+  /* ── Sidebar scroll (mobile) — SIMPLE approach: make the sidebar ITSELF the
+     scroll container. No flexbox, no PerfectScrollbar dependency. The whole
+     .main-menu gets a bounded height and scrolls everything (nav + logout) inside.
+     This avoids the flex `min-height:0` trap and any PS hijack. ── */
+  .main-menu {
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100vh !important;
+    max-height: 100dvh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
+    display: block !important;
+  }
+  /* Content area: no own height/scroll — let it grow naturally so .main-menu scrolls */
+  .main-menu .main-menu-content,
+  .main-menu.menu-fixed .main-menu-content {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    flex: none !important;
+  }
+  /* Kill any PerfectScrollbar rails inside the sidebar */
+  .main-menu .ps__rail-y, .main-menu .ps__rail-x { display: none !important; }
+
+  /* ── Sidebar container: full-height drawer — above navbar.
+     NOTE: the whole .main-menu is the scroll container (see the html body .main-menu
+     rule in main.blade.php). Keep it display:block + overflow-y:scroll here too so
+     this overlay rule doesn't fight that and cause inconsistent scrolling. ── */
   .vertical-overlay-menu .main-menu,
   body.vertical-layout.vertical-menu.menu-collapsed.vertical-overlay-menu .main-menu {
     height: 100vh !important;
+    height: 100dvh !important;
     max-height: 100vh !important;
+    max-height: 100dvh !important;
     position: fixed !important;
     top: 0 !important;
     bottom: 0 !important;
     left: -280px !important;
     width: 280px !important;
-    overflow: hidden !important;
+    overflow-y: scroll !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
     background: var(--color-deeper, #ffffff) !important;
     border-right: none !important;
     box-shadow: none !important;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     z-index: 1060 !important;
-    display: flex !important;
-    flex-direction: column !important;
+    display: block !important;
   }
 
   /* Slide-in active state */
@@ -2083,17 +2115,29 @@ body.vertical-layout.vertical-menu.menu-collapsed .main-menu ul.menu-popout li.a
     outline: none !important;
   }
 
-  /* ── Scrollable content area ── */
+  /* ── Content area — grows naturally; the OUTER .main-menu scrolls (single scroll
+     container = consistent scrolling). No own overflow/flex here. ── */
   .vertical-overlay-menu .main-menu .main-menu-content,
   body.vertical-layout.vertical-menu.menu-collapsed.vertical-overlay-menu .main-menu .main-menu-content {
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch !important;
-    flex: 1 !important;
-    height: calc(100vh - 60px) !important;
-    max-height: calc(100vh - 60px) !important;
-    padding: 8px 0 100px 0 !important;
+    overflow: visible !important;
+    flex: none !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    padding: 8px 0 40px 0 !important;
     background: var(--color-deeper, #ffffff) !important;
+    position: relative !important;
+  }
+  /* Neutralise PerfectScrollbar on mobile — it forces overflow:hidden and breaks
+     native touch scrolling on the drawer. Force native scroll instead. */
+  .vertical-overlay-menu .main-menu .main-menu-content.ps,
+  .vertical-overlay-menu .main-menu .main-menu-content.ps--active-y {
+    overflow-y: auto !important;
+    overflow: auto !important;
+  }
+  .vertical-overlay-menu .main-menu .main-menu-content .ps__rail-y,
+  .vertical-overlay-menu .main-menu .main-menu-content .ps__rail-x {
+    display: none !important;
   }
 
   /* Hidden scrollbar — clean look, still scrollable */

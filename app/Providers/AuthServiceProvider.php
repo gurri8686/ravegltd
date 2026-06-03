@@ -27,7 +27,11 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
         Gate::before(function ($user, $ability) {
-            return $user->hasRole(['admin','Admin']) ? true : null;
+            // Full-access roles bypass every permission check (spatie super-admin
+            // pattern). 'superadmin' covers the platform superadmin, who holds the
+            // spatie 'superadmin' role and also carries role column 'superadmin'.
+            return ($user->hasRole(['admin','Admin','superadmin','Superadmin'])
+                || $user->role === 'superadmin') ? true : null;
         });
     }
 }

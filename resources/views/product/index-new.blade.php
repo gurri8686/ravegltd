@@ -16,11 +16,17 @@
 	color: rgb(234, 88, 12) !important;
 }
 @media (max-width: 767px) {
-	/* Header — compact with + button */
+	/* Header — clean white card (mobile): white surface, soft shadow, light-grey border, 14px radius. */
 	.products-header-card {
-		padding: 14px 16px !important; border-radius: 14px !important;
-		margin-bottom: 14px !important; gap: 10px !important;
+		display: flex !important; align-items: center !important;
+		gap: 13px !important;
+		padding: 14px !important;
+		border-radius: 14px !important;
+		margin-bottom: 14px !important;
 		flex-wrap: nowrap !important;
+		background: rgb(255, 255, 255) !important;
+		border: 1px solid rgb(234, 236, 242) !important;
+		box-shadow: rgba(0, 0, 0, 0.06) 0px 1px 4px !important;
 	}
 	.products-header-card > div:first-child {
 		flex: 1 1 0; min-width: 0;
@@ -37,26 +43,45 @@
 	.products-header-card p { font-size: 10.5px !important; }
 	.products-create-btn { height: 34px !important; padding: 0 14px !important; font-size: 12px !important; border-radius: 9px !important; }
 
-	/* Card wrapper — clean */
-	#products-index-app > div > div {
-		border-radius: 14px !important; border: none !important;
-		box-shadow: 0 1px 4px rgba(0,0,0,0.04) !important;
-		overflow: visible !important;
-	}
+	/* (Mobile now renders the React card UI in ProductsIndexApp.js — no table wrapper to de-card here.
+	   The old `#products-index-app > div > div` reset was removed because it would strip the new
+	   summary/search/category/product cards' own backgrounds & borders.) */
 
-	/* Filter bar — single row */
+	/* Filter row — on the page directly under the header card (no card background, no divider) */
 	#products-index-app .pi-header {
-		padding: 10px 12px !important; gap: 8px !important;
-		border-bottom: 1px solid #f5f5f5 !important;
+		padding: 0 !important; gap: 8px !important;
+		border-bottom: none !important; background: transparent !important;
+		margin-bottom: 12px !important;
 	}
 	#products-index-app .pi-header > div[style*="width:200px"] { width: auto !important; min-width: 85px !important; order: 2 !important; }
 	#products-index-app .pi-header > div[style*="width:200px"] .react-select__control { min-height: 34px !important; height: 34px !important; border-radius: 8px !important; font-size: 12px !important; }
 	#products-index-app .pi-header > div[style*="width:200px"] .react-select__value-container { height: 34px !important; padding: 0 8px !important; }
 	#products-index-app .pi-header > div[style*="width:200px"] .react-select__indicators { height: 34px !important; }
 	#products-index-app .pi-header > div[style*="width:200px"] .react-select__single-value { font-size: 12px !important; }
-	#products-index-app .pi-search { max-width: none !important; min-width: 0 !important; flex: 1 !important; order: 1 !important; }
-	#products-index-app .pi-search input { height: 34px !important; font-size: 12px !important; padding-left: 30px !important; border-radius: 8px !important; }
-	#products-index-app .pi-search svg { width: 12px !important; height: 12px !important; left: 10px !important; }
+	/* Search box → .sm-search UI: flex row [icon + input], white surface, line-2 border, r-md radius, sh-1.
+	   Tokens: --surface #fff, --line-2 #eaecf2, --r-md 11px, --sh-1 0 1px 2px rgba(16,24,40,.04), --faint #9ca3af. */
+	#products-index-app .pi-search {
+		flex: 1 !important; order: 1 !important; min-width: 0 !important; max-width: none !important;
+		display: flex !important; align-items: center !important; gap: 9px !important;
+		height: 46px !important; padding: 0 13px !important;
+		background: #ffffff !important;
+		border: 1px solid #eaecf2 !important;
+		border-radius: 11px !important;
+		box-shadow: 0 1px 2px rgba(16,24,40,0.04) !important;
+	}
+	/* icon becomes an in-flow flex item (was absolutely positioned over the input) */
+	#products-index-app .pi-search svg {
+		position: static !important; left: auto !important; top: auto !important; transform: none !important;
+		width: 18px !important; height: 18px !important; flex-shrink: 0 !important;
+		color: #9ca3af !important; stroke: #9ca3af !important;
+	}
+	/* input fills the box, borderless/transparent (the container carries the chrome) */
+	#products-index-app .pi-search input {
+		flex: 1 !important; height: 100% !important;
+		border: none !important; background: transparent !important; box-shadow: none !important;
+		border-radius: 0 !important; padding: 0 !important;
+		font-size: 13.5px !important; color: #1e293b !important;
+	}
 
 	/* Force ALL columns visible on mobile — override DataTable responsive hiding */
 	#products-index-app .rdt_TableCol,
@@ -107,33 +132,5 @@
 		data-print-url="{{route('print.products')}}"
 		data-excel-url="{{route('excel.products')}}"
 	></div>
-	<script>
-	if (window.innerWidth <= 767) {
-		var check = setInterval(function() {
-			var rows = document.querySelectorAll('#products-index-app .rdt_TableRow');
-			if (rows.length > 0) {
-				clearInterval(check);
-				// Force every element from table to root to allow overflow
-				var el = rows[0];
-				while (el && el.id !== 'products-index-app') {
-					el.style.overflow = 'visible';
-					el.style.overflowX = 'visible';
-					el = el.parentElement;
-				}
-				// Find the pi-table-scroll div and force scroll
-				var scrollDiv = document.querySelector('.pi-table-scroll');
-				if (scrollDiv) {
-					scrollDiv.style.overflowX = 'scroll';
-					scrollDiv.style.overflowY = 'hidden';
-					scrollDiv.style.webkitOverflowScrolling = 'touch';
-					scrollDiv.style.display = 'block';
-					// Force inner content wider
-					var inner = scrollDiv.firstElementChild;
-					if (inner) inner.style.minWidth = '950px';
-				}
-			}
-		}, 500);
-	}
-	</script>
 </section>
 @endsection

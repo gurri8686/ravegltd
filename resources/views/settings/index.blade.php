@@ -177,7 +177,7 @@ html { scrollbar-gutter: stable; overflow-y: scroll; }
     /* Allow the dropdown panel to escape the card + match bottom card radius.
        Inner nav-bar has its own gradient background — give it the same radius so the visible
        corners aren't squared off when overflow:visible exposes the inner element's edges. */
-    .settings-nav-card { overflow: visible !important; border-radius: 16px !important; padding: 12px 14px !important; position: relative !important; }
+    .settings-nav-card { overflow: visible !important; border-radius: 16px !important; padding: 14px 16px !important; position: relative !important; }
     .settings-nav-bar {
         flex-direction: row !important;
         align-items: center !important;
@@ -197,23 +197,55 @@ html { scrollbar-gutter: stable; overflow-y: scroll; }
         align-items: center !important;
     }
     .settings-nav-icon {
-        width: 32px !important;
-        height: 32px !important;
-        border-radius: 10px !important;
-        box-shadow: 0 2px 8px rgba(249,115,22,0.3) !important;
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 12px rgba(249,115,22,0.28) !important;
+        flex-shrink: 0 !important;
     }
-    .settings-nav-icon i { font-size: 15px !important; }
+    .settings-nav-icon i { font-size: 17px !important; }
     .settings-nav-left > div:last-child > div:first-child {
         font-size: 14px !important;
         font-weight: 800 !important;
         letter-spacing: -0.2px !important;
     }
     .settings-nav-left > div:last-child > div:first-child > span:first-child {
-        font-size: 14px !important;
+        font-size: 16px !important;
+        font-weight: 800 !important;
+        color: #0f1115 !important;
     }
-    /* Hide ADMIN badge + subtitle on mobile to keep header compact like Stock Manager */
-    .settings-nav-left > div:last-child > div:first-child > span:last-child,
-    .settings-nav-left > div:last-child > div:last-child { display: none !important; }
+    /* Hide ADMIN badge + the long desktop subtitle on mobile */
+    .settings-nav-left > div:last-child > div:first-child > span:last-child { display: none !important; }
+    .settings-subtitle-desktop { display: none !important; }
+    /* Show the short mobile subtitle "Manage your workspace" under the title */
+    .settings-subtitle-mobile {
+        display: block !important;
+        font-size: 12.5px !important;
+        font-weight: 500 !important;
+        color: #6b7280 !important;
+        margin-top: 2px !important;
+        line-height: 1.3 !important;
+        white-space: nowrap !important;
+    }
+    /* Left column takes available width; reserve room on the right for the dropdown so neither
+       the title nor subtitle ever sits under it. */
+    .settings-nav-left { min-width: 0 !important; flex: 1 1 auto !important; gap: 11px !important; }
+    .settings-nav-left > div:last-child { min-width: 0 !important; flex: 1 1 auto !important; padding-right: 110px !important; }
+    /* "Roles" dropdown — vertically centred on the right edge, styled as an orange pill */
+    .settings-tabs-strip { top: 50% !important; transform: translateY(-50%) !important; right: 14px !important; }
+    .settings-tabs-mobile-dd .stmdd-trigger {
+        width: auto !important;
+        min-width: 84px !important;
+        height: 34px !important;
+        padding: 0 12px !important;
+        gap: 8px !important;
+        background: #fff5ec !important;
+        border: 1.5px solid #fed7aa !important;
+        border-radius: 10px !important;
+        box-shadow: none !important;
+    }
+    .settings-tabs-mobile-dd .stmdd-label { color: #ea580c !important; font-weight: 700 !important; font-size: 13.5px !important; }
+    .settings-tabs-mobile-dd .stmdd-caret { stroke: #ea580c !important; }
 
     /* Hide the original horizontal tabs pill row */
     .settings-tabs-wrap { display: none !important; }
@@ -3576,7 +3608,8 @@ button:focus, button:active, .btn:focus, .btn:active,
                         <span style="font-size:18px;font-weight:800;color:#0f1115;letter-spacing:-0.2px;">Settings</span>
                         <span style="display:inline-flex;align-items:center;font-size:11px;font-weight:700;color:#F27420;background:#fff5ec;border:1px solid #fed7aa;padding:3px 9px;border-radius:999px;letter-spacing:0.1px;line-height:1.4;">ADMIN</span>
                     </div>
-                    <div style="font-size:13px;color:#6b7280;margin-top:2px;">Roles, permissions, users &amp; account</div>
+                    <div class="settings-subtitle-desktop" style="font-size:13px;color:#6b7280;margin-top:2px;">Roles, permissions, users &amp; account</div>
+                    <div class="settings-subtitle-mobile" style="display:none;">Manage your workspace</div>
                 </div>
             </div>
         </div>

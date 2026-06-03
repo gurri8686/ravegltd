@@ -300,6 +300,22 @@
 }
 
 @media (max-width: 767px) {
+    /* Mobile-only top hero (greeting + Today's Sales) */
+    .dash-mob-hero { display: block !important; }
+    /* Visually hide the original Dashboard header on mobile (replaced by the greeting + hero) but
+       keep it in the DOM so the date-filter popover (#dashDatePopover) can position itself.
+       The mobile date button still calls dashToggleDatePicker() which opens the same popover. */
+    .dash-header-card {
+        position: absolute !important; left: 8px !important; right: 8px !important; top: 8px !important;
+        height: 0 !important; min-height: 0 !important; padding: 0 !important; margin: 0 !important;
+        border: none !important; box-shadow: none !important; background: transparent !important;
+        overflow: visible !important; pointer-events: none !important;
+    }
+    .dash-header-card > div:first-child { display: none !important; }
+    .dash-header-card #dashDateFilterWrap { visibility: hidden !important; height: 0 !important; }
+    .dash-header-card #dashDatePopover { visibility: visible !important; pointer-events: auto !important; left: 0 !important; right: 0 !important; }
+    /* Recent invoices — mobile only */
+    .dash-recent-invoices { display: block !important; margin-top: 14px; }
     /* Header — single row: icon + title block (left) + date filter (right end).
        flex-wrap:nowrap ensures filter stays on same line; min-width:0 lets the title block
        shrink/ellipsis cleanly on small phones so date filter is never cut off. */
@@ -375,55 +391,84 @@
     /* Show the mobile-only Cancel / Apply footer at the bottom of the date popover */
     #dashMobileFooter { display: flex !important; }
 
-    /* Stat cards — 2x2 clean */
-    .dash-row-today {
-        grid-template-columns: 1fr 1fr !important;
-        gap: 10px !important; margin-bottom: 12px !important;
-    }
-    .dash-row-today .dash-card:last-child:nth-child(odd) { grid-column: 1 / -1 !important; }
-    .dash-card {
-        padding: 14px !important; gap: 0 !important;
-        border-radius: 14px !important; flex-direction: row !important;
-        align-items: center !important;
-        border: 1px solid #f0f2f5 !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.03) !important;
-    }
-    .dash-card:hover { transform: none !important; box-shadow: 0 2px 8px rgba(0,0,0,0.03) !important; }
-    .dash-icon {
-        width: 36px !important; height: 36px !important;
-        border-radius: 10px !important; font-size: 15px !important;
-        margin-bottom: 0 !important; margin-right: 12px !important; flex-shrink: 0 !important;
-    }
-    .dash-label { font-size: 9px !important; letter-spacing: 0.4px !important; margin-bottom: 1px !important; }
-    .dash-value { font-size: 16px !important; line-height: 1.2 !important; }
-    .dash-sub { font-size: 9.5px !important; margin-top: 1px !important; color: #b0b8c4 !important; }
-
-    /* All-time — unified strip */
+    /* ── Stat cards — premium business-app look (2x2 grid, equal height, clean rhythm) ── */
+    .dash-row-today,
     .dash-row-alltime {
-        grid-template-columns: 1fr 1fr 1fr !important;
-        gap: 0 !important; margin-bottom: 12px !important;
-        background: linear-gradient(135deg, #fafbfc, #fff) !important;
-        border-radius: 14px !important;
-        border: 1px solid #f0f2f5 !important; overflow: hidden !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.03) !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px !important; margin-bottom: 10px !important;
+        background: transparent !important; border: none !important; box-shadow: none !important;
+        border-radius: 0 !important; overflow: visible !important;
+        align-items: stretch !important;
     }
+    /* If the row has an odd number of children, make the last one span both columns so we never get a half-empty row. */
+    .dash-row-today .dash-card:last-child:nth-child(odd),
+    .dash-row-alltime .dash-card:last-child:nth-child(odd) { grid-column: 1 / -1 !important; }
+    /* ── Stat cards — Icon + LABEL inline top row, amount big below ── */
+    .dash-card,
     .dash-row-alltime .dash-card {
-        padding: 14px 6px !important; text-align: center !important;
-        align-items: center !important; border-radius: 0 !important;
-        border: none !important; box-shadow: none !important;
-        border-right: 1px solid #f0f2f5 !important;
-        flex-direction: column !important;
+        padding: 14px !important; gap: 0 !important;
+        border-radius: 14px !important;
+        display: grid !important;
+        grid-template-columns: auto 1fr !important;
+        grid-template-rows: auto auto !important;
+        column-gap: 10px !important; row-gap: 8px !important;
+        align-items: center !important;
+        text-align: left !important;
+        border: 1px solid #eef0f3 !important;
+        box-shadow: 0 1px 2px rgba(15,17,21,0.04) !important;
+        background: #fff !important;
+        min-height: 96px !important;
+        position: relative !important;
+        transition: box-shadow 0.18s ease, transform 0.18s ease !important;
     }
-    .dash-row-alltime .dash-card:last-child { border-right: none !important; }
-    .dash-row-alltime .dash-card:hover { transform: none !important; box-shadow: none !important; }
-    .dash-row-alltime .dash-icon { display: none !important; }
-    .dash-row-alltime .dash-label {
-        font-size: 7.5px !important; text-align: center !important;
-        letter-spacing: 0.3px !important; color: #94a3b8 !important; margin-bottom: 3px !important;
+    .dash-card:active { transform: scale(0.985) !important; }
+    .dash-card:hover,
+    .dash-row-alltime .dash-card:hover { transform: none !important; box-shadow: 0 1px 2px rgba(15,17,21,0.04) !important; }
+    .dash-icon,
+    .dash-row-alltime .dash-icon {
+        grid-column: 1 !important; grid-row: 1 !important;
+        display: inline-flex !important;
+        width: 34px !important; height: 34px !important;
+        border-radius: 10px !important; font-size: 14px !important;
+        margin: 0 !important; flex-shrink: 0 !important;
+        align-self: center !important;
+        box-shadow: none !important;
+        align-items: center !important; justify-content: center !important;
     }
     .dash-row-alltime .dash-label i { display: none !important; }
-    .dash-row-alltime .dash-value { font-size: 14px !important; text-align: center !important; }
-    .dash-row-alltime .dash-sub { display: none !important; }
+    /* Inner text wrapper occupies the right column on row 1 + spans full width on row 2 */
+    .dash-card > div:not(.dash-icon) {
+        grid-column: 2 !important; grid-row: 1 / 3 !important;
+        display: grid !important;
+        grid-template-rows: auto auto !important;
+        row-gap: 6px !important;
+        min-width: 0 !important;
+        margin: 0 !important; padding: 0 !important;
+    }
+    .dash-value,
+    .dash-row-alltime .dash-value {
+        grid-row: 2 !important;
+        font-size: 20px !important; line-height: 1.1 !important;
+        font-weight: 800 !important; color: #0f1115 !important;
+        letter-spacing: -0.3px !important;
+        text-align: left !important;
+        margin: 0 !important;
+        font-family: ui-monospace,SFMono-Regular,Menlo,monospace;
+        white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;
+    }
+    .dash-label,
+    .dash-row-alltime .dash-label {
+        grid-row: 1 !important;
+        font-size: 10px !important; letter-spacing: 0.6px !important;
+        font-weight: 700 !important; color: #9ca3af !important;
+        text-transform: uppercase !important;
+        text-align: left !important;
+        margin: 0 !important;
+        white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;
+    }
+    .dash-sub { display: none !important; }
+    /* When a card spans both columns (e.g. Net Loss alone in an odd row), give the value a touch more presence */
+    .dash-card:last-child:nth-child(odd) .dash-value { font-size: 22px !important; }
 
     /* Chart panel */
     .dash-panel {
@@ -459,19 +504,235 @@
     /* Tooltip */
     #chartTip { min-width: 160px !important; padding: 10px 14px !important; border-radius: 10px !important; }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Mobile date-range bottom sheet — reference-exact (≤767px ONLY).
+   The desktop popover is untouched: the handle/header elements are
+   display:none by default, and every override below is mobile-scoped.
+   ───────────────────────────────────────────────────────────── */
+.dash-sheet-handle, .dash-sheet-header { display: none; }
+/* Mobile-only custom-range connectors (revealed at ≤767px; desktop keeps the plain "→") */
+.dash-range-line, .dash-range-arrow { display: none; }
+
+@media (max-width: 767px) {
+    /* Sheet shell — scrollable, rounded top, comfortable padding (footer adds the bottom space) */
+    /* Bottom sheet = flex column: fixed handle + header, scrollable body, fixed footer.
+       Only .dash-sheet-body scrolls — not the whole sheet or the page. */
+    #dashDatePopover {
+        padding: 8px 0 0 !important;
+        border-radius: 20px 20px 0 0 !important;
+        max-height: 70vh !important;   /* partial sheet — body (calendar) scrolls inside, page does not */
+        display: flex !important; flex-direction: column !important;
+        overflow: hidden !important;
+        transform: translateY(100%);
+        transition: transform 0.30s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    #dashDatePopover.dash-sheet-open { transform: translateY(0); }
+    .dash-sheet-body {
+        flex: 1 1 auto !important; min-height: 0 !important;
+        overflow-y: auto !important; overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding: 0 18px 16px !important;   /* equal left/right */
+    }
+    /* Drag handle */
+    .dash-sheet-handle {
+        display: block !important;
+        width: 40px; height: 5px; border-radius: 999px;
+        background: #d8dde5; margin: 0 auto 12px; flex-shrink: 0;
+    }
+    /* Header — orange calendar icon + title (left), round close button (right). Fixed (doesn't scroll). */
+    .dash-sheet-header {
+        display: flex !important; align-items: center; justify-content: space-between;
+        flex-shrink: 0; padding: 0 18px; margin: 0 0 16px;
+    }
+    .dash-sheet-title {
+        display: inline-flex; align-items: center; gap: 9px;
+        font-size: 16px; font-weight: 800; color: #0f1115; letter-spacing: -0.2px;
+    }
+    .dash-sheet-close {
+        width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+        background: #f1f5f9; border: none; color: #64748b;
+        display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .dash-sheet-close:active { background: #e5e7eb; }
+
+    /* Quick-select grid → 3 columns (reference spec) */
+    .dash-preset-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 8px !important; margin-bottom: 18px !important;
+    }
+    .dash-preset-btn {
+        height: 38px !important; border-radius: 11px !important;
+        font-size: 12px !important; font-weight: 800 !important; letter-spacing: -0.1px !important;
+        color: #374151 !important; padding: 0 4px !important;
+        border: 1.5px solid #e5e7eb !important; background: #fff !important;
+        box-shadow: 0 1px 2px rgba(16,24,40,0.04) !important; white-space: nowrap !important;
+    }
+    /* Active preset (set by JS on open — mobile only): cream fill + orange outline */
+    .dash-preset-btn.active {
+        background: #fff7ed !important; border-color: rgb(234, 88, 12) !important; color: rgb(234, 88, 12) !important;
+    }
+
+    /* Custom-range box — reference: peach, mono dark dates, thin orange lines + orange arrow */
+    .dash-range-summary {
+        height: auto !important; display: flex !important; align-items: center !important;
+        gap: 10px !important; padding: 11px 13px !important;
+        border-radius: 13px !important; background: #fff7ed !important; border: 1px solid #ffedd5 !important;
+    }
+    .dash-range-label {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace !important;
+        font-size: 13px !important; font-weight: 800 !important; color: #0f1115 !important; flex-shrink: 0 !important;
+    }
+    .dash-range-line { display: block !important; flex: 1 1 0% !important; height: 1.5px !important; background: #fed7aa !important; border-radius: 99px !important; min-width: 8px !important; }
+    .dash-range-sep { display: none !important; }              /* hide the desktop text "→" on mobile */
+    .dash-range-arrow { display: inline-flex !important; align-items: center !important; color: rgb(234, 88, 12) !important; flex-shrink: 0 !important; }
+
+    /* Calendar card — reference spec (pad 13/13/9, 14px/800 title) */
+    #dashCalWrap { border-radius: 16px !important; padding: 13px 13px 9px !important; }
+    #dashCalTitle { font-size: 14px !important; font-weight: 800 !important; color: #0f1115 !important; letter-spacing: -0.2px !important; }
+    .dash-cal-nav-btn { width: 32px !important; height: 32px !important; border-radius: 9px !important; border: 1px solid #e5e7eb !important; color: #374151 !important; }
+    #dashCalGrid { gap: 0 !important; row-gap: 1px !important; }
+    .dash-cal-dow { height: auto !important; font-family: ui-monospace, SFMono-Regular, Menlo, monospace !important; font-size: 10px !important; font-weight: 800 !important; padding: 4px 0 !important; color: #6b7280 !important; letter-spacing: 0 !important; }
+    .dash-cal-dow:first-child, .dash-cal-dow:nth-child(7) { color: #9ca3af !important; }   /* SU / SA lighter */
+    /* Day cell = 38px wrapper holding a 32px circle (::before). The range fill lives on
+       the wrapper so ranges connect, while the selected/today highlight is a perfect circle. */
+    .dash-cal-day {
+        position: relative !important; isolation: isolate !important;
+        height: 38px !important; width: 100% !important; margin: 0 !important;
+        display: flex !important; align-items: center !important; justify-content: center !important;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace !important;
+        font-size: 12.5px !important; font-weight: 700 !important; color: #0f1115 !important;
+        background: transparent !important; border: none !important; border-radius: 0 !important; box-shadow: none !important;
+    }
+    .dash-cal-day.muted { color: #cbd5e1 !important; }
+    /* the 32px circle (sits behind the number via z-index, contained by isolation:isolate) */
+    .dash-cal-day.selected::before, .dash-cal-day.today:not(.selected)::before {
+        content: '' !important; position: absolute; left: 50%; top: 50%;
+        width: 32px; height: 32px; border-radius: 50%; transform: translate(-50%, -50%); z-index: -1;
+    }
+    .dash-cal-day.today:not(.selected) { color: #c2410c !important; font-weight: 800 !important; }
+    .dash-cal-day.today:not(.selected)::before { background: #fff7ed; box-shadow: inset 0 0 0 1.5px #fed7aa; }
+    .dash-cal-day.selected { color: #fff !important; font-weight: 800 !important; }
+    .dash-cal-day.selected::before { background: rgb(234, 88, 12); box-shadow: rgba(234,88,12,0.55) 0 4px 10px -3px; }
+    /* range fill on the wrapper — connects start → end */
+    .dash-cal-day.in-range { background: #fff7ed !important; }
+    .dash-cal-day.range-start { background: #fff7ed !important; border-radius: 99px 0 0 99px !important; }
+    .dash-cal-day.range-end { background: #fff7ed !important; border-radius: 0 99px 99px 0 !important; }
+    .dash-cal-day.selected.range-start.range-end { background: transparent !important; border-radius: 0 !important; }
+    #dashCalHint { display: none !important; }
+    #dashCalWrap > .dash-cal-actions { display: none !important; }
+
+    /* Cancel / ✓ Apply — pinned to the bottom of the sheet */
+    /* Footer — fixed (doesn't scroll); equal 18px sides */
+    #dashMobileFooter {
+        display: flex !important; flex-shrink: 0;
+        margin: 0 !important;
+        padding: 14px 18px calc(14px + env(safe-area-inset-bottom)) !important;
+        background: #fff; border-top: 1px solid #f1f5f9;
+    }
+}
 </style>
 @endpush
 
 @php
-    $currency = env('CURRENCY_SYMBOL', 'Rs');
+    $currency = env('CURRENCY_SYMBOL', '£');
     $salesAllTime = $blocks['sales_alltime'][0]->amount ?? 0;
     $purchaseAllTime = $blocks['purchase_alltime'][0]->amount ?? 0;
     $net = $salesAllTime - $purchaseAllTime;
     $chartMax = $salesChart->max('amount') ?: 1;
 @endphp
 
+@php
+    $authUser    = \Auth::user();
+    $greetName   = $authUser ? ($authUser->first_name ?: explode('@', $authUser->email ?? '')[0]) : 'there';
+    $hourNow     = (int) now()->format('H');
+    $greetWord   = $hourNow < 12 ? 'Good morning' : ($hourNow < 17 ? 'Good afternoon' : 'Good evening');
+    $yesterdayAmt = (float) \DB::table('customer_invoice_products')
+        ->join('invoice_payments', 'invoice_payments.customer_invoice_id', '=', 'customer_invoice_products.customer_invoice_id')
+        ->join('payments', 'payments.id', '=', 'invoice_payments.payment_id')
+        ->where('payments.type', 'None')
+        ->whereDate('customer_invoice_products.updated_at', $selectedCarbon->copy()->subDay()->toDateString())
+        ->sum('customer_invoice_products.sub_total');
+    $salesDelta = ((float) $salesToday) - $yesterdayAmt;
+    $salesDeltaPct = $yesterdayAmt > 0 ? round((($salesToday - $yesterdayAmt) / $yesterdayAmt) * 100, 1) : 0;
+    // Build a tiny polyline path for the hero sparkline from $salesChart
+    $heroChart = $salesChart->pluck('amount')->toArray();
+    $heroMax = max($heroChart) ?: 1;
+    $heroPts = [];
+    $heroW = 320; $heroH = 60; $heroN = max(count($heroChart) - 1, 1);
+    foreach ($heroChart as $i => $v) {
+        $x = round(($i / $heroN) * $heroW, 1);
+        $y = round($heroH - (($v / $heroMax) * ($heroH - 8)) - 4, 1);
+        $heroPts[] = "$x,$y";
+    }
+    // Fallback to a flat baseline so the sparkline area is never empty on first render
+    if (empty($heroPts)) {
+        $heroPts = ['0,'.($heroH - 4), $heroW.','.($heroH - 4)];
+    }
+    $heroPath = implode(' ', $heroPts);
+    $heroArea = '0,'.$heroH.' '.$heroPath.' '.$heroW.','.$heroH;
+@endphp
+
 @section('content')
 <div style="max-width:1440px;margin:0 auto;">
+
+    {{-- ── Mobile-only greeting + Today's Sales hero card ── --}}
+    <div class="dash-mob-hero" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 14px;">
+            <div style="min-width:0;flex:1;">
+                <div id="dashHeroDate" style="font-size:11px;font-weight:700;color:rgb(234, 88, 12);letter-spacing:0.6px;text-transform:uppercase;">{{ $selectedCarbon->format('l') }} · {{ $selectedCarbon->format('d M') }}</div>
+                <h2 style="margin:4px 0 0;font-size:22px;font-weight:800;color:#0f1115;letter-spacing:-0.3px;line-height:1.2;"><span id="dashHeroGreetWord">{{ $greetWord }}</span>,<br>{{ $greetName }}</h2>
+            </div>
+            {{-- Mobile date filter button — opens the same popover the desktop button uses --}}
+            <button type="button" id="dashMobDateBtn" onclick="dashToggleDatePicker(event)" aria-label="Change date" style="flex-shrink:0;display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 12px;border-radius:10px;border:1px solid #eaecf2;background:#fff;color:#0f1115;font-size:12.5px;font-weight:700;cursor:pointer;outline:none;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgb(234, 88, 12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+                <span id="dashMobDateBtnLabel">{{ $selectedCarbon->isToday() ? 'Today' : $selectedCarbon->format('d M') }}</span>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M6 9l6 6 6-6"></path></svg>
+            </button>
+        </div>
+
+        {{-- Big orange "TODAY'S SALES" hero card --}}
+        <a href="/data_entry/sales_entry/view" id="dashHeroCard" style="display:block;text-decoration:none;color:inherit;background:linear-gradient(135deg,rgb(234, 88, 12),#fb923c);border-radius:20px;padding:18px 18px 0;color:#fff;box-shadow:0 12px 28px -8px rgba(234,88,12,0.55),0 4px 10px -4px rgba(234,88,12,0.35);margin-bottom:18px;overflow:hidden;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                <span style="display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;color:#fff;letter-spacing:1px;text-transform:uppercase;opacity:0.95;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    <span id="dashHeroLabel">Today's sales</span>
+                </span>
+                <span id="dashHeroDeltaPill" style="display:{{ $salesDeltaPct != 0 ? 'inline-flex' : 'none' }};align-items:center;gap:4px;font-size:11px;font-weight:800;background:rgba(255,255,255,0.18);color:#fff;border-radius:999px;padding:3px 10px;">
+                    <span id="dashHeroDeltaPillText">{{ $salesDeltaPct >= 0 ? '↑' : '↓' }} {{ abs($salesDeltaPct) }}%</span>
+                </span>
+            </div>
+            @php
+                $salesIntPart = number_format((int) $salesToday);
+                $salesDecPart = number_format(($salesToday - (int) $salesToday) * 100, 0, '', '');
+                $salesDecPart = str_pad($salesDecPart, 2, '0', STR_PAD_LEFT);
+            @endphp
+            <div style="display:flex;align-items:baseline;gap:2px;margin-top:14px;line-height:1;">
+                <span id="dashHeroCurrency" style="font-size:18px;font-weight:800;opacity:0.85;">{{ $currency }}</span>
+                <span id="dashHeroIntPart" style="font-size:38px;font-weight:900;letter-spacing:-1.5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;">{{ $salesIntPart }}</span>
+                <span id="dashHeroDecPart" style="font-size:18px;font-weight:800;opacity:0.85;">.{{ $salesDecPart }}</span>
+            </div>
+            <div id="dashHeroSub" style="margin-top:6px;font-size:12.5px;font-weight:600;opacity:0.95;">
+                @if($salesDelta != 0)
+                    {{ $salesDelta >= 0 ? '+' : '-' }}{{ $currency }}{{ number_format(abs($salesDelta), 0) }} vs yesterday
+                    @if($todayOrders) · {{ $todayOrders }} {{ $todayOrders == 1 ? 'invoice' : 'invoices' }} @endif
+                @elseif($todayOrders)
+                    {{ $todayOrders }} {{ $todayOrders == 1 ? 'invoice' : 'invoices' }}
+                @endif
+            </div>
+            <svg id="dashHeroSpark" viewBox="0 0 {{ $heroW }} {{ $heroH }}" preserveAspectRatio="none" style="display:block;width:100%;height:60px;margin-top:8px;">
+                <defs>
+                    <linearGradient id="heroSparkFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="rgba(255,255,255,0.45)"/>
+                        <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+                    </linearGradient>
+                </defs>
+                <polygon id="dashHeroSparkArea" points="{{ $heroArea }}" fill="url(#heroSparkFill)"/>
+                <polyline id="dashHeroSparkLine" points="{{ $heroPath }}" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </a>
+    </div>
+
 
     {{-- Header — exact spec UI --}}
     <div class="dash-header-card" style="margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#ffffff;border-radius:12px;padding:18px 22px;box-shadow:0 1px 2px rgba(15,17,21,0.04),0 6px 18px -8px rgba(15,17,21,0.12);border:1px solid #e8e8ec;">
@@ -493,9 +754,22 @@
                 <svg id="dashDateBtnCaret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;transition:transform 0.15s;"><path d="M6 9l6 6 6-6"></path></svg>
             </button>
             <div id="dashDatePopover" style="display:none;position:absolute;top:calc(100% + 8px);right:0;background:#fff;border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 12px 36px rgba(15,23,42,0.12), 0 2px 6px rgba(15,23,42,0.05);padding:14px;min-width:300px;z-index:100;">
+                {{-- Mobile-only bottom-sheet handle + header (base display:none → revealed at ≤767px; desktop never shows these) --}}
+                <div class="dash-sheet-handle"></div>
+                <div class="dash-sheet-header">
+                    <span class="dash-sheet-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgb(234, 88, 12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+                        Select date range
+                    </span>
+                    <button type="button" class="dash-sheet-close" onclick="dashMobileCancel()" aria-label="Close">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+                {{-- Scrollable body — ONLY this area scrolls; handle/header/footer stay fixed (mobile) --}}
+                <div class="dash-sheet-body">
                 {{-- Quick presets --}}
                 <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;">Quick select</div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px;">
+                <div class="dash-preset-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px;">
                     <button type="button" onclick="dashSetPreset('today')"     class="dash-preset-btn">Today</button>
                     <button type="button" onclick="dashSetPreset('yesterday')" class="dash-preset-btn">Yesterday</button>
                     <button type="button" onclick="dashSetPreset('last7')"     class="dash-preset-btn">Last 7 days</button>
@@ -512,7 +786,10 @@
                     <div id="dashRangeSummary" class="dash-range-summary">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgb(234, 88, 12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                         <span id="dashRangeFromLabel" class="dash-range-label from-label">{{ $selectedCarbon->format('d M Y') }}</span>
+                        <span class="dash-range-line"></span>
                         <span class="dash-range-sep">→</span>
+                        <span class="dash-range-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"></path></svg></span>
+                        <span class="dash-range-line"></span>
                         <span id="dashRangeToLabel"   class="dash-range-label to-label">{{ $selectedCarbon->format('d M Y') }}</span>
                     </div>
                 </div>
@@ -531,18 +808,20 @@
                     <div id="dashCalHint" style="font-size:11px;color:#94a3b8;text-align:center;margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9;font-weight:500;">
                         Pick a start date, then an end date
                     </div>
-                    <div style="display:flex;justify-content:space-between;margin-top:6px;">
+                    <div class="dash-cal-actions" style="display:flex;justify-content:space-between;margin-top:6px;">
                         <button type="button" onclick="dashCalClear()" style="background:none;border:none;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;outline:none;padding:4px 8px;border-radius:6px;">Clear</button>
                         <button type="button" onclick="dashCalToday()" style="background:none;border:none;color:rgb(234, 88, 12);font-size:12px;font-weight:700;cursor:pointer;outline:none;padding:4px 8px;border-radius:6px;">Today</button>
                     </div>
                 </div>
+                </div>{{-- /dash-sheet-body (scroll area ends) --}}
 
                 {{-- Mobile-only Cancel / Apply footer — desktop is hidden via CSS (max-width:767px shows it) --}}
                 <div id="dashMobileFooter" style="display:none;gap:10px;margin-top:14px;">
                     <button type="button" onclick="dashMobileCancel()" style="flex:1;height:44px;border-radius:10px;border:1.5px solid #e5e7eb;background:#ffffff;color:#475569;font-size:14px;font-weight:600;cursor:pointer;outline:none;">
                         Cancel
                     </button>
-                    <button type="button" onclick="dashMobileApply()" style="flex:1;height:44px;border-radius:10px;border:none;background:rgb(234, 88, 12);color:#ffffff;font-size:14px;font-weight:700;cursor:pointer;outline:none;box-shadow:0 2px 6px rgba(234,88,12,0.30);">
+                    <button type="button" onclick="dashMobileApply()" style="flex:1;height:44px;border-radius:10px;border:none;background:rgb(234, 88, 12);color:#ffffff;font-size:14px;font-weight:700;cursor:pointer;outline:none;box-shadow:0 2px 6px rgba(234,88,12,0.30);display:inline-flex;align-items:center;justify-content:center;gap:8px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                         Apply
                     </button>
                 </div>
@@ -711,6 +990,101 @@
             </div>
         </div>
 
+        {{-- Recent Invoices — mobile only. Latest 6 invoices across all dates with Paid/Partial/Unpaid badges --}}
+        <div class="dash-recent-invoices" style="display:none;">
+            <div class="dash-panel" style="background:#fff;border:1px solid #eaecf2;border-radius:16px;box-shadow:0 1px 4px rgba(0,0,0,0.06);overflow:hidden;">
+                <div class="dash-panel-header" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #f1f5f9;">
+                    <span class="dash-panel-title" style="font-size:14px;font-weight:800;color:#0f1115;">Recent invoices</span>
+                    <a href="/data_entry/sales_entry/view" style="font-size:12px;font-weight:700;color:rgb(234, 88, 12);text-decoration:none;display:inline-flex;align-items:center;gap:4px;">See all <span style="font-size:13px;">›</span></a>
+                </div>
+                <div id="dashRecentInvoicesList" style="padding:6px 0;">
+                    @php $recent = collect($recentInvoices ?? $invoices)->take(6); @endphp
+                    @forelse($recent as $inv)
+                        @php
+                            $total = (float) (method_exists($inv, 'getRelation') && $inv->relationLoaded('product') && $inv->product ? $inv->product->sum('sub_total') : 0);
+                            $paid  = (float) \DB::table('customer_payments')->where('customer_invoice_id', $inv->id)->sum('amount');
+                            if ($paid <= 0)            { $stLabel='Unpaid';  $stBg='#fef2f2'; $stColor='#dc2626'; }
+                            elseif ($paid < $total)    { $stLabel='Partial'; $stBg='#fffbeb'; $stColor='#d97706'; }
+                            else                       { $stLabel='Paid';    $stBg='#f0fdf4'; $stColor='#16a34a'; }
+                            $invNo = '#INV-' . ($inv->other_invoice_id ?: $inv->id);
+                            $whenC = $inv->created_at ? \Carbon\Carbon::parse($inv->created_at) : null;
+                            if ($whenC) {
+                                if ($whenC->isToday())         { $when = 'Today'; }
+                                elseif ($whenC->isYesterday()) { $when = 'Yesterday'; }
+                                else                            { $when = $whenC->format('d M'); }
+                            } else { $when = ''; }
+                        @endphp
+                        <a href="/data_entry/sales_entry/invoice/{{ $inv->id }}" style="display:flex;align-items:center;gap:12px;padding:10px 16px;text-decoration:none;color:inherit;">
+                            <div style="width:36px;height:36px;border-radius:10px;background:#fafafb;border:1px solid #eef0f3;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#9ca3af;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"></path></svg>
+                            </div>
+                            <div style="flex:1;min-width:0;">
+                                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                    <span style="font-size:13.5px;font-weight:700;color:#0f1115;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $inv->customer ? $inv->customer->name : 'Guest' }}</span>
+                                    <span style="font-size:10.5px;font-weight:700;color:{{ $stColor }};background:{{ $stBg }};border-radius:999px;padding:2px 8px;white-space:nowrap;">{{ $stLabel }}</span>
+                                </div>
+                                <div style="font-size:11px;color:#94a3b8;margin-top:2px;font-weight:500;">{{ $invNo }} @if($when) · {{ $when }} @endif</div>
+                            </div>
+                            <div style="flex-shrink:0;text-align:right;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;">
+                                <div style="font-size:14px;font-weight:800;color:#0f1115;">{{ $currency }}{{ number_format($total, 2) }}</div>
+                                @if($paid > 0 && $paid < $total)
+                                    <div style="font-size:10.5px;font-weight:600;color:#16a34a;margin-top:1px;">Paid {{ $currency }}{{ number_format($paid, 2) }}</div>
+                                @endif
+                            </div>
+                        </a>
+                    @empty
+                        <div style="padding:24px 16px;text-align:center;font-size:13px;color:#9ca3af;">No invoices yet.</div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+
+        {{-- Recent Activity — mobile only. Live mix of payments + sales + product additions, styled like Recent Invoices. --}}
+        <div class="dash-recent-invoices" style="display:none;margin-top:14px;">
+            <div class="dash-panel" style="background:#fff;border:1px solid #eaecf2;border-radius:16px;box-shadow:0 1px 4px rgba(0,0,0,0.06);overflow:hidden;">
+                <div class="dash-panel-header" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #f1f5f9;">
+                    <span class="dash-panel-title" style="font-size:14px;font-weight:800;color:#0f1115;">Recent activity</span>
+                    <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:#16a34a;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:999px;padding:2px 8px;"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#16a34a;"></span>Live</span>
+                </div>
+                <div id="dashRecentActivityList" style="padding:6px 0;">
+                    @forelse(($recentActivity ?? []) as $a)
+                        @php
+                            $iconBg='#fafafb'; $iconBd='#eef0f3'; $iconClr=$a['color']??'#6b7280';
+                            $svg='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"></path></svg>';
+                            switch($a['icon']??''){
+                                case 'cash':    $svg='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg>'; break;
+                                case 'card':    $svg='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>'; break;
+                                case 'bank':    $svg='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10M9 21V10M15 21V10M19 21V10M3 10l9-7 9 7"/></svg>'; break;
+                                case 'cheque':  $svg='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6"/></svg>'; break;
+                                case 'credit':  $svg='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>'; break;
+                                case 'sale':    $svg='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>'; break;
+                                case 'product': $svg='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>'; break;
+                            }
+                            $amtTxt = ($a['amount']??0) > 0 ? $currency.number_format($a['amount'], 2) : '';
+                            // Convert bg colour to a light tint for the pill (e.g. #16a34a -> #f0fdf4 style)
+                            $pillBgMap = ['#16a34a'=>'#f0fdf4', '#1d4ed8'=>'#eff6ff', '#0e7490'=>'#ecfeff', '#6d28d9'=>'#f5f3ff', 'rgb(234, 88, 12)'=>'#fff7ed'];
+                            $pillBg = $pillBgMap[$iconClr] ?? '#fafafb';
+                        @endphp
+                        <a href="{{ $a['link'] ?? '#' }}" style="display:flex;align-items:center;gap:14px;padding:14px 16px;text-decoration:none;color:inherit;border-bottom:1px solid #f5f6f8;">
+                            <div style="width:42px;height:42px;border-radius:12px;background:{{ $iconBg }};border:1px solid {{ $iconBd }};display:flex;align-items:center;justify-content:center;flex-shrink:0;color:{{ $iconClr }};">{!! $svg !!}</div>
+                            <div style="flex:1;min-width:0;">
+                                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                    <span style="font-size:15px;font-weight:800;color:#0f1115;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $a['headline'] ?? ($a['subject'] ?? '') }}</span>
+                                    <span style="display:inline-block;font-size:10.5px;font-weight:700;color:{{ $iconClr }};background:{{ $pillBg }};border-radius:999px;padding:2px 9px;white-space:nowrap;line-height:1.4;">{{ $a['pill'] ?? $a['title'] }}</span>
+                                </div>
+                                <div style="font-size:11.5px;color:#94a3b8;margin-top:4px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $a['ref'] ?? '' }}@if(!empty($a['when'])) · {{ $a['when'] }} @endif</div>
+                            </div>
+                            @if($amtTxt)
+                                <div style="flex-shrink:0;font-size:15px;font-weight:800;color:#0f1115;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;">{{ $amtTxt }}</div>
+                            @endif
+                        </a>
+                    @empty
+                        <div style="padding:24px 16px;text-align:center;font-size:13px;color:#9ca3af;">No recent activity.</div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+
     </div>
 
 
@@ -744,21 +1118,55 @@
             backdrop.id = 'dashDatePopoverBackdrop';
             backdrop.addEventListener('click', closePopover);
             document.body.appendChild(backdrop);
-            // force reflow so transition runs
+            // force reflow so the backdrop fade + sheet slide-up run from their start state
             void backdrop.offsetWidth;
+            void pop.offsetWidth;
             backdrop.classList.add('open');
+            pop.classList.add('dash-sheet-open');   // slides the sheet up from the bottom
         }
         document.addEventListener('click', onOutsideClick, true);
+        dashSyncActivePreset();
+    }
+    // Mobile only: highlight the quick-select preset matching the current range when the sheet opens.
+    // Desktop always has the class cleared (returns before adding), so its appearance is unchanged.
+    function dashSyncActivePreset() {
+        const presets = pop.querySelectorAll('.dash-preset-btn');
+        presets.forEach(function(b){ b.classList.remove('active'); });
+        if (!isMobile()) return;
+        const from = fromInp.value, to = toInp.value, t = todayISO();
+        const ranges = [
+            [t, t],
+            [isoDaysAgo(1), isoDaysAgo(1)],
+            [isoDaysAgo(6), t],
+            [isoDaysAgo(29), t],
+            [isoMonthStart(0), t],
+            [isoMonthStart(-1), isoMonthEnd(-1)],
+        ];
+        for (let i = 0; i < ranges.length; i++) {
+            if (from === ranges[i][0] && to === ranges[i][1]) { if (presets[i]) presets[i].classList.add('active'); break; }
+        }
     }
     function closePopover() {
-        pop.style.display = 'none';
         btn._open = false;
         btn.style.borderColor = '#e5e7eb';
         btn.style.background = '#fff';
         caret.style.transform = '';
-        if (backdrop && backdrop.parentNode) backdrop.parentNode.removeChild(backdrop);
-        backdrop = null;
         document.removeEventListener('click', onOutsideClick, true);
+        const bd = backdrop; backdrop = null;
+        if (isMobile() && pop.classList.contains('dash-sheet-open')) {
+            // slide the sheet back down, fade the backdrop, then hide once the animation ends
+            pop.classList.remove('dash-sheet-open');
+            if (bd) bd.classList.remove('open');
+            const p = pop;
+            window.setTimeout(function() {
+                if (!p.classList.contains('dash-sheet-open')) p.style.display = 'none';
+                if (bd && bd.parentNode) bd.parentNode.removeChild(bd);
+            }, 300);
+        } else {
+            pop.classList.remove('dash-sheet-open');
+            pop.style.display = 'none';
+            if (bd && bd.parentNode) bd.parentNode.removeChild(bd);
+        }
     }
     function onOutsideClick(e) {
         if (wrap.contains(e.target)) return;
@@ -807,33 +1215,251 @@
         btn.disabled = on; btn.style.cursor = on ? 'wait' : 'pointer';
     }
 
-    function applyRange(from, to) {
-        setBusy(true);
-        fetch(DASH_STATS_URL + '?from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to), { headers: { 'Accept': 'application/json' } })
-            .then(r => r.json())
-            .then(res => {
-                if (!res.success) throw new Error('bad response');
-                const p = res.payload;
-                document.getElementById('dashSalesValue').textContent    = DASH_CURRENCY + ' ' + fmt(p.sales_value);
-                document.getElementById('dashPurchaseValue').textContent = DASH_CURRENCY + ' ' + fmt(p.purchase_value);
-                document.getElementById('dashOrdersValue').textContent   = fmt(p.orders_count);
-                document.getElementById('dashSalesOrders').textContent   = fmt(p.orders_count);
-                if (p.is_today) {
-                    document.getElementById('dashSalesLabel').textContent    = "Today's Sales";
-                    document.getElementById('dashPurchaseLabel').textContent = "Today's Purchases";
-                    document.getElementById('dashOrdersLabel').textContent   = "Today's Orders";
-                } else {
-                    document.getElementById('dashSalesLabel').textContent    = p.label + ' Sales';
-                    document.getElementById('dashPurchaseLabel').textContent = p.label + ' Purchases';
-                    document.getElementById('dashOrdersLabel').textContent   = p.label + ' Orders';
+    function applyRange(from, to, opts) {
+        const silent = opts && opts.silent;
+        if (!silent) setBusy(true);
+        fetch(DASH_STATS_URL + '?from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to), { headers: { 'Accept': 'application/json' }, cache: 'no-store' })
+            .then(r => r.text().then(text => {
+                try { return JSON.parse(text); }
+                catch (e) {
+                    // Server returned HTML (an exception page or login redirect) — log a small snippet so we can debug.
+                    console.warn('Dashboard stats: non-JSON response (' + r.status + ')', text.slice(0, 200));
+                    throw new Error('non-JSON response ' + r.status);
                 }
-                btnLabel.textContent = p.is_today ? 'Today'
+            }))
+            .then(res => {
+                if (!res.success) {
+                    console.warn('Dashboard stats error:', res.error || 'bad response', res.where ? '@' + res.where : '');
+                    throw new Error(res.error || 'bad response');
+                }
+                const p = res.payload;
+                const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+                setText('dashSalesValue',    DASH_CURRENCY + ' ' + fmt(p.sales_value));
+                setText('dashPurchaseValue', DASH_CURRENCY + ' ' + fmt(p.purchase_value));
+                setText('dashOrdersValue',   fmt(p.orders_count));
+                setText('dashSalesOrders',   fmt(p.orders_count));
+                if (p.is_today) {
+                    setText('dashSalesLabel',    "Today's Sales");
+                    setText('dashPurchaseLabel', "Today's Purchases");
+                    setText('dashOrdersLabel',   "Today's Orders");
+                } else if (p.is_single_day) {
+                    setText('dashSalesLabel',    p.label + ' Sales');
+                    setText('dashPurchaseLabel', p.label + ' Purchases');
+                    setText('dashOrdersLabel',   p.label + ' Orders');
+                } else {
+                    // Range — keep card labels short so they don't overflow the small stat cards.
+                    setText('dashSalesLabel',    'Range Sales');
+                    setText('dashPurchaseLabel', 'Range Purchases');
+                    setText('dashOrdersLabel',   'Range Orders');
+                }
+                const desktopLabel = p.is_today ? 'Today'
                     : (p.is_single_day ? (new Date(p.from).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}))
                     : (new Date(p.from).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}) + ' – ' + new Date(p.to).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})));
+                if (btnLabel) btnLabel.textContent = desktopLabel;
+                // Shorter label for the mobile button (no year)
+                const mobLabel = p.is_today ? 'Today'
+                    : (p.is_single_day ? (new Date(p.from).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}))
+                    : (new Date(p.from).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}) + '–' + new Date(p.to).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})));
+                const mobLabelEl = document.getElementById('dashMobDateBtnLabel');
+                if (mobLabelEl) mobLabelEl.textContent = mobLabel;
+                // Mobile hero card + recent invoices + recent activity (silent during periodic refresh)
+                updateHeroCard(p);
+                updateRecentInvoices(p.recent_invoices || []);
+                updateRecentActivity(p.recent_activity || []);
             })
             .catch(err => { console.error('Dashboard stats fetch failed', err); })
-            .finally(() => setBusy(false));
+            .finally(() => { if (!silent) setBusy(false); });
     }
+
+    // ── Mobile hero card live updater ──
+    function updateHeroCard(p) {
+        const hero = document.getElementById('dashHeroCard');
+        if (!hero) return;
+        const sales = Number(p.sales_value) || 0;
+        const yesterday = Number(p.yesterday_value) || 0;
+        const delta = sales - yesterday;
+        const deltaPct = yesterday > 0 ? Math.round(((sales - yesterday) / yesterday) * 1000) / 10 : 0;
+
+        const intPart = Math.trunc(sales);
+        const decPart = Math.round((sales - intPart) * 100).toString().padStart(2, '0');
+        const intEl = document.getElementById('dashHeroIntPart');
+        const decEl = document.getElementById('dashHeroDecPart');
+        if (intEl) intEl.textContent = intPart.toLocaleString('en-GB');
+        if (decEl) decEl.textContent = '.' + decPart;
+
+        const labelEl = document.getElementById('dashHeroLabel');
+        // Keep the pill label short — long ranges would crowd the orange card.
+        if (labelEl) labelEl.textContent = p.is_today ? "Today's sales" : (p.is_single_day ? "Sales · " + (p.label || '') : 'Sales');
+
+        const pill = document.getElementById('dashHeroDeltaPill');
+        const pillTxt = document.getElementById('dashHeroDeltaPillText');
+        if (pill && pillTxt) {
+            if (deltaPct !== 0 && p.is_today) {
+                pill.style.display = 'inline-flex';
+                pillTxt.textContent = (deltaPct >= 0 ? '↑ ' : '↓ ') + Math.abs(deltaPct) + '%';
+            } else {
+                pill.style.display = 'none';
+            }
+        }
+
+        const sub = document.getElementById('dashHeroSub');
+        if (sub) {
+            const orders = Number(p.orders_count) || 0;
+            const parts = [];
+            if (delta !== 0 && p.is_today) {
+                parts.push((delta >= 0 ? '+' : '-') + DASH_CURRENCY + Math.round(Math.abs(delta)).toLocaleString('en-GB') + ' vs yesterday');
+            }
+            if (orders) {
+                parts.push(orders + (orders === 1 ? ' invoice' : ' invoices'));
+            }
+            sub.textContent = parts.join(' · ');
+        }
+
+        // Sparkline
+        const spark = document.getElementById('dashHeroSpark');
+        const sparkLine = document.getElementById('dashHeroSparkLine');
+        const sparkArea = document.getElementById('dashHeroSparkArea');
+        const chart = Array.isArray(p.sales_chart) ? p.sales_chart : [];
+        if (spark && sparkLine && sparkArea && chart.length) {
+            const vb = spark.getAttribute('viewBox').split(' ').map(Number);
+            const W = vb[2] || 320, H = vb[3] || 60;
+            const values = chart.map(d => Number(d.amount) || 0);
+            const max = Math.max.apply(null, values) || 1;
+            const n = Math.max(values.length - 1, 1);
+            const pts = values.map((v, i) => {
+                const x = Math.round((i / n) * W * 10) / 10;
+                const y = Math.round((H - (v / max) * (H - 8) - 4) * 10) / 10;
+                return x + ',' + y;
+            });
+            sparkLine.setAttribute('points', pts.join(' '));
+            sparkArea.setAttribute('points', '0,' + H + ' ' + pts.join(' ') + ' ' + W + ',' + H);
+            spark.style.display = 'block';
+        }
+    }
+
+    function escapeHtml(str) { return String(str == null ? '' : str).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+
+    function updateRecentInvoices(items) {
+        const list = document.getElementById('dashRecentInvoicesList');
+        if (!list) return;
+        if (!items.length) {
+            list.innerHTML = '<div style="padding:24px 16px;text-align:center;font-size:13px;color:#9ca3af;">No invoices yet.</div>';
+            return;
+        }
+        const html = items.map(it => {
+            let stBg, stColor;
+            if (it.status === 'Paid')         { stBg = '#f0fdf4'; stColor = '#16a34a'; }
+            else if (it.status === 'Partial') { stBg = '#fffbeb'; stColor = '#d97706'; }
+            else                              { stBg = '#fef2f2'; stColor = '#dc2626'; }
+            const totalNum = Number(it.total || 0);
+            const paidNum  = Number(it.paid  || 0);
+            const amount = totalNum.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const paidStr = paidNum.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const paidLine = (paidNum > 0 && paidNum < totalNum)
+                ? '<div style="font-size:10.5px;font-weight:600;color:#16a34a;margin-top:1px;">Paid ' + DASH_CURRENCY + paidStr + '</div>'
+                : '';
+            return '<a href="/data_entry/sales_entry/invoice/' + encodeURIComponent(it.id) + '" style="display:flex;align-items:center;gap:12px;padding:10px 16px;text-decoration:none;color:inherit;">'
+                + '<div style="width:36px;height:36px;border-radius:10px;background:#fafafb;border:1px solid #eef0f3;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#9ca3af;">'
+                + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>'
+                + '</div>'
+                + '<div style="flex:1;min-width:0;">'
+                + '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'
+                + '<span style="font-size:13.5px;font-weight:700;color:#0f1115;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(it.customer) + '</span>'
+                + '<span style="font-size:10.5px;font-weight:700;color:' + stColor + ';background:' + stBg + ';border-radius:999px;padding:2px 8px;white-space:nowrap;">' + escapeHtml(it.status) + '</span>'
+                + '</div>'
+                + '<div style="font-size:11px;color:#94a3b8;margin-top:2px;font-weight:500;">' + escapeHtml(it.invoice_no) + (it.when ? ' · ' + escapeHtml(it.when) : '') + '</div>'
+                + '</div>'
+                + '<div style="flex-shrink:0;text-align:right;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;">'
+                + '<div style="font-size:14px;font-weight:800;color:#0f1115;">' + DASH_CURRENCY + amount + '</div>'
+                + paidLine
+                + '</div>'
+                + '</a>';
+        }).join('');
+        list.innerHTML = html;
+    }
+
+    // ── Recent activity feed (mixed payments + sales + products) ──
+    const ACTIVITY_SVGS = {
+        cash:    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg>',
+        card:    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>',
+        bank:    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10M9 21V10M15 21V10M19 21V10M3 10l9-7 9 7"/></svg>',
+        cheque:  '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6"/></svg>',
+        credit:  '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>',
+        sale:    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>',
+        product: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>',
+        payment: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>',
+    };
+    const PILL_BG_MAP = { '#16a34a': '#f0fdf4', '#1d4ed8': '#eff6ff', '#0e7490': '#ecfeff', '#6d28d9': '#f5f3ff', 'rgb(234, 88, 12)': '#fff7ed' };
+    function updateRecentActivity(items) {
+        const list = document.getElementById('dashRecentActivityList');
+        if (!list) return;
+        if (!items.length) {
+            list.innerHTML = '<div style="padding:24px 16px;text-align:center;font-size:13px;color:#9ca3af;">No recent activity.</div>';
+            return;
+        }
+        const html = items.map(it => {
+            const svg = ACTIVITY_SVGS[it.icon] || ACTIVITY_SVGS.payment;
+            const color = it.color || '#6b7280';
+            const pillBg = PILL_BG_MAP[color] || '#fafafb';
+            const amt = Number(it.amount || 0);
+            const amtTxt = amt > 0 ? DASH_CURRENCY + amt.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '';
+            const headline = it.headline || it.subject || '';
+            const pill = it.pill || it.title || '';
+            const ref = it.ref || '';
+            return '<a href="' + escapeHtml(it.link || '#') + '" style="display:flex;align-items:center;gap:14px;padding:14px 16px;text-decoration:none;color:inherit;border-bottom:1px solid #f5f6f8;">'
+                + '<div style="width:42px;height:42px;border-radius:12px;background:#fafafb;border:1px solid #eef0f3;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:' + color + ';">' + svg + '</div>'
+                + '<div style="flex:1;min-width:0;">'
+                + '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'
+                + '<span style="font-size:15px;font-weight:800;color:#0f1115;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(headline) + '</span>'
+                + '<span style="display:inline-block;font-size:10.5px;font-weight:700;color:' + color + ';background:' + pillBg + ';border-radius:999px;padding:2px 9px;white-space:nowrap;line-height:1.4;">' + escapeHtml(pill) + '</span>'
+                + '</div>'
+                + '<div style="font-size:11.5px;color:#94a3b8;margin-top:4px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(ref) + (it.when ? ' · ' + escapeHtml(it.when) : '') + '</div>'
+                + '</div>'
+                + (amtTxt ? '<div style="flex-shrink:0;font-size:15px;font-weight:800;color:#0f1115;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;">' + amtTxt + '</div>' : '')
+                + '</a>';
+        }).join('');
+        list.innerHTML = html;
+    }
+
+    // ── Client-side greeting (uses browser local time so it matches the user's actual hour) ──
+    function updateGreetingAndDate() {
+        const wordEl = document.getElementById('dashHeroGreetWord');
+        if (wordEl) {
+            const h = new Date().getHours();
+            wordEl.textContent = h < 12 ? 'Good morning' : (h < 17 ? 'Good afternoon' : 'Good evening');
+        }
+        const dateEl = document.getElementById('dashHeroDate');
+        if (dateEl) {
+            const d = new Date();
+            const day  = d.toLocaleDateString('en-GB', { weekday: 'long' });
+            const dnum = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+            dateEl.textContent = day + ' · ' + dnum;
+        }
+    }
+    updateGreetingAndDate();
+    // Re-evaluate every minute so the greeting flips at noon/5pm even if the tab stays open.
+    setInterval(updateGreetingAndDate, 60000);
+
+    // ── Real-time refresh — silently re-pull stats every second while the page is visible ──
+    let _dashLiveTimer = null;
+    function startDashboardLive() {
+        if (_dashLiveTimer) return;
+        _dashLiveTimer = setInterval(function() {
+            if (document.hidden) return; // skip when tab/page hidden
+            const f = (fromInp && fromInp.value) || todayISO();
+            const t = (toInp && toInp.value) || f;
+            applyRange(f, t, { silent: true });
+        }, 1000);
+    }
+    document.addEventListener('visibilitychange', function() {
+        // Refresh immediately when coming back to the tab
+        if (!document.hidden) {
+            const f = (fromInp && fromInp.value) || todayISO();
+            const t = (toInp && toInp.value) || f;
+            applyRange(f, t, { silent: true });
+        }
+    });
+    startDashboardLive();
 
     // ── Custom range calendar — single picker, two-click range selection ──
     const calTitle    = document.getElementById('dashCalTitle');
@@ -948,6 +1574,13 @@
 
     // Mobile-only footer buttons
     window.dashMobileApply = function() {
+        // If the user tapped a single date (start only, no end yet), apply it as a single-day
+        // custom selection instead of ignoring it.
+        if (pendingStart) {
+            fromInp.value = pendingStart;
+            toInp.value   = pendingStart;
+            pendingStart  = null;
+        }
         let from = fromInp.value, to = toInp.value;
         if (!from && !to) {
             // Nothing picked yet — just close
@@ -1238,7 +1871,10 @@
         e.currentTarget.style.background='rgb(234, 88, 12)'; e.currentTarget.style.color='#fff'; e.currentTarget.dataset.active='1';
         loadChart();
     };
-    document.addEventListener('click', function() { document.getElementById('monthDrop').style.display='none'; document.getElementById('yearDrop').style.display='none'; });
+    document.addEventListener('click', function() {
+        const m = document.getElementById('monthDrop'); if (m) m.style.display = 'none';
+        const y = document.getElementById('yearDrop');  if (y) y.style.display = 'none';
+    });
 
 })();
 

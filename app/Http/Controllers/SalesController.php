@@ -1091,12 +1091,16 @@ class SalesController extends Controller
 			->with('salesman')
 			->with(['payments' => function($q){
 				$q->where(function($q){ $q->where('initiated', 0)->orWhereNull('initiated'); })
-					->leftJoin('payments', 'payments.id', '=', 'customer_payments.payment_id')
-					->select('customer_payments.customer_invoice_id', 'customer_payments.payment_id', DB::raw('MIN(customer_payments.id) as id'), DB::raw('SUM(customer_payments.amount) as total_amount'), DB::raw('MAX(payments.type) as payment_mode_type'))
-					->groupBy('customer_payments.customer_invoice_id', 'customer_payments.payment_id');
+					->with('paymentMode')
+					->select('customer_invoice_id', 'payment_id', DB::raw('MIN(id) as id'), DB::raw('SUM(amount) as total_amount'))
+					->groupBy('customer_invoice_id', 'payment_id');
 			}])
 			->orderBy('created_at', 'desc')
 			->get()->map(function($invoice){
+				// Fallback mode names keyed by payment_id — the `payments` (modes) lookup table can be
+				// unseeded in some environments, leaving the relation/DB type null. These ids are fixed
+				// app-wide: Cash=2, Cheque=3, Card=4, Bank Transfer=5, Credit=6.
+				$modeNames = [2 => 'Cash', 3 => 'Cheque', 4 => 'Card', 5 => 'Bank Transfer', 6 => 'Credit'];
 				$totalPaid = [];
 				foreach($invoice->payments as $payment){
 					$totalPaid[]= $payment->total_amount;
@@ -1108,13 +1112,13 @@ class SalesController extends Controller
 					: 0;
 				if ($creditTotal > 0) {
 					// Subtract credit from the cash payment total_amount for display
-					$paymentsArr = $invoice->payments->map(function($p) use ($creditTotal) {
+					$paymentsArr = $invoice->payments->map(function($p) use ($creditTotal, $modeNames) {
 						$item = [
 							'customer_invoice_id' => $p->customer_invoice_id,
 							'payment_id' => $p->payment_id,
 							'id' => $p->id,
 							'total_amount' => ($p->id && $p->total_amount > $creditTotal) ? $p->total_amount - $creditTotal : $p->total_amount,
-							'payment_mode_type' => $p->payment_mode_type ?? ($p->paymentMode->type ?? null),
+							'payment_mode_type' => $p->payment_mode_type ?? (optional($p->paymentMode)->type ?? ($modeNames[$p->payment_id] ?? null)),
 						];
 						return $item;
 					})->toArray();
@@ -1128,13 +1132,13 @@ class SalesController extends Controller
 					$invoice->setRelation('payments', collect());
 					$invoice->payments_list = $paymentsArr;
 				} else {
-					$invoice->payments_list = $invoice->payments->map(function($p) {
+					$invoice->payments_list = $invoice->payments->map(function($p) use ($modeNames) {
 						return [
 							'customer_invoice_id' => $p->customer_invoice_id,
 							'payment_id' => $p->payment_id,
 							'id' => $p->id,
 							'total_amount' => $p->total_amount,
-							'payment_mode_type' => $p->payment_mode_type ?? ($p->paymentMode->type ?? null),
+							'payment_mode_type' => $p->payment_mode_type ?? (optional($p->paymentMode)->type ?? ($modeNames[$p->payment_id] ?? null)),
 						];
 					})->toArray();
 				}

@@ -91,13 +91,20 @@ class CustomerPayment extends Model
 		}
 		
 		$query = $query->groupBy('customer_payments.id', 'customer_payments.amount');
-		
+
+		// For the dropdown listing, only return on-account payments that still have an
+		// unassigned balance. A specific $id lookup is allowed to return a fully-used
+		// record (e.g. when re-loading the saved payment's details).
+		if(empty($id)){
+			$query = $query->havingRaw('(customer_payments.amount - IFNULL(SUM(child.amount), 0)) > 0');
+		}
+
 		if(!empty($id)){
 			$query = $query->first();
 		}else{
 			$query = $query->get();
 		}
-		
+
 		return $query;
 	}
 	

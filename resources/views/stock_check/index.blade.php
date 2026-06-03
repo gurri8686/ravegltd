@@ -36,6 +36,9 @@
 .sc-section { display:none; }
 .sc-section.active { display:block; }
 
+/* Content wrapper is layout-neutral on desktop (renders as if it weren't there) */
+.sc-mob-content { display:contents; }
+
 /* ── Mobile only ── */
 .sc-mobile-header { display:none; }
 .sc-mobile-tab-bar { display:none; }
@@ -45,11 +48,47 @@
     .sc-nav-tabs { display:none !important; }
     .sc-mobile-tab-bar { display:none !important; }
 
-    /* Compact mobile header */
+    /* On mobile, drop the big wrapper card so the header and content read as
+       two separate cards with a gap between them. */
+    .sc-nav-card {
+        background:transparent !important;
+        border:none !important;
+        box-shadow:none !important;
+        border-radius:0 !important;
+        min-height:0 !important;
+        overflow:visible !important;
+    }
+    /* The desktop tab-row container (border-top) — hide its divider line on mobile */
+    .sc-nav-card > div[style*="border-top"] { border-top:none !important; }
+
+    /* Active tab content is NOT wrapped in a card — each inner section (summary, search,
+       content) stands on its own. */
+    .sc-nav-card > .sc-section.active {
+        background:transparent;
+        border:none;
+        box-shadow:none;
+        overflow:visible;
+    }
+
+    /* Products count bar + list/empty: no background card — the product cards stand on their own */
+    .sc-mob-content {
+        display:block !important;
+        margin:0;
+        background:transparent;
+        border:none;
+        box-shadow:none;
+        overflow:visible;
+    }
+
+    /* Compact mobile header — now its own standalone card */
     .sc-mobile-header {
         display:flex;align-items:center;justify-content:space-between;
-        padding:10px 14px;gap:10px;border-bottom:1px solid #f1f5f9;
+        padding:12px 14px;gap:10px;
         background:#fff;
+        border:1px solid #eaecf2;
+        border-radius:16px;
+        box-shadow:0 1px 4px rgba(0,0,0,0.06);
+        margin:0 0 14px;
     }
     .sc-mob-brand {
         display:flex;align-items:center;gap:8px;flex-shrink:0;

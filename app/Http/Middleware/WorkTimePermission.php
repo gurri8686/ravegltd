@@ -25,7 +25,8 @@ class WorkTimePermission
 		if(in_array($currentRoute, config('nonRestrictedRoutes'))){
 			return $next($request);
 		}
-        if ($roleName == 'Admin' || $roleName == 'admin') {
+        // Admins and the platform superadmin are exempt from work-time slots.
+        if ($user->hasRole(['admin','Admin','superadmin','Superadmin']) || $user->role === 'superadmin') {
             return $next($request);
         } else {
             $roleid = $user->roles->pluck('id');
