@@ -75,8 +75,8 @@
 }
 
 @media (max-width: 767px), (min-width: 768px) and (max-width: 1024px) {
-    /* ── Page background ── */
-    .users-list-wrapper { background: #f4f6f9; }
+    /* ── Page background (white, no grey) ── */
+    html, body, .app-content, .content-wrapper, .content-body, .users-list-wrapper { background: #fff !important; }
     .row.match-height { margin: 0 !important; }
     .row.match-height > .col-md-12 { padding: 0 !important; }
 
@@ -89,55 +89,62 @@
     .cust-create-header p { font-size: 11px !important; margin: 2px 0 0 !important; }
 
     /* ── Main card → transparent wrapper ── */
-    .card { background: transparent !important; box-shadow: none !important; border: none !important; height: auto !important; }
-    .card-body { padding: 0 !important; }
+    .users-list-wrapper .card, .users-list-wrapper .card-content, .users-list-wrapper .card-body,
+    .app-content .content-body, .cust-form-actions { background: transparent !important; background-color: transparent !important; box-shadow: none !important; border: none !important; }
+    .users-list-wrapper .card { height: auto !important; }
+    .users-list-wrapper .card-body { padding: 0 !important; }
 
     /* ── Section cards ── */
     .cust-form-card {
         background: #fff !important;
         border-radius: 16px !important;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.05) !important;
-        border: 1px solid #F0F4F8 !important;
-        padding: 18px 16px !important;
-        margin-bottom: 10px !important;
+        box-shadow: none !important;
+        border: 1px solid #ECECEC !important;
+        padding: 8px 16px 16px !important;
+        margin-bottom: 14px !important;
     }
 
     /* ── Section headers ── */
     h4.form-section {
-        font-size: 14px !important; font-weight: 800 !important; color: #0f172a !important;
-        border: none !important; padding: 0 0 13px !important; margin: 0 0 12px !important;
-        display: flex !important; align-items: center !important; gap: 10px !important;
-        background: none !important; border-bottom: 1.5px solid #f1f5f9 !important;
-        letter-spacing: -0.1px !important;
+        font-size: 14.5px !important; font-weight: 600 !important; color: #0A0A0A !important; line-height: 1.2 !important;
+        border: none !important; padding: 0 0 14px !important; margin: 0 0 16px !important;
+        display: flex !important; align-items: center !important; gap: 11px !important;
+        background: none !important; border-bottom: 1px solid #F2F2F2 !important;
+        letter-spacing: 0 !important;
     }
     h4.form-section i {
-        width: 30px !important; height: 30px !important; min-width: 30px !important;
-        border-radius: 8px !important; background: #FFF5ED !important;
-        color: rgb(234, 88, 12) !important; font-size: 14px !important;
+        width: 34px !important; height: 34px !important; min-width: 34px !important;
+        border-radius: 9px !important; background: #FFF1E6 !important;
+        color: #FF6B1A !important; font-size: 16px !important;
         display: inline-flex !important; align-items: center !important; justify-content: center !important;
+    }
+    h4.form-section .fs-tt { display: flex !important; flex-direction: column !important; gap: 2px !important; line-height: 1.2 !important; }
+    h4.form-section .fs-tt small {
+        font-size: 11.5px !important; font-weight: 400 !important; color: #9A9A9A !important;
+        text-transform: none !important; letter-spacing: 0 !important; line-height: 1.2 !important;
     }
 
     /* ── Form group ── */
     .form-group { margin-bottom: 0 !important; padding-bottom: 0 !important; }
 
     /* ── Field spacing: gap between cols in same row, and between rows ── */
-    .cust-form-card .row > [class*="col-"]:not(:last-child) { margin-bottom: 24px !important; }
-    .cust-form-card .row + .row { margin-top: 24px !important; }
+    .cust-form-card .row > [class*="col-"]:not(:last-child) { margin-bottom: 14px !important; }
+    .cust-form-card .row + .row { margin-top: 14px !important; }
 
     /* ── Labels ── */
     .form-group label {
-        font-size: 12px !important; font-weight: 700 !important; color: #9CA3AF !important;
-        text-transform: uppercase !important; letter-spacing: 0.7px !important;
-        margin-bottom: 8px !important; display: block !important;
+        font-size: 10.5px !important; font-weight: 700 !important; color: #6B6B6B !important;
+        text-transform: uppercase !important; letter-spacing: 0.8px !important;
+        margin-bottom: 7px !important; display: block !important;
         line-height: 1 !important;
     }
 
     /* ── Inputs ── */
     .form-control {
-        border-radius: 12px !important;
-        border: 1px solid #E5E7EB !important;
-        font-size: 14px !important; height: 50px !important; padding: 0 16px !important;
-        color: #1e293b !important; background-color: #fff !important;
+        border-radius: 10px !important;
+        border: 1px solid #ECECEC !important;
+        font-size: 14px !important; height: 44px !important; padding: 0 12px !important;
+        color: #0A0A0A !important; background-color: #fff !important;
         box-shadow: none !important;
         transition: border-color 0.15s, box-shadow 0.15s !important;
     }
@@ -164,32 +171,40 @@
 
     /* ── Icons inside inputs ── */
     input[name="website"] {
-        padding-left: 46px !important;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Cline x1='2' y1='12' x2='22' y2='12'%3E%3C/line%3E%3Cpath d='M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z'%3E%3C/path%3E%3C/svg%3E") !important;
-        background-repeat: no-repeat !important; background-position: 15px center !important; background-size: 17px !important;
+        padding-left: 36px !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none'%3E%3Ccircle cx='12' cy='12' r='8.5' stroke='%239A9A9A' stroke-width='1.6'%3E%3C/circle%3E%3Cpath d='M3.5 12h17M12 3.5c2.5 2.5 2.5 14.5 0 17M12 3.5c-2.5 2.5-2.5 14.5 0 17' stroke='%239A9A9A' stroke-width='1.4'%3E%3C/path%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important; background-position: 12px center !important; background-size: 15px !important;
     }
     input[name="email"] {
-        padding-left: 46px !important;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z'%3E%3C/path%3E%3Cpolyline points='22%2C6 12%2C13 2%2C6'%3E%3C/polyline%3E%3C/svg%3E") !important;
-        background-repeat: no-repeat !important; background-position: 15px center !important; background-size: 17px !important;
+        padding-left: 36px !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none'%3E%3Crect x='3' y='5.5' width='18' height='13' rx='2.2' stroke='%239A9A9A' stroke-width='1.6'%3E%3C/rect%3E%3Cpath d='M4 7l8 6 8-6' stroke='%239A9A9A' stroke-width='1.6' stroke-linecap='round'%3E%3C/path%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important; background-position: 12px center !important; background-size: 15px !important;
     }
-    .iti { width: 100% !important; display: block !important; }
+    input[name="first_name"] {
+        padding-left: 36px !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none'%3E%3Ccircle cx='12' cy='8' r='3.4' stroke='%236B6B6B' stroke-width='1.7'%3E%3C/circle%3E%3Cpath d='M5 20c1.4-3.4 4-5 7-5s5.6 1.6 7 5' stroke='%236B6B6B' stroke-width='1.7' stroke-linecap='round'%3E%3C/path%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important; background-position: 12px center !important; background-size: 15px !important;
+    }
+    .form-group label .text-danger { color: #FF6B1A !important; margin-left: 2px !important; }
+    /* ── Mobile: separate flag box + gap + input ── */
+    .iti { width: 100% !important; display: flex !important; align-items: center !important; gap: 8px !important; }
+    .iti__flag-container { position: relative !important; height: 44px !important; padding: 0 !important; flex-shrink: 0 !important; }
     .iti__selected-flag {
-        background: transparent !important;
-        border-right: 1px solid #E5E7EB !important;
-        padding: 0 10px 0 12px !important;
-        gap: 5px !important;
-        border-radius: 12px 0 0 12px !important;
+        height: 44px !important; background: #fff !important;
+        border: 1px solid #ECECEC !important; border-radius: 10px !important;
+        padding: 0 10px !important; gap: 6px !important;
+        display: flex !important; align-items: center !important;
     }
-    .iti__selected-flag:hover { background: #f9fafb !important; }
-    .iti__selected-dial-code { font-size: 13px !important; font-weight: 600 !important; color: #374151 !important; }
-    .iti__arrow { border-top-color: #9CA3AF !important; }
+    .iti__selected-flag:hover { background: #fafafa !important; }
+    .iti__selected-dial-code { font-size: 13.5px !important; font-weight: 600 !important; color: #0A0A0A !important; }
+    .iti__arrow { border-top-color: #9CA3AF !important; margin-left: 2px !important; }
     .iti__country-list { border-radius: 10px !important; border: 1px solid #E5E7EB !important; box-shadow: 0 8px 24px rgba(0,0,0,0.10) !important; font-size: 13px !important; z-index: 9999 !important; }
     .iti__country.iti__highlight { background: #fff7ed !important; }
     .iti__search-input { border-radius: 8px !important; border: 1px solid #E5E7EB !important; font-size: 13px !important; padding: 6px 10px !important; margin: 6px !important; width: calc(100% - 12px) !important; box-sizing: border-box !important; }
     .iti input[name="mobile"] {
-        padding-left: 90px !important;
+        padding-left: 12px !important;
         background-image: none !important;
+        flex: 1 1 0 !important; width: auto !important; min-width: 0 !important;
     }
     input[name="address1"], input[name="address2"] {
         padding-left: 46px !important;
@@ -202,9 +217,16 @@
         background-repeat: no-repeat !important; background-position: 15px center !important; background-size: 17px !important;
     }
     input[name="credit_limit"] {
-        padding-left: 46px !important;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='12' y1='1' x2='12' y2='23'%3E%3C/line%3E%3Cpath d='M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'%3E%3C/path%3E%3C/svg%3E") !important;
-        background-repeat: no-repeat !important; background-position: 15px center !important; background-size: 17px !important;
+        padding-left: 32px !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ctext x='8' y='12.5' font-size='14' font-weight='600' fill='%239A9A9A' text-anchor='middle' font-family='Arial,Helvetica,sans-serif'%3E%C2%A3%3C/text%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important; background-position: 12px center !important; background-size: 14px !important;
+    }
+    select[name="currency"], #currency {
+        padding-left: 38px !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239A9A9A' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='8' cy='8' r='6'/%3E%3Cpath d='M18.09 10.37A6 6 0 1 1 10.34 18'/%3E%3Cpath d='M7 6h1v4'/%3E%3Cpath d='m16.71 13.88.7.71-2.82 2.82'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%239A9A9A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat, no-repeat !important;
+        background-position: 12px center, right 14px center !important;
+        background-size: 16px, 14px !important;
     }
 
     /* ── 2-column pairs ── */
@@ -253,11 +275,11 @@
 
     /* ── Form actions card ── */
     .cust-form-actions {
-        background: #fff !important;
-        border-radius: 14px !important;
-        box-shadow: 0 1px 6px rgba(0,0,0,0.06) !important;
-        border: 1px solid #f0f4f8 !important;
-        padding: 14px !important;
+        background: transparent !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
         display: flex !important; gap: 10px !important; justify-content: flex-end !important;
     }
     .cfa-cancel, .cfa-save { width: 130px !important; height: 44px !important; justify-content: center !important; margin: 0 !important; padding: 0 !important; }
@@ -346,7 +368,7 @@ $(document).ready(function() {
 
                             {{-- ── Basic Information ── --}}
                             <div class="cust-form-card">
-                            <h4 class="form-section"><i class="feather icon-user"></i> Basic Information</h4>
+                            <h4 class="form-section"><i><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="#FF6B1A" stroke-width="1.7"></circle><path d="M5 20c1.4-3.4 4-5 7-5s5.6 1.6 7 5" stroke="#FF6B1A" stroke-width="1.7" stroke-linecap="round"></path></svg></i> <span class="fs-tt">Basic Information<small>Name &amp; contact details</small></span></h4>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -383,7 +405,7 @@ $(document).ready(function() {
 
                             {{-- ── Address ── --}}
                             <div class="cust-form-card">
-                            <h4 class="form-section"><i class="feather icon-home"></i> Address</h4>
+                            <h4 class="form-section"><i class="feather icon-home"></i> <span class="fs-tt">Address<small>Where they receive deliveries</small></span></h4>
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
@@ -438,7 +460,7 @@ $(document).ready(function() {
 
                             {{-- ── Accounting ── --}}
                             <div class="cust-form-card">
-                            <h4 class="form-section"><i class="feather icon-briefcase"></i> Accounting</h4>
+                            <h4 class="form-section"><i class="feather icon-briefcase"></i> <span class="fs-tt">Accounting<small>Tax, currency &amp; credit terms</small></span></h4>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -479,7 +501,7 @@ $(document).ready(function() {
 
                             {{-- ── Others ── --}}
                             <div class="cust-form-card">
-                            <h4 class="form-section"><i class="feather icon-file-text"></i> Others</h4>
+                            <h4 class="form-section"><i class="feather icon-file-text"></i> <span class="fs-tt">Others<small>Status &amp; internal notes</small></span></h4>
                             <div class="row cust-others-row">
                                 <div class="col-lg-6 col-md-6">
                                     <div class="form-group">

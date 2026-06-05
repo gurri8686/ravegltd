@@ -556,68 +556,99 @@
     }
     .dash-sheet-close:active { background: #e5e7eb; }
 
-    /* Quick-select grid → 3 columns (reference spec) */
+    /* Hide the uppercase "Quick select" / "Custom range" mini-labels on mobile (Sales sheet has none) */
+    .dash-mini-label { display: none !important; }
+    /* Presets → horizontal-scroll pill row (Sales sheet) */
     .dash-preset-grid {
-        grid-template-columns: repeat(3, 1fr) !important;
-        gap: 8px !important; margin-bottom: 18px !important;
+        display: flex !important; grid-template-columns: none !important;
+        flex-wrap: nowrap !important; overflow-x: auto !important;
+        gap: 8px !important; margin-bottom: 14px !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important; -ms-overflow-style: none !important;
     }
+    .dash-preset-grid::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
     .dash-preset-btn {
-        height: 38px !important; border-radius: 11px !important;
-        font-size: 12px !important; font-weight: 800 !important; letter-spacing: -0.1px !important;
-        color: #374151 !important; padding: 0 4px !important;
+        flex: 0 0 auto !important;
+        height: 34px !important; border-radius: 999px !important; padding: 0 16px !important;
+        font-size: 13px !important; font-weight: 700 !important; letter-spacing: 0 !important;
+        color: #475569 !important;
         border: 1.5px solid #e5e7eb !important; background: #fff !important;
-        box-shadow: 0 1px 2px rgba(16,24,40,0.04) !important; white-space: nowrap !important;
+        box-shadow: none !important; white-space: nowrap !important;
     }
-    /* Active preset (set by JS on open — mobile only): cream fill + orange outline */
+    /* Active preset (set by JS on open — mobile only): solid black pill (Sales sheet) */
     .dash-preset-btn.active {
-        background: #fff7ed !important; border-color: rgb(234, 88, 12) !important; color: rgb(234, 88, 12) !important;
+        background: #111827 !important; border-color: #111827 !important; color: #fff !important;
     }
 
-    /* Custom-range box — reference: peach, mono dark dates, thin orange lines + orange arrow */
+    /* Custom-range row — Sales sheet: two white boxes (orange border) + 36px orange arrow button */
     .dash-range-summary {
-        height: auto !important; display: flex !important; align-items: center !important;
-        gap: 10px !important; padding: 11px 13px !important;
-        border-radius: 13px !important; background: #fff7ed !important; border: 1px solid #ffedd5 !important;
+        height: auto !important; display: flex !important; align-items: stretch !important;
+        gap: 10px !important; padding: 0 !important;
+        border-radius: 0 !important; background: transparent !important; border: none !important;
     }
+    .dash-range-summary > svg { display: none !important; }    /* hide the single leading icon — boxes carry their own */
+    .dash-range-line { display: none !important; }
+    .dash-range-sep { display: none !important; }
+    /* FROM / TO white boxes with caption (icon + label via ::before) */
     .dash-range-label {
-        font-family: ui-monospace, SFMono-Regular, Menlo, monospace !important;
-        font-size: 13px !important; font-weight: 800 !important; color: #0f1115 !important; flex-shrink: 0 !important;
+        flex: 1 1 0% !important; min-width: 0 !important;
+        display: flex !important; flex-direction: column !important; gap: 3px !important;
+        background: #fff !important; border: 2px solid rgb(234, 88, 12) !important; border-radius: 12px !important;
+        padding: 8px 12px !important; text-align: center !important;
+        font-family: inherit !important; font-size: 14px !important; font-weight: 700 !important;
+        color: #0f172a !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;
     }
-    .dash-range-line { display: block !important; flex: 1 1 0% !important; height: 1.5px !important; background: #fed7aa !important; border-radius: 99px !important; min-width: 8px !important; }
-    .dash-range-sep { display: none !important; }              /* hide the desktop text "→" on mobile */
-    .dash-range-arrow { display: inline-flex !important; align-items: center !important; color: rgb(234, 88, 12) !important; flex-shrink: 0 !important; }
+    .dash-range-label::before {
+        display: inline-flex !important; align-items: center !important; justify-content: center !important;
+        font-size: 10px !important; font-weight: 800 !important; letter-spacing: 0.6px !important;
+        color: rgb(234, 88, 12) !important; text-transform: uppercase !important;
+        padding-left: 15px !important; min-height: 12px !important;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%23ea580c' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2'/%3E%3Cline x1='16' y1='2' x2='16' y2='6'/%3E%3Cline x1='8' y1='2' x2='8' y2='6'/%3E%3Cline x1='3' y1='10' x2='21' y2='10'/%3E%3C/svg%3E") no-repeat left center !important;
+    }
+    .dash-range-label.from-label::before { content: 'From' !important; }
+    .dash-range-label.to-label::before   { content: 'To' !important; }
+    /* Mid-selection (To not picked yet) → grey To box, like Sales */
+    .dash-range-summary.pending .dash-range-label.to-label { border-color: #e5e7eb !important; color: #cbd5e1 !important; }
+    /* Orange square arrow button between the boxes */
+    .dash-range-arrow {
+        display: inline-flex !important; align-items: center !important; justify-content: center !important;
+        flex: 0 0 auto !important; align-self: center !important;
+        width: 36px !important; height: 36px !important; border-radius: 10px !important;
+        background: rgb(234, 88, 12) !important; color: #fff !important;
+        box-shadow: 0 3px 10px rgba(234,88,12,0.35) !important;
+    }
+    .dash-range-arrow svg { stroke: #fff !important; }
 
     /* Calendar card — reference spec (pad 13/13/9, 14px/800 title) */
     #dashCalWrap { border-radius: 16px !important; padding: 13px 13px 9px !important; }
     #dashCalTitle { font-size: 14px !important; font-weight: 800 !important; color: #0f1115 !important; letter-spacing: -0.2px !important; }
-    .dash-cal-nav-btn { width: 32px !important; height: 32px !important; border-radius: 9px !important; border: 1px solid #e5e7eb !important; color: #374151 !important; }
+    .dash-cal-nav-btn { width: 34px !important; height: 34px !important; border-radius: 50% !important; border: 1.5px solid #e5e7eb !important; color: #475569 !important; }
     #dashCalGrid { gap: 0 !important; row-gap: 1px !important; }
-    .dash-cal-dow { height: auto !important; font-family: ui-monospace, SFMono-Regular, Menlo, monospace !important; font-size: 10px !important; font-weight: 800 !important; padding: 4px 0 !important; color: #6b7280 !important; letter-spacing: 0 !important; }
-    .dash-cal-dow:first-child, .dash-cal-dow:nth-child(7) { color: #9ca3af !important; }   /* SU / SA lighter */
+    .dash-cal-dow { height: auto !important; font-family: inherit !important; font-size: 11px !important; font-weight: 600 !important; padding: 4px 0 !important; color: #9ca3af !important; letter-spacing: 0.5px !important; text-transform: uppercase !important; }
     /* Day cell = 38px wrapper holding a 32px circle (::before). The range fill lives on
        the wrapper so ranges connect, while the selected/today highlight is a perfect circle. */
     .dash-cal-day {
         position: relative !important; isolation: isolate !important;
-        height: 38px !important; width: 100% !important; margin: 0 !important;
+        height: 42px !important; width: 100% !important; margin: 0 !important;
         display: flex !important; align-items: center !important; justify-content: center !important;
-        font-family: ui-monospace, SFMono-Regular, Menlo, monospace !important;
-        font-size: 12.5px !important; font-weight: 700 !important; color: #0f1115 !important;
+        font-family: inherit !important;
+        font-size: 14px !important; font-weight: 500 !important; color: #334155 !important;
         background: transparent !important; border: none !important; border-radius: 0 !important; box-shadow: none !important;
     }
     .dash-cal-day.muted { color: #cbd5e1 !important; }
     /* the 32px circle (sits behind the number via z-index, contained by isolation:isolate) */
     .dash-cal-day.selected::before, .dash-cal-day.today:not(.selected)::before {
         content: '' !important; position: absolute; left: 50%; top: 50%;
-        width: 32px; height: 32px; border-radius: 50%; transform: translate(-50%, -50%); z-index: -1;
+        width: 34px; height: 34px; border-radius: 50%; transform: translate(-50%, -50%); z-index: -1;
     }
     .dash-cal-day.today:not(.selected) { color: #c2410c !important; font-weight: 800 !important; }
     .dash-cal-day.today:not(.selected)::before { background: #fff7ed; box-shadow: inset 0 0 0 1.5px #fed7aa; }
     .dash-cal-day.selected { color: #fff !important; font-weight: 800 !important; }
     .dash-cal-day.selected::before { background: rgb(234, 88, 12); box-shadow: rgba(234,88,12,0.55) 0 4px 10px -3px; }
     /* range fill on the wrapper — connects start → end */
-    .dash-cal-day.in-range { background: #fff7ed !important; }
-    .dash-cal-day.range-start { background: #fff7ed !important; border-radius: 99px 0 0 99px !important; }
-    .dash-cal-day.range-end { background: #fff7ed !important; border-radius: 0 99px 99px 0 !important; }
+    .dash-cal-day.in-range { background: #fff7f0 !important; }
+    .dash-cal-day.range-start { background: #fff7f0 !important; border-radius: 99px 0 0 99px !important; }
+    .dash-cal-day.range-end { background: #fff7f0 !important; border-radius: 0 99px 99px 0 !important; }
     .dash-cal-day.selected.range-start.range-end { background: transparent !important; border-radius: 0 !important; }
     #dashCalHint { display: none !important; }
     #dashCalWrap > .dash-cal-actions { display: none !important; }
@@ -625,11 +656,15 @@
     /* Cancel / ✓ Apply — pinned to the bottom of the sheet */
     /* Footer — fixed (doesn't scroll); equal 18px sides */
     #dashMobileFooter {
-        display: flex !important; flex-shrink: 0;
+        display: flex !important; flex-shrink: 0; gap: 12px !important;
         margin: 0 !important;
         padding: 14px 18px calc(14px + env(safe-area-inset-bottom)) !important;
         background: #fff; border-top: 1px solid #f1f5f9;
     }
+    /* Footer is mobile-only — size its buttons to the Sales sheet (52px / radius 14px) */
+    #dashMobileFooter > button { height: 52px !important; border-radius: 14px !important; font-size: 15px !important; }
+    #dashMobileFooter > button:first-child { flex: 1 1 0% !important; font-weight: 700 !important; }
+    #dashMobileFooter > button:last-child  { flex: 1.6 1 0% !important; font-weight: 800 !important; box-shadow: 0 6px 16px rgba(234,88,12,0.35) !important; }
 }
 </style>
 @endpush
@@ -768,7 +803,7 @@
                 {{-- Scrollable body — ONLY this area scrolls; handle/header/footer stay fixed (mobile) --}}
                 <div class="dash-sheet-body">
                 {{-- Quick presets --}}
-                <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;">Quick select</div>
+                <div class="dash-mini-label" style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;">Quick select</div>
                 <div class="dash-preset-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px;">
                     <button type="button" onclick="dashSetPreset('today')"     class="dash-preset-btn">Today</button>
                     <button type="button" onclick="dashSetPreset('yesterday')" class="dash-preset-btn">Yesterday</button>
@@ -778,7 +813,7 @@
                     <button type="button" onclick="dashSetPreset('lastMonth')" class="dash-preset-btn">Last month</button>
                 </div>
                 {{-- Custom range — single calendar with range selection (click start, click end) --}}
-                <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;">Custom range</div>
+                <div class="dash-mini-label" style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;">Custom range</div>
                 {{-- Range summary pill — read-only display of the picked From → To range --}}
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
                     <input type="hidden" id="dashDateFrom" value="{{ $selectedDate }}">
