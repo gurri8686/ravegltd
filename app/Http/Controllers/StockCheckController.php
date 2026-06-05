@@ -149,9 +149,16 @@ class StockCheckController extends Controller
 				$grouped[$key][] = $h;
 			}
 
-			// Build list of all dates in range
+			// Build list of all dates in range.
+			// Clamp the day-loop start to the earliest stock activity so a far-back
+			// $from_date (e.g. "Clear filters" → show all data) doesn't iterate over
+			// empty years. Safe: days before the earliest activity have no activity
+			// and (for such an early $from_date) no prior-day closing, so they would
+			// never emit a row, and the running opening stock starts at 0 either way.
+			$earliestActivity = StockProduct::where('is_archived', 0)->min(DB::raw('DATE(created_at)'));
+			$loopStart = ($earliestActivity && $earliestActivity > $from_date) ? $earliestActivity : $from_date;
 			$dates = [];
-			$d = new \DateTime($from_date);
+			$d = new \DateTime($loopStart);
 			$end = new \DateTime($to_date);
 			while ($d <= $end) {
 				$dates[] = $d->format('Y-m-d');
