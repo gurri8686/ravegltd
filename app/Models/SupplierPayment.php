@@ -44,7 +44,10 @@ class SupplierPayment extends Model
         return $this->hasMany(SupplierPayment::class, 'supplier_payment_id', 'id');
     }
 	public function payments(){
-        return $this->hasMany('App\Models\SupplierPayment','supplier_invoice_id','id')->where('is_archived',0);
+        // Link an invoice row to its payment rows by supplier_invoice_id on BOTH sides
+        // (mirrors CustomerPayment::payments()). The previous localKey of `id` matched the
+        // SupplierPayment row id instead of the invoice id, so paid invoices stayed "Unpaid".
+        return $this->hasMany('App\Models\SupplierPayment','supplier_invoice_id','supplier_invoice_id')->where('is_archived',0);
     }
 	
 	public function products(){

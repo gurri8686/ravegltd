@@ -434,16 +434,16 @@ class SupplierPayments{
 						$lastPayDate = $p->created_at;
 					}
 					if($p->is_paid == 1){
-						if($p->paymentMode->type == 'Card'){
+						if(optional($p->paymentMode)->type == 'Card'){
 							$data[$i]['paid_by_card'][] = $p->amount;
 						}
-						if($p->paymentMode->type == 'Cash'){
+						if(optional($p->paymentMode)->type == 'Cash'){
 							$data[$i]['paid_by_cash'][] = $p->amount;
 						}
-						if($p->paymentMode->type == 'Cheque'){
+						if(optional($p->paymentMode)->type == 'Cheque'){
 							$data[$i]['paid_by_cheque'][] = $p->amount;
 						}
-						if($p->paymentMode->type == 'Bank Transfer'){
+						if(optional($p->paymentMode)->type == 'Bank Transfer'){
 							$data[$i]['paid_by_bank'][] = $p->amount;
 						}
 					}

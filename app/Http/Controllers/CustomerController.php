@@ -67,7 +67,9 @@ class CustomerController extends Controller
     {
         try{
             $rules = [
-                'first_name' => 'required|min:3|max:30|regex:/(^[A-Za-z ]+$)+/'
+                // Customer name can be anything (company names, digits, '.', '&', etc.).
+                // Only requirement is that it's present; uniqueness is enforced below.
+                'first_name' => 'required'
             ];
             if($request->zipcode){
               $rules['zipcode'] = 'max:12|regex:/(^[A-Za-z0-9 ]+$)+/';
@@ -141,7 +143,7 @@ class CustomerController extends Controller
             }
             else
             {
-                throw new \Exception("That Customer already exists.");
+                return $this->validationErrorResponse(['first_name' => ["That Customer already exists."]]);
             }
             if (!$record || !$recordUpdate) {
                 throw new \Exception("Error to add Module");
@@ -219,7 +221,7 @@ class CustomerController extends Controller
                 }
                 else
                 {
-                    throw new \Exception("That Customer already exists.");
+                    return $this->validationErrorResponse(['first_name' => ["That Customer already exists."]]);
                 }
 
             }

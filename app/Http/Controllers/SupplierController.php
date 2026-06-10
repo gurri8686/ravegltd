@@ -140,7 +140,7 @@ class SupplierController extends Controller
             }
             else
             {
-                throw new \Exception("That Supplier already exists.");
+                return $this->validationErrorResponse(['first_name' => ["That Supplier already exists."]]);
             }
             if (!$record || !$recordUpdate) {
                 throw new \Exception("Error to add Module");
@@ -216,7 +216,7 @@ class SupplierController extends Controller
                 }
                 else
                 {
-                    throw new \Exception("That Supplier already exists.");
+                    return $this->validationErrorResponse(['first_name' => ["That Supplier already exists."]]);
                 }
 
             }

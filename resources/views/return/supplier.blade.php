@@ -30,6 +30,7 @@
 	</a> --}}
 </div>
 	<div id="suppliers-return-app"
+		data-no-header="1"
 		data-currency="{{env('CURRENCY_SYMBOL', '£')}}"
 		data-suppliers-list-api="/supplier_return/view/suppliers"
 		data-products-list-api="/supplier_return/view/products"
@@ -40,6 +41,11 @@
 		data-invoices-return-create-api="/supplier_return/view/return/create"
 		data-invoices-return-update-api="/supplier_return/view/return/update"
 		data-invoices-return-delete-api="/supplier_return/view/return/delete"
+		data-history-url="{{route('supplier_return.view.history')}}"
+		data-print-url="{{route('print.supplier_return')}}"
+		data-excel-url="{{route('excel.supplier_return')}}"
+		data-returnable-print-url="{{route('print.supplier_returnable')}}"
+		data-returnable-excel-url="{{route('excel.supplier_returnable')}}"
 	></div>
 </section>
 @endsection
