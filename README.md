@@ -1,81 +1,192 @@
+# R & A Veg Ltd (ravegltd)
 
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+Laravel **multi-domain** business app (sales / purchases / inventory) with a
+per-vendor **database-per-tenant** model. Each domain/subdomain is mapped to its
+own database, and the page UI (lists, tables, cards) is a JavaScript bundle
+served from `public/cdn`.
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> **Read this first — it prevents "my local looks different from live".**
+> The visible UI does **not** come only from PHP/Blade. It is built from extra
+> pieces (a JS/CSS bundle + per-domain `.env` + the local web-server setup).
+> The PHP code is identical everywhere (so *functionality* is the same), but if
+> any of those extra pieces are missing or stale on a machine, the **UI** looks
+> different. The steps below make every machine match.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Requirements (match these versions)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| Tool | Version |
+|------|---------|
+| PHP | 8.0 – 8.2 (tested on **8.2**) |
+| Composer | latest |
+| MySQL / MariaDB | XAMPP default is fine |
+| Apache | XAMPP / WAMP / Laragon — app is served via a **vhost**, *not* `php artisan serve` (multi-domain needs a real hostname) |
+| Node.js + npm | **16+** — *only* needed if you change frontend assets (see [Frontend / Assets](#frontend--assets)) |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+> Tip: pin Node to one version across the team (add a `.nvmrc`). Different
+> Node/npm versions can produce slightly different CSS/JS builds.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## How the UI loads (important)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- The page content (supplier/customer lists, tables, cards) is rendered by a
+  **JS bundle** in **`public/cdn`** (`js/manifest.js` + `js/vendor.js` +
+  `js/app.js` + `css/app.css`). The app loads it from the **`CDN_DOMAIN`** env
+  value — locally `http://ravegltd.localhost/cdn` (i.e. this same site's
+  `public/cdn` folder).
+- **`public/cdn`, `public/css/app.css` and `public/js/app.js` are committed to
+  git.** So a fresh clone already has the exact same UI as production — you do
+  **not** need to run `npm` just to run the app.
+- ⚠️ **Therefore:** if you change any CSS / JS / React source, you **must rebuild
+  and commit the built files**, otherwise other machines (and new clones) will
+  show **old UI**. See [Frontend / Assets](#frontend--assets).
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+## Setup (step by step)
 
-### Premium Partners
+### 1. Clone & PHP dependencies
+```bash
+git clone https://github.com/gurri8686/ravegltd.git
+cd ravegltd
+composer install
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[CMS Max](https://www.cmsmax.com/)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
-- **[Romega Software](https://romegasoftware.com)**
+### 2. Environment (per-domain `.env`)
+This app uses [gecche/laravel-multidomain](https://github.com/gecche/laravel-multidomain):
+each host has its **own** env file inside the **`envs/`** folder, named
+`.env.<host>` (e.g. `envs/.env.ravegltd.localhost`).
 
-## Contributing
+Create `envs/.env.ravegltd.localhost` with at least:
+```env
+APP_NAME=Laravel
+APP_ENV=local
+APP_KEY=                 # generate it (next command)
+APP_DEBUG=true
+APP_URL=http://ravegltd.localhost
+CDN_DOMAIN=http://ravegltd.localhost/cdn   # <- UI bundle loads from here; must be correct
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=ts.ravegltd.com   # this domain's tenant DB
+DB_USERNAME=root
+DB_PASSWORD=
+ORG_DB_DATABASE=ts_organizations   # control-plane DB (holds the `sites` table)
+```
+Generate the app key for this domain:
+```bash
+php artisan key:generate --domain=ravegltd.localhost
+```
+> Never commit real `.env` files / passwords. Copy values from the team.
 
-## Code of Conduct
+### 3. Hosts file
+Add to `C:\Windows\System32\drivers\etc\hosts` (needs admin):
+```
+127.0.0.1   ravegltd.localhost
+```
+*(Modern browsers also auto-resolve `*.ravegltd.localhost` to localhost, used for
+vendor subdomains.)*
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 4. Apache vhost
+Point the host to `public/` and allow vendor subdomains:
+```apache
+<VirtualHost *:80>
+    ServerName ravegltd.localhost
+    ServerAlias *.ravegltd.localhost
+    DocumentRoot "d:/path/to/ravegltd/public"
+    <Directory "d:/path/to/ravegltd/public">
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+```
+The CDN bundle is served from this same site under `/cdn` (it's `public/cdn`), so
+**no separate CDN vhost is needed.** Restart Apache after editing.
 
-## Security Vulnerabilities
+> If you run multiple sites and one vhost uses a broad `ServerAlias *.localhost`,
+> keep the **specific** hosts listed **before** it, or the wildcard will steal
+> them.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 5. Database
+1. Create the two databases: the tenant DB (e.g. `ts.ravegltd.com`) and
+   `ts_organizations`.
+2. Load data: import the provided SQL dump, **or** build from scratch:
+   ```bash
+   php artisan migrate --domain=ravegltd.localhost
+   php artisan db:seed --domain=ravegltd.localhost   # superadmin + roles
+   ```
+3. **Register the domain** in the control-plane `sites` table (this is required —
+   `DomainsMiddleware` returns **404 on every page** if the host isn't there):
 
-## License
+   In `ts_organizations.sites`, add a row:
+   `subdomain = ravegltd.localhost`, `domain = ravegltd.localhost`,
+   `database = ts.ravegltd.com`, `status = 1` (+ any `api_key`/`api_secret`).
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 6. Permissions
+```bash
+php artisan permissions:update --domain=ravegltd.localhost
+```
 
-## Multisite
-Extension Used : https://github.com/gecche/laravel-multidomain
+### 7. Run
+Open **http://ravegltd.localhost** — and the superadmin panel at
+**http://ravegltd.localhost/admin/login**.
 
-1. Create Domain(Example) : `php artisan domain:add site1.com` or `php artisan domain:add site2.com`
-2. Remove Domain(Example) : `php artisan domain:remove site1.com` or `php artisan domain:remove site2.com` 
-3. Update All env Files Parameter : `php artisan domain:update_env --domain_values='{"TOM_DRIVER":"TOMMY"}'`
+---
 
-4. Each Site will have its Own .env file and will have different values.
-Site Env's Path : Create a folder envs on the root of project and the site enb file will be : `.env.site1.com` or `.env.site2.com`
+## Frontend / Assets
 
-## Routes Update
-No need to manually insert the permissions to the `permissions` table just use the below command.
-Command : `php artisan permissions:update --domain=ts.localhost`
+You only touch this when you **change** CSS / JS:
+```bash
+npm install        # first time (use `npm ci` for an exact, locked install)
+npm run dev        # quick build  (or `npm run prod` for production/minified)
+```
+This rebuilds `public/css/app.css` and `public/js/app.js`.
+
+**Rule (prevents "old CSS on other machines"):** after any frontend change,
+**rebuild and commit the built files together with your source change.** The
+shared UI components/bundle in `public/cdn` come from the separate **ts-cdn**
+project — rebuild there and copy its output into `public/cdn`, then commit.
+
+---
+
+## Multi-domain commands
+
+- Add a domain: `php artisan domain:add site1.com`
+- Remove a domain: `php artisan domain:remove site1.com`
+- Update a value across all env files:
+  `php artisan domain:update_env --domain_values='{"KEY":"VALUE"}'`
+- Each site has its own `envs/.env.<host>` file with its own values.
+
+---
+
+## Routes / permissions
+
+No need to insert permissions into the `permissions` table by hand:
+```bash
+php artisan permissions:update --domain=ravegltd.localhost
+```
+
+---
+
+## Troubleshooting (common local issues)
+
+| Symptom | Cause / Fix |
+|---------|-------------|
+| **Every page 404s** (even though Apache/PHP are fine) | The host isn't in `ts_organizations.sites`. Add the row (Setup step 5.3). |
+| **Pages are blank except the Dashboard** | The CDN UI bundle isn't loading. Check `public/cdn` exists, `CDN_DOMAIN` is correct, and the vhost serves `/cdn`. In the browser **Network/Console** tab, look for failed `cdn/js/*` or `app.css`. |
+| **Cards/tables show old styling** | Built CSS is stale (built files are committed but weren't rebuilt). Rebuild + commit (see Frontend / Assets), then hard-refresh (`Ctrl+Shift+R`). |
+| **Wrong data on a subdomain** | The host → database mapping comes from the `sites` table (`DomainsMiddleware`). Check the row's `database` value. |
+| **Changed `.env` / mail not taking effect** | Multi-domain caches env; restart Apache fully after editing env files. |
+
+---
+
+## Notes
+
+- App is served via Apache vhost, **not** `php artisan serve`.
+- Per-domain DB switching happens in `app/Http/Middleware/DomainsMiddleware.php`
+  (host → `sites` row → database).
+- Superadmin panel: `/admin/login` (role-gated).
