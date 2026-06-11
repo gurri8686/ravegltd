@@ -172,26 +172,6 @@ php artisan permissions:update --domain=ravegltd.localhost
 
 ---
 
-## Docker (optional — the easiest way to avoid setup differences)
-
-If a developer keeps hitting environment differences (different PHP / Node /
-MySQL versions, vhost problems, missing PHP extensions, "works on my machine"),
-the most reliable fix is to run the whole stack in **Docker** — every machine
-then gets an **identical** environment, so local matches live exactly.
-
-> ⚠️ This repo does **not** include Docker config yet. To enable it, add a
-> `Dockerfile` + `docker-compose.yml` that bundle PHP + Apache, MySQL, and Node
-> (for builds). Once added, any developer can bring the whole stack up with a
-> single command — no manual PHP/MySQL/Apache/vhost setup:
->
-> ```bash
-> docker compose up -d
-> ```
->
-> Recommended if multiple people will run the project locally — it removes the
-> per-machine differences entirely (same PHP + extensions, same MySQL, same web
-> server, same Node build, everywhere).
-
 ## Troubleshooting (common local issues)
 
 | Symptom | Cause / Fix |
