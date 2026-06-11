@@ -71,4 +71,30 @@ class Kernel extends HttpKernel
         'wtpermission' => \App\Http\Middleware\WorkTimePermission::class,
         'superadmin' => \App\Http\Middleware\SuperadminMiddleware::class,
     ];
+
+    /**
+     * The priority-sorted list of middleware.
+     *
+     * Mirrors the framework default, but inserts the tenant-routing middleware
+     * (localization + domains) BEFORE the auth middleware. Laravel sorts any
+     * middleware implementing AuthenticatesRequests by this priority, which
+     * otherwise runs `auth` BEFORE our custom `domains` middleware — so the
+     * logged-in user would be resolved against the main DB before the per-domain
+     * connection switch, leaking the main account onto vendor subdomains.
+     *
+     * @var string[]
+     */
+    protected $middlewarePriority = [
+        \Illuminate\Cookie\Middleware\EncryptCookies::class,
+        \Illuminate\Session\Middleware\StartSession::class,
+        \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+        \App\Http\Middleware\Localization::class,
+        \App\Http\Middleware\DomainsMiddleware::class,
+        \Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests::class,
+        \Illuminate\Routing\Middleware\ThrottleRequests::class,
+        \Illuminate\Routing\Middleware\ThrottleRequestsWithRedis::class,
+        \Illuminate\Session\Middleware\AuthenticateSession::class,
+        \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        \Illuminate\Auth\Middleware\Authorize::class,
+    ];
 }

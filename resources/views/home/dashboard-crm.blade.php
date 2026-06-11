@@ -1475,26 +1475,16 @@
     // Re-evaluate every minute so the greeting flips at noon/5pm even if the tab stays open.
     setInterval(updateGreetingAndDate, 60000);
 
-    // ── Real-time refresh — silently re-pull stats every second while the page is visible ──
-    let _dashLiveTimer = null;
-    function startDashboardLive() {
-        if (_dashLiveTimer) return;
-        _dashLiveTimer = setInterval(function() {
-            if (document.hidden) return; // skip when tab/page hidden
-            const f = (fromInp && fromInp.value) || todayISO();
-            const t = (toInp && toInp.value) || f;
-            applyRange(f, t, { silent: true });
-        }, 1000);
-    }
-    document.addEventListener('visibilitychange', function() {
-        // Refresh immediately when coming back to the tab
-        if (!document.hidden) {
-            const f = (fromInp && fromInp.value) || todayISO();
-            const t = (toInp && toInp.value) || f;
-            applyRange(f, t, { silent: true });
-        }
-    });
-    startDashboardLive();
+    // ── Stats load ONCE on page load — per-second polling removed (it hit
+    //    /dashboard/view/stats every second per open dashboard tab, loading the
+    //    server and slowing other pages). This ONLY changes WHEN stats are
+    //    fetched — it does not touch any layout/design. The date-range picker
+    //    below still fetches on demand when the user changes the range.
+    (function loadDashboardStatsOnce() {
+        const f = (fromInp && fromInp.value) || todayISO();
+        const t = (toInp && toInp.value) || f;
+        applyRange(f, t, { silent: true });
+    })();
 
     // ── Custom range calendar — single picker, two-click range selection ──
     const calTitle    = document.getElementById('dashCalTitle');
