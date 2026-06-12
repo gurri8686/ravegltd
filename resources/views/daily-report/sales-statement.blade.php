@@ -73,7 +73,7 @@
         <tr>
             <td>{{ $index + 1 }}</td>
             <td><strong>#{{ $invoice->id }}</strong></td>
-            <td>{{ \Carbon\Carbon::parse($invoice->created_at)->format('d M Y') }}</td>
+            <td>{{ uk_ts($invoice->created_at, 'd M Y') }}</td>
             <td>{{ $invoice->customer->name ?? '-' }}</td>
             <td class="text-right">{{ $currency }} {{ number_format($invoice->total ?? 0, 2) }}</td>
             <td class="text-right">{{ $currency }} {{ number_format($invoice->total_paid ?? 0, 2) }}</td>

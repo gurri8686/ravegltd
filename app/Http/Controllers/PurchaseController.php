@@ -744,7 +744,7 @@ class PurchaseController extends Controller
 			$total = (float)($invoice->total ?? 0);
 			$rows[] = [
 				'#' . ($invoice->other_invoice_id ?? $invoice->id),
-				\Carbon\Carbon::parse($invoice->created_at)->format('d M Y'),
+				uk_ts($invoice->created_at, 'd M Y'),
 				$invoice->supplier->name ?? '',
 				number_format($total, 2),
 			];
@@ -849,7 +849,7 @@ class PurchaseController extends Controller
 			$total = (float)($invoice->total ?? 0);
 			$rows[] = [
 				'#' . ($invoice->other_invoice_id ?? $invoice->id),
-				\Carbon\Carbon::parse($invoice->created_at)->format('d M Y'),
+				uk_ts($invoice->created_at, 'd M Y'),
 				$invoice->supplier->name ?? '',
 				number_format($total, 2),
 			];

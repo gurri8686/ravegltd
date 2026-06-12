@@ -124,6 +124,34 @@ if(!function_exists('formatTwoDecimalCurrenty')){
 	}
 }
 
+if(!function_exists('uk_ts')){
+	/**
+	 * Format a STORED UTC date/time for display in UK time (Europe/London —
+	 * auto GMT in winter / BST in summer).
+	 *
+	 * Use this ONLY for true timestamps (created_at / updated_at and other
+	 * recorded date-times). Do NOT use it for user-entered date filters or for
+	 * pure business calendar dates (invoice date, payment date, …) — those carry
+	 * no timezone and must be displayed as stored.
+	 *
+	 * @param  mixed   $value   a UTC datetime (string / Carbon / null)
+	 * @param  string  $format  any PHP date() format
+	 */
+	function uk_ts($value, $format = 'd M Y, H:i')
+	{
+		if (empty($value)) {
+			return '';
+		}
+		try {
+			return \Illuminate\Support\Carbon::parse($value, 'UTC')
+				->setTimezone('Europe/London')
+				->format($format);
+		} catch (\Throwable $e) {
+			return is_string($value) ? $value : '';
+		}
+	}
+}
+
 if (!function_exists('route_exists_like')) {
     function route_exists_like($pattern)
     {

@@ -215,7 +215,7 @@ class PrintController extends Controller
 					$price = (float)($entry[$priceKey] ?? 0);
 					$rows[] = [
 						$type,
-						isset($entry['created_at']) ? \Carbon\Carbon::parse($entry['created_at'])->format('d M Y') : '',
+						isset($entry['created_at']) ? uk_ts($entry['created_at'], 'd M Y') : '',
 						$entry['product']['name'] ?? '',
 						$party,
 						$qty,

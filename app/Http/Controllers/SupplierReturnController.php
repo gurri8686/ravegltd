@@ -143,7 +143,7 @@ class SupplierReturnController extends Controller
 				$available = $item->quantity - abs($supplierUsed) - (abs($customerConsumed) - abs($customerReturned));
 
 				$date = '';
-				try { $date = Carbon::parse($item->getRawOriginal('created_at'))->format('d M Y'); } catch(\Exception $e) {}
+				try { $date = uk_ts($item->getRawOriginal('created_at'), 'd M Y'); } catch(\Exception $e) {}
 				$supplierId = $item->supplier_id ?: ($item->invoice ? $item->invoice->supplier_id : null);
 				return [
 					'id' => $item->id,
@@ -239,7 +239,7 @@ class SupplierReturnController extends Controller
 			foreach($returns as $return){
 				$supplier = optional($return->supplier);
 				$date = '';
-				try { $date = \Carbon\Carbon::parse($return->getRawOriginal('created_at'))->format('Y-m-d H:i:s'); } catch(\Exception $e) {}
+				try { $date = uk_ts($return->getRawOriginal('created_at'), 'Y-m-d H:i:s'); } catch(\Exception $e) {}
 				$data[] = [
 					'id' => $return->id,
 					'editable' => false,

@@ -80,7 +80,7 @@
                         <a href="#" onclick="" class="btn btn-primary mr-1 btn-sm"><i class="feather icon-eye"></i> View</a>
                     </th>
 
-                    <td>{{ $log->created_at->format('d M,y H:iA') }}</td>
+                    <td>{{ uk_ts($log->created_at, 'd M,y H:iA') }}</td>
                 </tr>
             @endforeach
         </tbody>

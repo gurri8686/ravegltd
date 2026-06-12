@@ -335,7 +335,7 @@ class StockCheckController extends Controller
 			$result[] = [
 				'id'         => $item->id,
 				'invoice_id' => $item->supplier_invoice_id,
-				'updated_at' => \Carbon\Carbon::parse($item->created_at)->format('d M Y'),
+				'updated_at' => uk_ts($item->created_at, 'd M Y'),
 				'product'    => ['name' => $item->product?->name ?? '-'],
 				'supplier'   => ['name' => $item->supplier?->name ?? '-'],
 				'remarks'    => $item->remarks,
@@ -576,7 +576,7 @@ class StockCheckController extends Controller
 				'recorded_stock' => (float) $recorded,
 				'variance'       => $variance,
 				'date'           => optional($product->stockClosing)->created_at
-					? \Carbon\Carbon::parse($product->stockClosing->created_at)->format('d M Y')
+					? uk_ts($product->stockClosing->created_at, 'd M Y')
 					: '—',
 			];
 		});

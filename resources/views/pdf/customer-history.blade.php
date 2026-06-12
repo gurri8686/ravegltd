@@ -60,7 +60,7 @@
 				@endphp
 				<tr>
 					<td class="row-num">{{ $i }}.</td>
-					<td class="row-date">{{ \Carbon\Carbon::parse($invoice['created_at'])->format('d M Y') }}</td>
+					<td class="row-date">{{ uk_ts($invoice['created_at'], 'd M Y') }}</td>
 					<td class="row-invoice">{{ $invoice['id'] }}</td>
 					<td class="right row-amount">{{ $invoice['net_amount'] }}</td>
 					<td class="right {{ $invoice['total_paid'] == 0 ? 'row-zero' : 'row-amount' }}">{{ $invoice['total_paid'] }}</td>

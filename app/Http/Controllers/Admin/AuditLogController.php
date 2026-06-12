@@ -69,7 +69,7 @@ class AuditLogController extends Controller
             $u = $r->causer_id ? $causers->get($r->causer_id) : null;
             $r->who = $u ? (trim($u->first_name . ' ' . $u->last_name) ?: $u->email) : 'System';
             $r->when_human = $r->created_at ? Carbon::parse($r->created_at)->diffForHumans() : '';
-            $r->when_exact = $r->created_at ? Carbon::parse($r->created_at)->format('d M Y H:i') : '';
+            $r->when_exact = $r->created_at ? uk_ts($r->created_at, 'd M Y H:i') : '';
 
             return $r;
         });

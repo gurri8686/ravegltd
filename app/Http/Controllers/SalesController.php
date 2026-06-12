@@ -849,7 +849,7 @@ class SalesController extends Controller
 			}
 			$rows[] = [
 				'#' . $invoice->id,
-				\Carbon\Carbon::parse($invoice->created_at)->format('d M Y'),
+				uk_ts($invoice->created_at, 'd M Y'),
 				$invoice->customer->name ?? '',
 				number_format($total, 2),
 				$paid > 0 ? number_format($paid, 2) : '',
@@ -980,7 +980,7 @@ class SalesController extends Controller
 			}
 			$rows[] = [
 				'#' . $invoice->id,
-				\Carbon\Carbon::parse($invoice->created_at)->format('d M Y'),
+				uk_ts($invoice->created_at, 'd M Y'),
 				$invoice->customer->name ?? '',
 				number_format($total, 2),
 				$paid > 0 ? number_format($paid, 2) : '',

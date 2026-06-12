@@ -62,7 +62,7 @@ class ExcelController extends Controller
 			if (($inv['is_credited'] ?? 0) == 1) continue;
 			$rows[] = [
 				$inv['id'] ?? '',
-				isset($inv['created_at']) ? \Carbon\Carbon::parse($inv['created_at'])->format('d M Y') : '',
+				isset($inv['created_at']) ? uk_ts($inv['created_at'], 'd M Y') : '',
 				number_format((float)($inv['net_amount'] ?? 0), 2),
 				number_format((float)($inv['total_paid'] ?? 0), 2),
 				number_format((float)($inv['credit_adj'] ?? 0), 2),
@@ -98,7 +98,7 @@ class ExcelController extends Controller
 			if (($inv['is_credited'] ?? 0) == 1) continue;
 			$rows[] = [
 				$inv['id'] ?? '',
-				isset($inv['created_at']) ? \Carbon\Carbon::parse($inv['created_at'])->format('d M Y') : '',
+				isset($inv['created_at']) ? uk_ts($inv['created_at'], 'd M Y') : '',
 				number_format((float)($inv['net_amount'] ?? 0), 2),
 				number_format((float)($inv['total_paid'] ?? 0), 2),
 				number_format((float)($inv['credit_adj'] ?? 0), 2),
@@ -138,7 +138,7 @@ class ExcelController extends Controller
 				$price = (float)($entry[$priceKey] ?? 0);
 				$rows[] = [
 					$type,
-					isset($entry['created_at']) ? \Carbon\Carbon::parse($entry['created_at'])->format('d M Y') : '',
+					isset($entry['created_at']) ? uk_ts($entry['created_at'], 'd M Y') : '',
 					$entry['product']['name'] ?? '',
 					$party,
 					$qty,
@@ -544,7 +544,7 @@ class ExcelController extends Controller
 				$p->selling_price !== null && $p->selling_price !== '' ? $currency . ' ' . $p->selling_price : '',
 				$p->unit_weight ?? '',
 				$p->tax_vat ?? '',
-				$p->created_at ? \Carbon\Carbon::parse($p->created_at)->format('d M Y') : '',
+				$p->created_at ? uk_ts($p->created_at, 'd M Y') : '',
 				$p->is_active == 1 ? 'Active' : 'Inactive',
 				$plText,
 			];

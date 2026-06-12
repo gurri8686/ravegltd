@@ -87,7 +87,7 @@
                         <span>
                           <strong>Invoice Id : </strong>{{$data->id}}
                         <br/>
-                          <strong>Invoice Date: </strong>{{ \Carbon\Carbon::parse($data->created_at)->format('Y-m-d') }}
+                          <strong>Invoice Date: </strong>{{ uk_ts($data->created_at, 'Y-m-d') }}
                         </span>
                      </div>
                      <div class="panel-body">

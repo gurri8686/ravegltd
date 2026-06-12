@@ -61,7 +61,7 @@ class DashboardController extends Controller
                 'email'   => $u->email,
                 'initial' => strtoupper(substr($u->first_name ?: $u->email, 0, 1)),
                 'active'  => (bool) $u->is_active,
-                'when'    => $u->created_at ? Carbon::parse($u->created_at)->format('d M Y') : '—',
+                'when'    => $u->created_at ? uk_ts($u->created_at, 'd M Y') : '—',
             ]);
 
         // ── subscriptions: trial/expiry + distribution ───────────────────

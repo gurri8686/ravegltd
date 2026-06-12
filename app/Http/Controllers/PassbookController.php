@@ -77,7 +77,7 @@ class PassbookController extends Controller
             foreach ($passbookData as $passbook)
             {
                 $passData['s_no'] = $index++;
-                $passData['created_at'] = \Carbon\Carbon::parse($passbook->created_at)->format('Y-m-d');
+                $passData['created_at'] = uk_ts($passbook->created_at, 'Y-m-d');
                 $passData['customer'] = $passbook->customer->first_name;
                 $passData['amount'] = $passbook->amount;
                 $passData['payment_id'] = !empty($passbook->transaction->payment)?$passbook->transaction->payment->type:"";

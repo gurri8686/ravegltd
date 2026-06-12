@@ -116,7 +116,7 @@ class DumpController extends Controller
 
                 if ($netStock > 0) {
                     $itemDate = '';
-                    try { $itemDate = \Carbon\Carbon::parse($item->getRawOriginal('created_at'))->format('d M Y'); } catch(\Exception $e) {}
+                    try { $itemDate = uk_ts($item->getRawOriginal('created_at'), 'd M Y'); } catch(\Exception $e) {}
                     $result[] = [
                         'id'            => $item->id,
                         'supplier_id'   => $itemSupplierId,
@@ -260,7 +260,7 @@ class DumpController extends Controller
 			foreach($returns as $return){
 				$supplier = optional($return->supplier);
 				$date = '';
-				try { $date = \Carbon\Carbon::parse($return->getRawOriginal('created_at'))->format('Y-m-d H:i:s'); } catch(\Exception $e) {}
+				try { $date = uk_ts($return->getRawOriginal('created_at'), 'Y-m-d H:i:s'); } catch(\Exception $e) {}
 				$data[] = [
 					'id' => $return->id,
 					'editable' => false,

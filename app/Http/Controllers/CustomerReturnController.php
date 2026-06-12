@@ -117,7 +117,7 @@ class CustomerReturnController extends Controller
 					->sum('stock');
 				$available = $item->quantity - abs($returned);
 				$date = '';
-				try { $date = \Carbon\Carbon::parse($item->getRawOriginal('created_at'))->format('d M Y'); } catch(\Exception $e) {}
+				try { $date = uk_ts($item->getRawOriginal('created_at'), 'd M Y'); } catch(\Exception $e) {}
 				return [
 					'id' => $item->id,
 					'customer_id' => $item->customer_id,
@@ -226,7 +226,7 @@ class CustomerReturnController extends Controller
 					'invoice_id' => $return->invoice_id,
 					'note' => $return->remarks ?? '',
 					'customer_id' => $customer->id ?? '',
-					'date' => \Carbon\Carbon::parse($return->getRawOriginal('created_at'))->format('Y-m-d H:i:s'),
+					'date' => uk_ts($return->getRawOriginal('created_at'), 'Y-m-d H:i:s'),
 					'invoices' => '',
 					'total' => abs($return->stock) * abs($return->price),
 					'customer' => $customer->name ?? '',

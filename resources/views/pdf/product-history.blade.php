@@ -118,7 +118,7 @@
 					@endphp
 					<tr>
 						<td class="row-num">{{ $i }}</td>
-						<td class="row-date">{{ \Carbon\Carbon::parse($entry['created_at'])->format('d M Y') }}</td>
+						<td class="row-date">{{ uk_ts($entry['created_at'], 'd M Y') }}</td>
 						<td class="row-date">{{ $entry['supplier']['name'] ?? '' }}</td>
 						<td class="row-date">{{ $entry['product']['name'] ?? '' }}</td>
 						<td class="right row-date">{{ $entry['quantity'] }}</td>
@@ -170,7 +170,7 @@
 					@endphp
 					<tr>
 						<td class="row-num">{{ $j }}</td>
-						<td class="row-date">{{ \Carbon\Carbon::parse($entry['created_at'])->format('d M Y') }}</td>
+						<td class="row-date">{{ uk_ts($entry['created_at'], 'd M Y') }}</td>
 						<td class="row-invoice">{{ $entry['invoice_id'] ?? '' }}</td>
 						<td class="row-date">{{ $entry['supplier']['name'] ?? '' }}</td>
 						<td class="row-date">{{ $entry['product']['name'] ?? '' }}</td>
@@ -223,7 +223,7 @@
 					@endphp
 					<tr>
 						<td class="row-num">{{ $k }}</td>
-						<td class="row-date">{{ \Carbon\Carbon::parse($entry['created_at'])->format('d M Y') }}</td>
+						<td class="row-date">{{ uk_ts($entry['created_at'], 'd M Y') }}</td>
 						<td class="row-invoice">{{ $entry['customer_invoice_id'] ?? '' }}</td>
 						<td class="row-date">{{ $entry['customer']['name'] ?? '' }}</td>
 						<td class="row-date">{{ $entry['product']['name'] ?? '' }}</td>
@@ -276,7 +276,7 @@
 					@endphp
 					<tr>
 						<td class="row-num">{{ $m }}</td>
-						<td class="row-date">{{ \Carbon\Carbon::parse($entry2['created_at'])->format('d M Y') }}</td>
+						<td class="row-date">{{ uk_ts($entry2['created_at'], 'd M Y') }}</td>
 						<td class="row-invoice">{{ $entry2['customer_invoice']['id'] ?? '' }}</td>
 						<td class="row-date">{{ $entry2['customer']['name'] ?? '' }}</td>
 						<td class="row-date">{{ $entry2['product']['name'] ?? '' }}</td>
@@ -329,7 +329,7 @@
 					@endphp
 					<tr>
 						<td class="row-num">{{ $n }}</td>
-						<td class="row-date">{{ \Carbon\Carbon::parse($entry2['created_at'])->format('d M Y') }}</td>
+						<td class="row-date">{{ uk_ts($entry2['created_at'], 'd M Y') }}</td>
 						<td class="row-invoice">{{ $entry2['supplier_invoice']['id'] ?? '' }}</td>
 						<td class="row-date">{{ $entry2['supplier']['name'] ?? '' }}</td>
 						<td class="row-date">{{ $entry2['product']['name'] ?? '' }}</td>

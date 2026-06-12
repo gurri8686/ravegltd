@@ -64,7 +64,7 @@
                                     <td>{{$row->tax_vat}}</td>
                                     <td>{{$row->unit_weight}}</td>
                                     <td>{{($row->user)?$row->user->first_name:""}}</td>
-                                    <td>{{\Carbon\Carbon::parse($row->created_at)->format('Y-m-d')}}</td>
+                                    <td>{{ uk_ts($row->created_at, 'Y-m-d') }}</td>
                                     <td><span class="badge badge-{{$spanClass}}">{{$status}} </span></td>
                                     <td class="text-right">
 									<div class="dropstart">

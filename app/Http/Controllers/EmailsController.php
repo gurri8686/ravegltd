@@ -69,7 +69,7 @@ class EmailsController extends Controller
 		$companyDetails = \App\Models\CompanyDetailModel::first();
 		$companyName    = $companyDetails->company_name ?? 'R & A Veg Ltd';
 		$customerName   = $invoiceModel->customer->name ?? 'Customer';
-		$invoiceDate    = $invoiceModel->created_at ? \Carbon\Carbon::parse($invoiceModel->created_at)->format('d M Y') : '';
+		$invoiceDate    = $invoiceModel->created_at ? uk_ts($invoiceModel->created_at, 'd M Y') : '';
 		$cur            = env('CURRENCY_SYMBOL', '£');
 		$totalAmount    = optional($invoiceModel->order)->total ?? 0;
 
@@ -131,7 +131,7 @@ class EmailsController extends Controller
 		$companyDetails = \App\Models\CompanyDetailModel::first();
 		$companyName    = $companyDetails->company_name ?? 'R & A Veg Ltd';
 		$supplierName   = $invoiceModel->supplier->name ?? 'Supplier';
-		$invoiceDate    = $invoiceModel->created_at ? \Carbon\Carbon::parse($invoiceModel->created_at)->format('d M Y') : '';
+		$invoiceDate    = $invoiceModel->created_at ? uk_ts($invoiceModel->created_at, 'd M Y') : '';
 		$cur            = env('CURRENCY_SYMBOL', '£');
 
 		// Compute total from products

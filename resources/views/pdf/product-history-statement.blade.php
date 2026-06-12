@@ -87,7 +87,7 @@
     @foreach($suppliers as $i => $row)
         <tr>
             <td>{{ $i + 1 }}</td>
-            <td>{{ \Carbon\Carbon::parse($row['created_at'])->format('d M Y') }}</td>
+            <td>{{ uk_ts($row['created_at'], 'd M Y') }}</td>
             <td>{{ $row['supplier']['name'] ?? '-' }}</td>
             <td class="text-center">{{ $row['quantity'] }}</td>
             <td class="text-right">{{ $currency }}{{ number_format($row['unit_price'], 2) }}</td>
@@ -110,7 +110,7 @@
     @foreach($supplier_returns as $i => $row)
         <tr>
             <td>{{ $i + 1 }}</td>
-            <td>{{ \Carbon\Carbon::parse($row['created_at'])->format('d M Y') }}</td>
+            <td>{{ uk_ts($row['created_at'], 'd M Y') }}</td>
             <td>{{ $row['supplier']['name'] ?? '-' }}</td>
             <td class="text-center">{{ $row['stock'] }}</td>
         </tr>
@@ -130,7 +130,7 @@
     @foreach($sales as $i => $row)
         <tr>
             <td>{{ $i + 1 }}</td>
-            <td>{{ \Carbon\Carbon::parse($row['created_at'])->format('d M Y') }}</td>
+            <td>{{ uk_ts($row['created_at'], 'd M Y') }}</td>
             <td>{{ $row['customer']['name'] ?? '-' }}</td>
             <td class="text-center">{{ $row['quantity'] }}</td>
             <td class="text-right">{{ $currency }}{{ number_format($row['unit_price'], 2) }}</td>
@@ -153,7 +153,7 @@
     @foreach($customer_returns as $i => $row)
         <tr>
             <td>{{ $i + 1 }}</td>
-            <td>{{ \Carbon\Carbon::parse($row['created_at'])->format('d M Y') }}</td>
+            <td>{{ uk_ts($row['created_at'], 'd M Y') }}</td>
             <td>{{ $row['customer']['name'] ?? '-' }}</td>
             <td class="text-center">{{ $row['stock'] }}</td>
         </tr>
@@ -173,7 +173,7 @@
     @foreach($dumps as $i => $row)
         <tr>
             <td>{{ $i + 1 }}</td>
-            <td>{{ \Carbon\Carbon::parse($row['created_at'])->format('d M Y') }}</td>
+            <td>{{ uk_ts($row['created_at'], 'd M Y') }}</td>
             <td>{{ $row['supplier']['name'] ?? '-' }}</td>
             <td class="text-center">{{ $row['stock'] }}</td>
         </tr>

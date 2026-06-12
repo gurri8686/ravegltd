@@ -90,7 +90,7 @@ class PaymentController extends Controller
                 {
                     $paymentData['s_no'] = $index++;
                     $paymentData['type'] = $payment->type;
-                    $paymentData['created_at'] = \Carbon\Carbon::parse($payment->created_at)->format('Y-m-d');
+                    $paymentData['created_at'] = uk_ts($payment->created_at, 'Y-m-d');
                     $paymentData['options'] = "&emsp;<i class='fa fa-regular fa-print' onClick='print(".$payment->id.")'></i>&emsp;<i class='fa fa-regular fa-print' onClick='print(".$payment->id.")'></i>&emsp;<i class='fa fa-plus' onClick='expand(".$payment->id.")'></i>&emsp;<i class='fa fa-envelope' onClick='mail(".$payment->id.")'></i>&emsp;". $payment->type;
                     $payments[] = $paymentData;
                 }

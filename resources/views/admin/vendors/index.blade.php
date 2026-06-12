@@ -112,7 +112,7 @@
                             <span class="spinner-border spinner-border-sm tg-spin d-none ms-2" style="width:16px;height:16px;color:var(--accent);"></span>
                         </div>
                     </td>
-                    <td class="text-muted small">{{ $vendor->created_at ? Carbon::parse($vendor->created_at)->format('d M Y') : '—' }}</td>
+                    <td class="text-muted small">{{ $vendor->created_at ? uk_ts($vendor->created_at, 'd M Y') : '—' }}</td>
                     <td class="text-end">
                         <div class="d-inline-flex gap-1">
                             <a href="{{ route('admin.vendors.show', $vendor->id) }}" class="act-btn act-view" title="Sales & Purchases"><i class="bi bi-eye"></i></a>

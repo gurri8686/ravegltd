@@ -267,7 +267,7 @@
 						@endphp
 						<tr>
 							<td class="row-invoice">#{{ $invoice->id }}</td>
-							<td class="row-date">{{ \Carbon\Carbon::parse($invoice->created_at)->format('d M Y') }}</td>
+							<td class="row-date">{{ uk_ts($invoice->created_at, 'd M Y') }}</td>
 							<td class="row-customer">{{ $invoice->customer->name ?? '' }}</td>
 							<td class="right row-amount">{{ $currency }} {{ number_format($total, 2) }}</td>
 							<td class="right row-amount">{{ $paid > 0 ? $currency . ' ' . number_format($paid, 2) : '' }}</td>

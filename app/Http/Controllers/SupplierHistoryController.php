@@ -122,7 +122,7 @@ class SupplierHistoryController extends Controller
 				if (($inv['is_credited'] ?? 0) == 1) continue;
 				$rows[] = [
 					$inv['id'] ?? '',
-					isset($inv['created_at']) ? Carbon::parse($inv['created_at'])->format('d M Y') : '',
+					isset($inv['created_at']) ? uk_ts($inv['created_at'], 'd M Y') : '',
 					number_format((float)($inv['net_amount'] ?? 0), 2),
 					number_format((float)($inv['total_paid'] ?? 0), 2),
 					number_format((float)($inv['credit_adj'] ?? 0), 2),

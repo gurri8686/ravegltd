@@ -43,7 +43,7 @@
             <div class="col-sm-6"><div class="info-label">Domain</div><div class="info-val">{{ $site->domain ?: '—' }}</div></div>
             <div class="col-sm-6"><div class="info-label">Subdomain</div><div class="info-val">{{ $site->subdomain ?: '—' }}</div></div>
             <div class="col-sm-6"><div class="info-label">Database</div><div class="info-val"><code>{{ $site->database }}</code></div></div>
-            <div class="col-sm-6"><div class="info-label">Created</div><div class="info-val">{{ $site->created_at ? Carbon::parse($site->created_at)->format('d M Y') : '—' }}</div></div>
+            <div class="col-sm-6"><div class="info-label">Created</div><div class="info-val">{{ $site->created_at ? uk_ts($site->created_at, 'd M Y') : '—' }}</div></div>
         </div>
     </div>
 </div>

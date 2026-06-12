@@ -114,7 +114,7 @@ class StockClosingController extends Controller
 					'stock' => (int)$existing->stock,
 					'remark'=> $existing->remark ?? '',
 					'is_reviewed' => (bool)($existing->is_reviewed ?? false),
-					'updated_at' => $existing->updated_at ? \Carbon\Carbon::parse($existing->updated_at)->format('d M Y, H:i') : null,
+					'updated_at' => $existing->updated_at ? uk_ts($existing->updated_at, 'd M Y, H:i') : null,
 				] : null;
 				$results[] = $arr;
 			}
@@ -369,7 +369,7 @@ class StockClosingController extends Controller
             $products = $query->orderBy('id', 'desc')->get()->map(function($item) {
                 $date = '';
                 if ($item->created_at) {
-                    try { $date = \Carbon\Carbon::parse($item->created_at)->format('d/m/Y'); } catch(\Exception $e) {}
+                    try { $date = uk_ts($item->created_at, 'd/m/Y'); } catch(\Exception $e) {}
                 }
                 $customerName = '';
                 if ($item->customerInvoice && $item->customerInvoice->customer) {

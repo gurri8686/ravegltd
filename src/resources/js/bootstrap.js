@@ -1,5 +1,25 @@
 window._ = require('lodash');
 
+/**
+ * UK timezone policy (app-wide).
+ * Times are stored/sent in UTC; the whole app DISPLAYS them in UK time
+ * (Europe/London — auto GMT in winter / BST in summer). We default every
+ * Date#toLocale* call to that zone unless a caller passes its own `timeZone`.
+ * Number#toLocaleString is a different method and is NOT affected (so money/
+ * quantity formatting is untouched).
+ */
+(function () {
+    const UK_TIMEZONE = 'Europe/London';
+    ['toLocaleString', 'toLocaleDateString', 'toLocaleTimeString'].forEach((name) => {
+        const original = Date.prototype[name];
+        Date.prototype[name] = function (locales, options) {
+            const opts = options ? { ...options } : {};
+            if (opts.timeZone == null) opts.timeZone = UK_TIMEZONE;
+            return original.call(this, locales, opts);
+        };
+    });
+})();
+
 try {
     require('bootstrap');
 } catch (e) {}
