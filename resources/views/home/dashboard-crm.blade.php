@@ -680,7 +680,7 @@
 @php
     $authUser    = \Auth::user();
     $greetName   = $authUser ? ($authUser->first_name ?: explode('@', $authUser->email ?? '')[0]) : 'there';
-    $hourNow     = (int) now()->format('H');
+    $hourNow     = (int) uk_ts(now(), 'H');
     $greetWord   = $hourNow < 12 ? 'Good morning' : ($hourNow < 17 ? 'Good afternoon' : 'Good evening');
     $yesterdayAmt = (float) \DB::table('customer_invoice_products')
         ->join('invoice_payments', 'invoice_payments.customer_invoice_id', '=', 'customer_invoice_products.customer_invoice_id')

@@ -25,7 +25,7 @@
                     <td class="text-muted">{{ $a->email }}</td>
                     <td><span class="role-chip {{ $roleColors[$a->role] ?? 'rc-grey' }}">{{ ucfirst($a->role) }}</span></td>
                     <td><span class="pill {{ $a->is_active ? 'pill-on' : 'pill-off' }}">{{ $a->is_active ? 'Active' : 'Inactive' }}</span></td>
-                    <td class="text-muted small">{{ $a->last_login_at ? Carbon::parse($a->last_login_at)->format('d M Y H:i') : 'Never' }}</td>
+                    <td class="text-muted small">{{ $a->last_login_at ? uk_ts($a->last_login_at, 'd M Y H:i') : 'Never' }}</td>
                     <td class="text-end">
                         <div class="d-inline-flex gap-1">
                             <a href="{{ route('admin.adminusers.edit', $a->id) }}" class="act-btn act-edit" title="Edit"><i class="bi bi-pencil"></i></a>

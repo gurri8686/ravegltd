@@ -183,7 +183,7 @@ class DomainController extends Controller
         return response()->json([
             'dns_verified' => $dns,
             'ssl_status'   => $ssl,
-            'verified_at'  => now()->format('d M Y H:i'),
+            'verified_at'  => uk_ts(now(), 'd M Y H:i'),
             'message'      => 'Checked ' . $host,
         ]);
     }

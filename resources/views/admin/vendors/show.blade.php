@@ -168,7 +168,7 @@
             // to current plan. Expire = start + the plan's billing cycle.
             // default plan = current vendor's plan, else the first available plan
             $defPlanId  = ($curSub && $curSub->plan_tier_id) ? $curSub->plan_tier_id : optional($plans->first())->id;
-            $defStart   = ($curSub && $subActive) ? Carbon::parse($curSub->expire)->format('Y-m-d') : now()->format('Y-m-d');
+            $defStart   = ($curSub && $subActive) ? Carbon::parse($curSub->expire)->format('Y-m-d') : uk_ts(now(), 'Y-m-d');
             $curPlanRow = ($curSub && $curSub->plan_tier_id) ? $plans->firstWhere('id', $curSub->plan_tier_id) : null;
             $defCycle   = ($defPlanId ? optional($plans->firstWhere('id', $defPlanId))->billing_cycle : null) ?: 'yearly';
             $defExpire  = $defCycle === 'monthly'

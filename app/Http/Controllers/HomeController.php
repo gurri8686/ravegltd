@@ -228,7 +228,7 @@ class HomeController extends Controller
                 'sales_chart'      => $salesChart,
                 'recent_invoices'  => $recent,
                 'recent_activity'  => $activity,
-                'server_time'      => now()->format('H:i:s'),
+                'server_time'      => uk_ts(now(), 'H:i:s'),
             ],
         ]);
         } catch (\Throwable $e) {

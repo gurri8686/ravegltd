@@ -165,8 +165,8 @@
                         </select>
                     </div>
                     <div class="row g-2">
-                        <div class="col-6"><label class="form-label fw-semibold">Start <span class="text-danger">*</span></label><input type="date" name="start" class="form-control" value="{{ now()->format('Y-m-d') }}" required></div>
-                        <div class="col-6"><label class="form-label fw-semibold">Expire <span class="text-danger">*</span></label><input type="date" name="expire" class="form-control" value="{{ now()->addYear()->format('Y-m-d') }}" required></div>
+                        <div class="col-6"><label class="form-label fw-semibold">Start <span class="text-danger">*</span></label><input type="date" name="start" class="form-control" value="{{ uk_ts(now(), 'Y-m-d') }}" required></div>
+                        <div class="col-6"><label class="form-label fw-semibold">Expire <span class="text-danger">*</span></label><input type="date" name="expire" class="form-control" value="{{ uk_ts(now()->addYear(), 'Y-m-d') }}" required></div>
                     </div>
                 </div>
                 <div class="modal-footer" style="border-color:var(--border);">

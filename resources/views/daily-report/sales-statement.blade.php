@@ -37,7 +37,7 @@
     @endif
     <h1>Daily Sales Statement</h1>
     <h2>{{ \Carbon\Carbon::parse($start_date)->format('d M Y') }} @if($start_date != $end_date) - {{ \Carbon\Carbon::parse($end_date)->format('d M Y') }} @endif</h2>
-    <p>Generated on {{ now()->format('d M Y, h:i A') }}</p>
+    <p>Generated on {{ uk_ts(now(), 'd M Y, h:i A') }}</p>
 </div>
 
 <table class="summary-table">

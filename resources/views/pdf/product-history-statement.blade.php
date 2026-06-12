@@ -34,7 +34,7 @@
     @endif
     <h1>Product History Statement</h1>
     <h2>{{ $productName }} | {{ \Carbon\Carbon::parse($start_date)->format('d M Y') }} - {{ \Carbon\Carbon::parse($end_date)->format('d M Y') }}</h2>
-    <p>Generated on {{ now()->format('d M Y, h:i A') }}</p>
+    <p>Generated on {{ uk_ts(now(), 'd M Y, h:i A') }}</p>
 </div>
 
 @php

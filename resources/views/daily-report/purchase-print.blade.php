@@ -163,7 +163,7 @@
 			</div>
 			<div class="contact-right">
 				<div class="report-title">Daily Purchase Report</div>
-				<div class="report-sub">Generated on {{ now()->format('d M Y, h:i A') }}</div>
+				<div class="report-sub">Generated on {{ uk_ts(now(), 'd M Y, h:i A') }}</div>
 			</div>
 		</div>
 
