@@ -22,10 +22,11 @@ served from `public/cdn`.
 | Composer | latest |
 | MySQL / MariaDB | XAMPP default is fine |
 | Apache | XAMPP / WAMP / Laragon — app is served via a **vhost**, *not* `php artisan serve` (multi-domain needs a real hostname) |
-| Node.js + npm | **16+** — *only* needed if you change frontend assets (see [Frontend / Assets](#frontend--assets)) |
+| Node.js + npm | **18+** (tested on Node 22 / npm 11) — *only* needed if you change frontend assets (see [Frontend / Assets](#frontend--assets-react-ui-build)) |
 
-> Tip: pin Node to one version across the team (add a `.nvmrc`). Different
-> Node/npm versions can produce slightly different CSS/JS builds.
+> Tip: the JS toolchain is locked by **`package-lock.json`** — always install with
+> **`npm ci`** (not `npm install`) so everyone builds with the exact same versions
+> (notably **webpack 5.103.0**, which laravel-mix 6 requires).
 
 ---
 
@@ -41,7 +42,7 @@ served from `public/cdn`.
   **not** need to run `npm` just to run the app.
 - ⚠️ **Therefore:** if you change any CSS / JS / React source, you **must rebuild
   and commit the built files**, otherwise other machines (and new clones) will
-  show **old UI**. See [Frontend / Assets](#frontend--assets).
+  show **old UI**. See [Frontend / Assets](#frontend--assets-react-ui-build).
 
 ---
 
@@ -137,19 +138,54 @@ Open **http://ravegltd.localhost** — and the superadmin panel at
 
 ---
 
-## Frontend / Assets
+## Frontend / Assets (React UI build)
 
-You only touch this when you **change** CSS / JS:
+The page UI — the `*App.js` React screens (lists, tables, cards, forms) — is built
+**from this repo's own source** in `src/resources/js/` and bundled into
+`public/cdn`. You only touch this when you **change** the UI.
+
 ```bash
-npm install        # first time (use `npm ci` for an exact, locked install)
-npm run dev        # quick build  (or `npm run prod` for production/minified)
+npm ci             # first time — installs the exact locked toolchain (prefer over `npm install`)
+npm run watch      # rebuild on save while developing
+npm run prod       # production (minified) build  →  public/cdn/js + public/cdn/css
 ```
-This rebuilds `public/css/app.css` and `public/js/app.js`.
 
-**Rule (prevents "old CSS on other machines"):** after any frontend change,
-**rebuild and commit the built files together with your source change.** The
-shared UI components/bundle in `public/cdn` come from the separate **ts-cdn**
-project — rebuild there and copy its output into `public/cdn`, then commit.
+- **Source:** `src/resources/js/` (entry `app.js`; screens in `components/`, plus
+  `elements/` and `hooks/`; styles in `src/resources/css/app.css`).
+- **Output:** `public/cdn/js/{manifest,vendor,app}.js` + `public/cdn/css/app.css`
+  (TinyMCE is copied to `public/cdn/tinymce` by `postinstall.js`).
+- ⚠️ **Do NOT `npm update` webpack.** `package-lock.json` pins **webpack 5.103.0**;
+  5.107+ removes `webpack/lib/SizeFormatHelpers` and breaks laravel-mix 6 (the build
+  crashes with `Cannot find module …`). Use `npm ci` to keep the locked versions.
+
+**Rule (prevents "old UI on other machines / live"):** after any UI change,
+**rebuild (`npm run prod`) and commit the regenerated `public/cdn` together with
+your source change.** The server does **not** build — it serves the committed bundle.
+
+> The React source also lives in a separate **ts-cdn** repo (still shared by the
+> ts-organizations app). It now lives **here** too, so ravegltd builds its own UI —
+> changes made here do **not** propagate to ts-organizations, and vice-versa.
+>
+> Legacy note: the old Vue login scaffold (`resources/js` → `public/js/app.js`) only
+> powers the auth/login pages; its mix line is left commented in `webpack.mix.js`.
+> Don't confuse it with the React bundle in `public/cdn`.
+
+---
+
+## Deploy (production)
+
+Production (GoDaddy / cPanel) is a **git deploy** — the server does **not** run a
+build. So shipping a UI change is:
+
+1. `npm run prod` → regenerates `public/cdn`
+2. commit the regenerated `public/cdn` **and** your source change
+3. `git push origin main`
+4. deploy: cPanel → **Git Version Control → Manage → Deploy HEAD Commit**
+   (runs `.cpanel.yml`, which copies the files into the live docroot)
+
+If a deploy is blocked by *"uncommitted changes on the checked-out branch"*, clean
+the server clone first — `git fetch origin && git reset --hard origin/main` (your
+gitignored `envs/` is untouched) — then deploy.
 
 ---
 
@@ -181,6 +217,7 @@ php artisan permissions:update --domain=ravegltd.localhost
 | **Cards/tables show old styling** | Built CSS is stale (built files are committed but weren't rebuilt). Rebuild + commit (see Frontend / Assets), then hard-refresh (`Ctrl+Shift+R`). |
 | **Wrong data on a subdomain** | The host → database mapping comes from the `sites` table (`DomainsMiddleware`). Check the row's `database` value. |
 | **Changed `.env` / mail not taking effect** | Multi-domain caches env; restart Apache fully after editing env files. |
+| **`npm run prod` fails: `Cannot find module 'webpack/lib/SizeFormatHelpers'`** | webpack drifted past 5.103. Run `npm ci` to restore the locked version (or `npm i -D webpack@5.103.0`). |
 
 ---
 
