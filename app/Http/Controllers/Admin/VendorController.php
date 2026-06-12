@@ -173,7 +173,15 @@ class VendorController extends Controller
             $site = $this->provisionVendorSite($vendor);
             $vendor->site_id = $site['id'];
             $vendor->save();
-            $note = " Their site: http://{$site['host']} (database: {$site['database']}).";
+            if ($site['db_ready']) {
+                $note = " Their site: http://{$site['host']} (database: {$site['database']}).";
+            } else {
+                // Subdomain created, but the database could not be created here
+                // (typically shared hosting blocks CREATE DATABASE). Tell the
+                // admin the exact next step.
+                $note = " Subdomain http://{$site['host']} created. Database \"{$site['database']}\""
+                    . ' is pending — create it in cPanel and assign the DB user, then provision it from Domains.';
+            }
         } catch (\Throwable $e) {
             report($e);
             $note = ' Note: automatic site provisioning failed (' . $e->getMessage()
@@ -281,16 +289,13 @@ class VendorController extends Controller
         @set_time_limit(0); // schema clone is quick, but never risk a timeout mid-provision
 
         $provisioner = new TenantProvisioner();
+        $database    = $provisioner->databaseName($vendor);
+        $host        = $this->uniqueSubdomain($vendor->first_name);
 
-        // Create the tenant DB (idempotent — reuse it if it somehow already exists).
-        $database = $provisioner->databaseName($vendor);
-        $exists   = DB::table('information_schema.schemata')->where('schema_name', $database)->exists();
-        if (!$exists) {
-            $database = $provisioner->provisionForVendor($vendor);
-        }
-
-        // Register the subdomain → tenant DB mapping in the control-plane sites table.
-        $host   = $this->uniqueSubdomain($vendor->first_name);
+        // 1) ALWAYS register the subdomain → tenant DB mapping first, so the
+        //    subdomain is created even if the database itself can't be. On shared
+        //    hosting (e.g. GoDaddy) the app may not CREATE DATABASE — there the DB
+        //    is made by hand in cPanel afterwards and this row already points to it.
         $siteId = DB::connection('organizations')->table('sites')->insertGetId([
             'subdomain'  => $host,
             'domain'     => $host,
@@ -302,7 +307,19 @@ class VendorController extends Controller
             'updated_at' => now(),
         ]);
 
-        return ['id' => $siteId, 'host' => $host, 'database' => $database];
+        // 2) Best-effort: build the tenant database. provisionForVendor() creates
+        //    it only if it doesn't exist (local/VPS), or just populates a
+        //    pre-created one (cPanel). If CREATE DATABASE is blocked by the host,
+        //    the subdomain still stands and the DB is left "pending".
+        $dbReady = false;
+        try {
+            $provisioner->provisionForVendor($vendor);
+            $dbReady = true;
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        return ['id' => $siteId, 'host' => $host, 'database' => $database, 'db_ready' => $dbReady];
     }
 
     /**

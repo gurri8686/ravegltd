@@ -45,8 +45,13 @@ class TenantProvisioner
         $main   = DB::connection('mysql')->getDatabaseName();
         $dbName = $this->databaseName($vendor);
 
-        // 1. create the database
-        DB::statement("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+        // 1. Create the database ONLY if it doesn't already exist.
+        //    On shared hosting (e.g. GoDaddy cPanel) the app's MySQL user can't
+        //    run CREATE DATABASE — there the database is created by hand in cPanel
+        //    first, and here we just populate that already-existing database.
+        if (!$this->databaseExists($dbName)) {
+            DB::statement("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+        }
 
         // 2. clone every table's structure from the main db
         foreach ($this->tablesOf($main) as $table) {
@@ -87,6 +92,13 @@ class TenantProvisioner
     {
         return DB::table('information_schema.tables')
             ->where('table_schema', $database)->where('table_name', $table)->exists();
+    }
+
+    /** Does a database with this name already exist on the server? */
+    private function databaseExists(string $database): bool
+    {
+        return DB::table('information_schema.schemata')
+            ->where('schema_name', $database)->exists();
     }
 
     /** Recreate the vendor as an admin user inside their own database. */
