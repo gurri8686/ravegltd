@@ -1,0 +1,45 @@
+.datagrid-container {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  background: #fff;
+}
+
+.datagrid-controls {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.datagrid-controls select,
+.datagrid-controls input {
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.datagrid-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.datagrid-table th,
+.datagrid-table td {
+  padding: 8px;
+  border: 1px solid #eee;
+  text-align: left;
+}
+
+.datagrid-table th.sortable {
+  cursor: pointer;
+}
+
+.datagrid-table th.sortable:hover {
+  background-color: #f9f9f9;
+}
+
+.datagrid-pagination {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}

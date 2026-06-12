@@ -1,0 +1,15 @@
+/* Fix dropdown clipping inside react-data-table rows */
+.rdt_TableCell,
+.rdt_TableRow {
+    overflow: visible !important;
+}
+
+/* Make dropdown appear above table */
+.dropdown-menu {
+    z-index: 9999 !important;
+}
+
+/* Ensure parent container does not hide overflow */
+.rdt_TableBody {
+    overflow: visible !important;
+}

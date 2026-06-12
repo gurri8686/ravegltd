@@ -1,0 +1,306 @@
+/* ── Global Font Family — Open Sans across entire application ────────── */
+html, body, button, input, select, textarea, label, h1, h2, h3, h4, h5, h6, p, span, div, td, th, a {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+}
+
+/* ── Global: Remove black focus outline, use orange ── */
+*:focus {
+    outline: none !important;
+}
+button:focus,
+a:focus,
+input:focus,
+select:focus,
+textarea:focus,
+[tabindex]:focus {
+    outline: none !important;
+    box-shadow: none;
+}
+/* :focus-visible appears with keyboard navigation (Tab key). For inputs/selects
+   we use their own border-color + shadow, so the extra outline is redundant
+   and looks like a "double border" (especially with react-select). Suppress it
+   to keep visuals clean. We still keep an accessible outline on buttons/links. */
+button:focus-visible,
+a:focus-visible {
+    outline: 2px solid #F27420 !important;
+    outline-offset: 1px;
+}
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+    outline: none !important;
+}
+/* Generic focus styling applies ONLY to .form-control and Bootstrap form inputs.
+   Custom React components handle their own focus styles inline. */
+.form-control:focus,
+input.form-control:focus,
+select.form-control:focus,
+textarea.form-control:focus {
+    border-color: #F27420 !important;
+    box-shadow: 0 0 0 3px rgba(242,116,32,0.1) !important;
+}
+
+/* react-select internal inputs: keep them transparent and bare. */
+.select__control input:focus,
+[class$="-control"] input:focus,
+[class*="-control "] input:focus,
+.react-select__input input:focus,
+div[class*="control"] input:focus {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+.btn:focus,
+.btn:active:focus,
+.form-control:focus,
+.form-select:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(242,116,32,0.1) !important;
+    border-color: #F27420 !important;
+}
+
+/* ── DataTable Pagination Dropdown — Orange Theme ── */
+.rdt_Pagination select {
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    padding: 4px 24px 4px 10px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    background: #fff !important;
+    outline: none !important;
+    cursor: pointer !important;
+    transition: border-color 0.15s !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23F27420' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 8px center !important;
+}
+.rdt_Pagination select:focus {
+    border-color: #F27420 !important;
+    box-shadow: 0 0 0 3px rgba(242,116,32,0.1) !important;
+}
+.rdt_Pagination select option:checked,
+.rdt_Pagination select option:hover {
+    background: #F27420 !important;
+    background-color: #F27420 !important;
+    color: #fff !important;
+}
+.rdt_Pagination select option {
+    padding: 8px 12px !important;
+    font-weight: 500 !important;
+}
+
+/* ── Invoice Payment Modal — balanced top/bottom spacing ─────────────────
+   margin: 63px auto provides equal top + bottom spacing from navbar/viewport edges.
+   max-height ensures internal scroll when content overflows instead of pushing dialog. */
+.payment-modal-wide.modal-dialog,
+div.modal-dialog.payment-modal-wide {
+    max-width: 780px !important;
+    width: calc(100% - 30px) !important;
+    max-height: calc(100vh - 60px) !important;
+    margin: 63px auto !important;
+    min-height: auto !important;
+    display: block !important;
+    align-items: unset !important;
+}
+
+.payment-modal-wide .modal-content {
+    width: 100%;
+    max-height: calc(100vh - 126px);
+    overflow-y: auto;
+    border-radius: 18px !important;
+    border: none !important;
+    box-shadow: 0 24px 60px -12px rgba(15,17,21,0.28), 0 8px 20px -8px rgba(15,17,21,0.16) !important;
+}
+
+/* Custom scrollbar inside the modal — subtle, on-brand */
+.payment-modal-wide .modal-content::-webkit-scrollbar { width: 6px; }
+.payment-modal-wide .modal-content::-webkit-scrollbar-thumb { background: #f97316; border-radius: 3px; }
+.payment-modal-wide .modal-content::-webkit-scrollbar-track { background: transparent; }
+
+@media (max-width: 768px) {
+    .payment-modal-wide.modal-dialog,
+    div.modal-dialog.payment-modal-wide {
+        margin: 40px auto !important;
+        max-height: calc(100vh - 40px) !important;
+    }
+    .payment-modal-wide .modal-content {
+        max-height: calc(100vh - 80px);
+    }
+}
+
+/* ── Global orange loading/spinner colors ── */
+.spinner-border,
+.spinner-grow {
+    color: #f97316 !important;
+    border-color: #f97316 !important;
+    border-right-color: transparent !important;
+}
+.spinner-border-sm { color: #f97316 !important; }
+.fa-spinner, .fa-circle-notch, .fa-cog.fa-spin, .fa-refresh.fa-spin {
+    color: #f97316 !important;
+}
+.loading-text, .loader-text {
+    color: #f97316 !important;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+/* react-loader-spinner SVG override */
+.loading-indicator svg circle,
+[aria-label="loading-indicator"] svg circle {
+    stroke: #f97316 !important;
+    fill: #f97316 !important;
+}
+
+/* ── Global Toastify Styles — premium SaaS look ───────────────────────────
+   Applies to all react-toastify notifications site-wide.
+   Success → soft green card. Error → soft red. Info/Warning → soft slate/amber.
+   All share: rounded corners, subtle shadow, no border, comfortable padding. */
+
+.Toastify__toast-container {
+    width: auto !important;
+    max-width: 380px !important;
+    padding: 8px !important;
+}
+
+.Toastify__toast {
+    min-height: 52px !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 24px -8px rgba(15, 17, 21, 0.15), 0 4px 8px -4px rgba(15, 17, 21, 0.08) !important;
+    padding: 12px 16px !important;
+    background: #ffffff !important;
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    font-size: 13.5px !important;
+    font-weight: 500 !important;
+    border: 1px solid #f1f5f9 !important;
+    margin-bottom: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.Toastify__toast-body {
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    line-height: 1.4 !important;
+}
+
+.Toastify__toast-icon {
+    width: 22px !important;
+    height: 22px !important;
+    flex-shrink: 0 !important;
+    margin-inline-end: 0 !important;
+}
+
+/* Success — white bg, green icon, dark text */
+.Toastify__toast--success {
+    background: #ffffff !important;
+    color: #0f172a !important;
+}
+.Toastify__toast--success .Toastify__toast-icon svg {
+    fill: #15803d !important;
+}
+
+/* Error — white bg, red icon, dark text */
+.Toastify__toast--error {
+    background: #ffffff !important;
+    color: #0f172a !important;
+}
+.Toastify__toast--error .Toastify__toast-icon svg {
+    fill: #b91c1c !important;
+}
+
+/* Warning — white bg, amber icon, dark text */
+.Toastify__toast--warning {
+    background: #ffffff !important;
+    color: #0f172a !important;
+}
+.Toastify__toast--warning .Toastify__toast-icon svg {
+    fill: #b45309 !important;
+}
+
+/* Info — white bg, orange icon, dark text */
+.Toastify__toast--info {
+    background: #ffffff !important;
+    color: #0f172a !important;
+}
+.Toastify__toast--info .Toastify__toast-icon svg {
+    fill: #f97316 !important;
+}
+
+/* Default */
+.Toastify__toast--default {
+    background: #ffffff !important;
+    color: #0f172a !important;
+}
+
+/* Close button — subtle, muted */
+.Toastify__close-button {
+    color: #94a3b8 !important;
+    opacity: 0.6 !important;
+    align-self: center !important;
+    padding: 0 0 0 8px !important;
+}
+.Toastify__close-button:hover {
+    opacity: 1 !important;
+    color: #0f172a !important;
+}
+
+/* Progress bar — hidden */
+.Toastify__progress-bar {
+    display: none !important;
+}
+
+
+/* ── Modern tooltip for icon buttons ─────────────────────────────────── */
+.icon-tip {
+    position: relative;
+}
+/* Tooltip appears BELOW the button so it never gets clipped by overflow:hidden
+   parents above (header bars, summary cards, etc.). */
+.icon-tip::after {
+    content: attr(data-tip);
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) translateY(-4px);
+    background: #0f172a;
+    color: #fff;
+    font-size: 11.5px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.2px;
+    padding: 7px 10px;
+    border-radius: 7px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    z-index: 9999;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+}
+.icon-tip::before {
+    content: '';
+    position: absolute;
+    top: calc(100% + 3px);
+    left: 50%;
+    transform: translateX(-50%) translateY(-4px);
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid #0f172a;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    z-index: 9999;
+}
+.icon-tip:hover::after,
+.icon-tip:hover::before {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
