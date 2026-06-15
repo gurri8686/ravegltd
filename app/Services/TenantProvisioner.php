@@ -46,11 +46,12 @@ class TenantProvisioner
         $dbName = $this->databaseName($vendor);
 
         // 1. Create the database ONLY if it doesn't already exist.
-        //    On shared hosting (e.g. GoDaddy cPanel) the app's MySQL user can't
-        //    run CREATE DATABASE — there the database is created by hand in cPanel
-        //    first, and here we just populate that already-existing database.
+        //    'native' -> direct CREATE DATABASE (local root / VPS).
+        //    'cpanel' -> create via cPanel UAPI + grant the app's MySQL user,
+        //                because on shared hosting (GoDaddy) the app user can't
+        //                run CREATE DATABASE. Configured in config/tenant.php.
         if (!$this->databaseExists($dbName)) {
-            DB::statement("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+            $this->createDatabase($dbName);
         }
 
         // 2. clone every table's structure from the main db
@@ -71,13 +72,37 @@ class TenantProvisioner
         return $dbName;
     }
 
-    /** Build a safe, unique database name: <slug>_<id>_ravegltd. */
+    /**
+     * Create the tenant database using the configured provider:
+     *   native: a direct CREATE DATABASE (needs a privileged MySQL user).
+     *   cpanel: cPanel UAPI creates it and grants the app's MySQL user ALL on it
+     *           (shared hosting, where CREATE DATABASE is blocked for the app user).
+     */
+    private function createDatabase(string $dbName): void
+    {
+        if (config('tenant.provider') === 'cpanel') {
+            $cpanel = new CpanelMysql();
+            $cpanel->createDatabase($dbName);
+            $cpanel->grantUser($dbName, (string) config('tenant.cpanel.grant_user'));
+
+            // Pick up the freshly granted privileges before cloning tables into it.
+            DB::purge('mysql');
+            DB::reconnect('mysql');
+
+            return;
+        }
+
+        DB::statement("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+    }
+
+    /** Build a safe, unique database name: [prefix]<slug>_<id>_ravegltd. */
     public function databaseName(object $vendor): string
     {
         $name = trim(($vendor->first_name ?? '') . ' ' . ($vendor->last_name ?? '')) ?: ($vendor->username ?? 'vendor');
         $slug = Str::slug($name, '_') ?: 'vendor';
 
-        return strtolower($slug . '_' . $vendor->id . '_' . self::BASE);
+        // The prefix is mandatory on cPanel (e.g. "fx8fdk9i85rt_"); empty locally.
+        return config('tenant.db_prefix', '') . strtolower($slug . '_' . $vendor->id . '_' . self::BASE);
     }
 
     private function tablesOf(string $database): array
