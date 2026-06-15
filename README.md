@@ -113,19 +113,39 @@ The CDN bundle is served from this same site under `/cdn` (it's `public/cdn`), s
 > them.
 
 ### 5. Database
-1. Create the two databases: the tenant DB (e.g. `ts.ravegltd.com`) and
-   `ts_organizations`.
-2. Load data: import the provided SQL dump, **or** build from scratch:
+This app uses **two** databases:
+- **Tenant DB** (e.g. `ts.ravegltd.com`) — business data (customers, suppliers,
+  invoices, users, roles, permissions).
+- **`ts_organizations`** (control-plane) — the `sites` host→database map, plus
+  `plans` / `plan_tiers` / `platform_*`.
+
+1. **Create both databases** (empty):
+   ```sql
+   CREATE DATABASE `ts.ravegltd.com`;
+   CREATE DATABASE `ts_organizations`;
+   ```
+2. **Build the schema** — a single `migrate` creates the tables in **both** DBs; the
+   control-plane tables (`sites`, `plans`, `plan_tiers`, `platform_*`) are created on
+   the `organizations` connection automatically:
    ```bash
    php artisan migrate --domain=ravegltd.localhost
-   php artisan db:seed --domain=ravegltd.localhost   # superadmin + roles
    ```
-3. **Register the domain** in the control-plane `sites` table (this is required —
-   `DomainsMiddleware` returns **404 on every page** if the host isn't there):
-
-   In `ts_organizations.sites`, add a row:
+   > A from-scratch `migrate` now creates `sites`/`plans` too. (Earlier these were
+   > not migratable, so a fresh DB had no `sites` table and **every page 404'd**.)
+3. **Seed the login** (minimum needed to get in):
+   ```bash
+   php artisan db:seed --domain=ravegltd.localhost   # superadmin@ravegltd.local / ChangeMe@123 + superadmin/vendor roles
+   ```
+   > ⚠️ **Only** the superadmin login + roles are seeded — **not** `general_settings`
+   > or any business data. If a page (e.g. Sales / Invoices) looks blank or errors on a
+   > missing setting, seed it manually
+   > (`php artisan db:seed --class=GeneralSettingSeeder --domain=ravegltd.localhost`)
+   > or import a **data** dump from an existing environment.
+4. **Register the domain** in `ts_organizations.sites` (REQUIRED — `DomainsMiddleware`
+   returns **404 on every page** if the host isn't there). `migrate` creates the table
+   but it's empty, so add a row:
    `subdomain = ravegltd.localhost`, `domain = ravegltd.localhost`,
-   `database = ts.ravegltd.com`, `status = 1` (+ any `api_key`/`api_secret`).
+   `database = ts.ravegltd.com`, `status = 1` (+ `api_key` / `api_secret`).
 
 ### 6. Permissions
 ```bash
