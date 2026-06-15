@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
  * Provisions a brand-new database for a vendor (database-per-tenant model).
  *
  * Given a vendor (a users row in the MAIN db) and a subdomain, it:
- *   1. creates a new database  `<slug>_<id>_<base>`
+ *   1. creates a new database  `<firstname>_<nnnnn>`
  *   2. clones the schema of the main db (CREATE TABLE ... LIKE — structure only)
  *   3. copies the RBAC reference data (roles/permissions) so logins work
  *   4. creates the vendor's admin user inside the new db
@@ -22,9 +22,6 @@ use Illuminate\Support\Str;
  */
 class TenantProvisioner
 {
-    /** Short base appended to each tenant db name. */
-    private const BASE = 'ravegltd';
-
     /**
      * RBAC / reference tables copied (with data) into the new tenant db.
      * NOTE: only role/permission STRUCTURE — never the user-specific
@@ -95,14 +92,21 @@ class TenantProvisioner
         DB::statement("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
     }
 
-    /** Build a safe, unique database name: [prefix]<slug>_<id>_ravegltd. */
+    /** Build a short, STABLE database name: [prefix]<firstname>_<nnnnn>. */
     public function databaseName(object $vendor): string
     {
-        $name = trim(($vendor->first_name ?? '') . ' ' . ($vendor->last_name ?? '')) ?: ($vendor->username ?? 'vendor');
-        $slug = Str::slug($name, '_') ?: 'vendor';
+        $first = $vendor->first_name ?: ($vendor->username ?? 'vendor');
+        $slug  = Str::slug($first, '_') ?: 'vendor';
 
-        // The prefix is mandatory on cPanel (e.g. "fx8fdk9i85rt_"); empty locally.
-        return config('tenant.db_prefix', '') . strtolower($slug . '_' . $vendor->id . '_' . self::BASE);
+        // A 5-digit suffix that LOOKS random but is DERIVED from the vendor id,
+        // so it is stable: databaseName() is called multiple times (create the
+        // DB, record it on the site, later find/reuse it) and every call must
+        // return the same name. A truly random suffix would differ each call
+        // and break provisioning. (id -> crc32 -> 10000..99999)
+        $suffix = abs(crc32('tenant|' . $vendor->id)) % 90000 + 10000;
+
+        // Prefix is empty on this server (no db-name prefix enforced); empty locally.
+        return config('tenant.db_prefix', '') . strtolower($slug . '_' . $suffix);
     }
 
     private function tablesOf(string $database): array
