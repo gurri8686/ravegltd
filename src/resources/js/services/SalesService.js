@@ -16,7 +16,7 @@ const SalesService = {
         return axios.post('/data_entry/sales_entry/ajax/add-invoice', values);
     },
     addSingleInvoice: (values) => {
-       return axios.post('/data_entry/sales_entry/ajax/add-single-invoice', values);
+       return axios.post('/data_entry/sales_entry/ajax/add-single-invoice', { ...values, price: Number(values.price) || 0, totalPrice: Number(values.totalPrice) || 0 });
     },
     deleteSingleInvoice: (values) => {
         return axios.post('/data_entry/sales_entry/ajax/delete-single-invoice', values);
@@ -28,7 +28,7 @@ const SalesService = {
       return axios.get('/data_entry/sales_entry/ajax/invoice-detail/'+ id);
    },
      editSingleInvoice: (values) => {
-        return axios.post('/data_entry/sales_entry/ajax/edit-single-invoice', values);
+        return axios.post('/data_entry/sales_entry/ajax/edit-single-invoice', { ...values, price: Number(values.price) || 0, totalPrice: Number(values.totalPrice) || 0 });
      },
      updatePaymentMethod: (values) => {
         return axios.post('/data_entry/sales_entry/ajax/update-payment', values);

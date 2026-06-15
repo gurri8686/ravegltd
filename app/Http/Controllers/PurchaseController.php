@@ -48,7 +48,7 @@ class PurchaseController extends Controller
                 'products' => 'nullable|array',
                 'products.*.product_id' => 'required',
                 'products.*.quantity' => 'required|numeric|min:0.01',
-                'products.*.price' => 'required|numeric|min:0.01',
+                'products.*.price' => 'nullable|numeric|min:0',
             ]);
 
             // Create invoice
@@ -463,7 +463,7 @@ class PurchaseController extends Controller
 			'invoiceproductid' => ['required','integer'],
 			
 			'quantity' => ['required','numeric'],
-			'price' => ['required','numeric']
+			'price' => ['nullable','numeric']
 		];
 		
 		$validator = Validator::make($request->all(), $rules);
@@ -560,7 +560,7 @@ class PurchaseController extends Controller
 			'invoiceId' => ['required','integer'],
 			
 			'quantity' => ['required','numeric'],
-			'price' => ['required','numeric']
+			'price' => ['nullable','numeric']
 		];
 		
 		$validator = Validator::make($request->all(), $rules);

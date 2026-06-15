@@ -551,7 +551,7 @@ class SalesController extends Controller
 		'product.label' => ['required', 'string'],
 		'product.value' => ['required','integer'],
 		'quantity' => ['required','numeric'],
-		'price' => ['required','numeric']
+		'price' => ['nullable','numeric']
 	];
 
 	if ($showSuppliers) {
@@ -588,13 +588,9 @@ class SalesController extends Controller
 		$request->supplier_invoice_product_id = 0;
 		$request->invoice_id = 0;
 		$request->supplier_id = 0;
-		// No supplier binding (e.g. show_suppliers = OFF): still block selling more
-		// than the product actually has in stock so Sales stays in sync with Stock Manager.
-		try {
-			$salePurchaseValidation->canAddSaleEntryByProductStock($request->product, $request->quantity);
-		} catch(\Exception $ex) {
-			return $this->errorResponse($ex->getMessage());
-		}
+		// Supplier Required (show_suppliers) is OFF: do NOT enforce stock /
+		// quantity-availability validation — the sale is allowed regardless of how
+		// much stock the product has on hand.
 	}
 	
 	// validation: only one combination of product is allowed to add. (supplier_invoice_id, customer_invoice_id, supplier_id, product_id)
@@ -1313,7 +1309,7 @@ class SalesController extends Controller
 				'product.label' => ['required', 'string'],
 				'product.value' => ['required','integer'],
 				'quantity' => ['required','numeric'],
-				'price' => ['required','numeric'],
+				'price' => ['nullable','numeric'],
 				'customer_id' => ['required','numeric']
 			];
 
@@ -1349,10 +1345,11 @@ class SalesController extends Controller
 				$request->supplier_invoice_product_id = 0;
 				$request->invoice_id = 0;
 				$request->supplier_id = 0;
-				// No supplier binding: block editing qty above available product stock
-				// (exclude the row being edited so its own qty isn't double-counted).
+				// Supplier Required (show_suppliers) ON but no supplier bound: guard qty
+				// against available product stock. When Supplier Required is OFF, skip
+				// the stock/quantity-availability check entirely (sale allowed regardless).
 				try {
-					$salePurchaseValidation->canAddSaleEntryByProductStock($request->product, $request->quantity, $request->invoiceproductid);
+					if ($showSuppliers) $salePurchaseValidation->canAddSaleEntryByProductStock($request->product, $request->quantity, $request->invoiceproductid);
 				} catch(\Exception $ex) {
 					return $this->errorResponse($ex->getMessage());
 				}

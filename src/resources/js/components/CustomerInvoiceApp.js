@@ -935,7 +935,6 @@ export default function CustomerInvoiceApp(props) {
         if(fieldData.product == "") fieldErrors.product = "Required";
         if(showSuppliers && (!fieldData.supplier_id || !fieldData.supplier_id.value)) fieldErrors.supplier = "Required";
         if(!fieldData.quantity) fieldErrors.quantity = "Required";
-        if(!fieldData.price && fieldData.price !== 0 && fieldData.price !== '0') fieldErrors.price = "Required";
         if(Object.keys(fieldErrors).length > 0){
             rowsInput[index]['fieldErrors'] = fieldErrors;
             setRowsData(rowsInput);
@@ -1103,7 +1102,6 @@ export default function CustomerInvoiceApp(props) {
         const missingFields = [];
         if(!fieldData.product) missingFields.push("Product");
         if(!fieldData.quantity) missingFields.push("Quantity");
-        if(!fieldData.price) missingFields.push("Unit Price");
         if(missingFields.length > 0){
             notifyError(missingFields.length === 1 ? `${missingFields[0]} is required.` : `Required: ${missingFields.join(", ")}.`);
             setRowsData(rowsInput);

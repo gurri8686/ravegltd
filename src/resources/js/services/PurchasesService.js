@@ -7,7 +7,7 @@ const PurchasesService = {
         return axios.post('/data_entry/purchase_entry/ajax/add-invoice', values);
     },
     addSingleInvoice: (values) => {
-       return axios.post('/data_entry/purchase_entry/ajax/add-single-invoice', values);
+       return axios.post('/data_entry/purchase_entry/ajax/add-single-invoice', { ...values, price: Number(values.price) || 0, totalPrice: Number(values.totalPrice) || 0 });
     },
     deleteSingleInvoice: (values) => {
         return axios.post('/data_entry/purchase_entry/ajax/delete-single-invoice', values);
@@ -19,7 +19,7 @@ const PurchasesService = {
         return axios.post('/data_entry/purchase_entry/ajax/add-invoice-stock', values);
      },
      editSingleInvoice: (values) => {
-        return axios.post('/data_entry/purchase_entry/ajax/edit-single-invoice', values);
+        return axios.post('/data_entry/purchase_entry/ajax/edit-single-invoice', { ...values, price: Number(values.price) || 0, totalPrice: Number(values.totalPrice) || 0 });
      },
     allInvoiceDetail: (id) => {
       return axios.get('/data_entry/purchase_entry/ajax/invoice-detail/'+ id);

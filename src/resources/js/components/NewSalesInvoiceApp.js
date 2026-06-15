@@ -88,6 +88,9 @@ export default function NewSalesInvoiceApp(props) {
     const [curProduct, setCurProduct] = useState(null);
     const [curSupplierOptions, setCurSupplierOptions] = useState([]);
     const [curSupplier, setCurSupplier] = useState(null);
+    // Supplier Required (show_suppliers): when OFF, do NOT cap quantity by stock.
+    const showSuppliers = props.showSuppliers !== '0';
+    const stockCap = showSuppliers ? curSupplier?.available_qty : null;
     const [curRemarks, setCurRemarks] = useState('');
     const [errors, setErrors] = useState({});
     const [curQty, setCurQty] = useState('');
@@ -179,13 +182,12 @@ export default function NewSalesInvoiceApp(props) {
         if (!curProduct) errs.product = true;
         if (!curSupplier) errs.supplier = true;
         if (!curQty || Number(curQty) <= 0) errs.qty = true;
-        if (!curPrice || Number(curPrice) <= 0) errs.price = true;
         if (Object.keys(errs).length > 0) {
             setErrors(prev => ({...prev, ...errs}));
             toast.error('Please fill in all required fields');
             return;
         }
-        const maxQty = curSupplier?.available_qty;
+        const maxQty = stockCap;
         if (maxQty !== null && maxQty !== undefined && Number(curQty) > Number(maxQty)) { toast.error(`Only ${maxQty} available in stock`); return; }
         setItems([...items, {
             product_id: curProduct.value,
@@ -194,8 +196,8 @@ export default function NewSalesInvoiceApp(props) {
             supplier_data: curSupplier.value,
             remarks: curRemarks,
             quantity: Number(curQty),
-            price: Number(curPrice),
-            total: Number(curQty) * Number(curPrice),
+            price: Number(curPrice) || 0,
+            total: Number(curQty) * (Number(curPrice) || 0),
         }]);
         setCurProduct(null); setCurSupplier(null); setCurSupplierOptions([]);
         setCurRemarks(''); setCurQty(''); setCurPrice('');
@@ -540,9 +542,9 @@ export default function NewSalesInvoiceApp(props) {
                         <div style={{display:'flex',alignItems:'flex-end',gap:'8px'}}>
                             <div style={{flex:1,minWidth:0}}>
                                 <label style={lblStyle}>Qty</label>
-                                <input type="number" min="0.01" max={curSupplier?.available_qty || undefined} step="any" value={curQty}
-                                    onChange={e => { let val=e.target.value; if(curSupplier?.available_qty!=null&&Number(val)>Number(curSupplier.available_qty))val=curSupplier.available_qty; setCurQty(val); setErrors(prev=>({...prev,qty:false})); }}
-                                    placeholder={curSupplier?.available_qty!=null?`Max ${curSupplier.available_qty}`:'Qty'}
+                                <input type="number" min="0.01" max={stockCap || undefined} step="any" value={curQty}
+                                    onChange={e => { let val=e.target.value; if(stockCap!=null&&Number(val)>Number(stockCap))val=stockCap; setCurQty(val); setErrors(prev=>({...prev,qty:false})); }}
+                                    placeholder={stockCap!=null?`Max ${stockCap}`:'Qty'}
                                     style={{...inputStyle, border: errors.qty ? '2px solid #ef4444' : '1.5px solid #e2e8f0'}}
                                     onFocus={e=>{e.target.style.borderColor=errors.qty?'#ef4444':'rgb(234, 88, 12)';}} onBlur={e=>{e.target.style.borderColor=errors.qty?'#ef4444':'#e2e8f0';}}
                                 />
@@ -577,16 +579,16 @@ export default function NewSalesInvoiceApp(props) {
                         </div>
                         <div style={{width:'100px'}}>
                             <label style={lblStyle}>Quantity</label>
-                            <input type="number" min="0.01" max={curSupplier?.available_qty || undefined} step="any" value={curQty}
-                                title={curSupplier?.available_qty != null ? `Max: ${curSupplier.available_qty}` : ''}
+                            <input type="number" min="0.01" max={stockCap || undefined} step="any" value={curQty}
+                                title={stockCap != null ? `Max: ${stockCap}` : ''}
                                 onChange={e => {
                                     let val = e.target.value;
-                                    if (curSupplier?.available_qty != null && Number(val) > Number(curSupplier.available_qty)) val = curSupplier.available_qty;
+                                    if (stockCap != null && Number(val) > Number(stockCap)) val = stockCap;
                                     setCurQty(val);
                                     setErrors(prev => ({...prev, qty: false}));
                                 }}
-                                placeholder={curSupplier?.available_qty != null ? `Max ${curSupplier.available_qty}` : 'Qty'}
-                                style={{...inputStyle, border: errors.qty ? '2px solid #ef4444' : (curQty && curSupplier?.available_qty != null && Number(curQty) > Number(curSupplier.available_qty) ? '1.5px solid #ef4444' : '1.5px solid #e2e8f0')}}
+                                placeholder={stockCap != null ? `Max ${stockCap}` : 'Qty'}
+                                style={{...inputStyle, border: errors.qty ? '2px solid #ef4444' : (curQty && stockCap != null && Number(curQty) > Number(stockCap) ? '1.5px solid #ef4444' : '1.5px solid #e2e8f0')}}
                                 onFocus={e => {e.target.style.borderColor= errors.qty ? '#ef4444' : 'rgb(234, 88, 12)';e.target.style.background='#f8fafc';}}
                                 onBlur={e => {e.target.style.borderColor= errors.qty ? '#ef4444' : '#e2e8f0';e.target.style.background='#f8fafc';}}
                             />

@@ -404,7 +404,7 @@ export default function SupplierInvoiceApp(props) {
 
         // Validation on fieldData
         const { product, quantity, remarks, selected,price, totalPrice, fieldToggle } = fieldData;
-        if(!fieldData.product || fieldData.quantity === "" || fieldData.quantity === undefined || fieldData.price === "" || fieldData.price === undefined){
+        if(!fieldData.product || fieldData.quantity === "" || fieldData.quantity === undefined){
             setErrorData(true);
         } else {
             /*setErrorData(false);
@@ -457,7 +457,7 @@ export default function SupplierInvoiceApp(props) {
 
         // Validation on fieldData
         const { product, quantity, price, totalPrice, fieldToggle } = fieldData;
-        if(!product || !quantity || !price || !totalPrice || fieldToggle) {
+        if(!product || !quantity || fieldToggle) {
             // Show alert
             return;
         };

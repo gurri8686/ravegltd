@@ -92,7 +92,6 @@ export default function NewPurchaseInvoiceApp(props) {
         const errs = {};
         if (!curProduct) errs.product = true;
         if (!curQty || Number(curQty) <= 0) errs.qty = true;
-        if (!curPrice || Number(curPrice) <= 0) errs.price = true;
         if (Object.keys(errs).length > 0) {
             setErrors(prev => ({...prev, ...errs}));
             toast.error('Please fill in all required fields');
@@ -103,9 +102,9 @@ export default function NewPurchaseInvoiceApp(props) {
             product_name: curProduct.label,
             remarks: curRemarks,
             quantity: Number(curQty),
-            price: Number(curPrice),
+            price: Number(curPrice) || 0,
             sale_price: curSalePrice ? Number(curSalePrice) : null,
-            total: Number(curQty) * Number(curPrice),
+            total: Number(curQty) * (Number(curPrice) || 0),
         }]);
         setCurProduct(null); setCurRemarks(''); setCurQty(''); setCurPrice(''); setCurSalePrice('');
     };
