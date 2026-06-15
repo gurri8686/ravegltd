@@ -31,6 +31,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Tenant base domain
+    |--------------------------------------------------------------------------
+    | The parent domain under which vendor subdomains are created, e.g. with
+    | 'ravegltd.com' a vendor "gurri" becomes gurri.ravegltd.com.
+    |
+    | Leave EMPTY to derive it from the host the admin is currently on — but
+    | note that yields <vendor>.<full-current-host> (so on a staging host like
+    | ravegltd.kodionsoftwares.com you'd get gurri.ravegltd.kodionsoftwares.com).
+    | Set it explicitly to control the level, e.g. TENANT_BASE_DOMAIN=ravegltd.com.
+    |
+    | Whatever you choose MUST have wildcard DNS (*.<base>) + wildcard SSL
+    | pointing at this app, or each subdomain won't resolve/serve.
+    */
+    'base_domain' => env('TENANT_BASE_DOMAIN'),
+
+    /*
+    |--------------------------------------------------------------------------
     | cPanel UAPI credentials (only used when provider = 'cpanel')
     |--------------------------------------------------------------------------
     | Create an API token in cPanel → Security → Manage API Tokens.

@@ -30,8 +30,14 @@ class DomainController extends Controller
         'portal', 'dashboard', 'billing', 'pay', 'payment',
     ];
 
-    /** Base domain used when auto-generating a subdomain. */
+    /** Default base domain when auto-generating a subdomain (TENANT_BASE_DOMAIN overrides). */
     private const BASE_DOMAIN = 'ravegltd.com';
+
+    /** Configured tenant base domain, falling back to the default constant. */
+    private function baseDomain(): string
+    {
+        return config('tenant.base_domain') ?: self::BASE_DOMAIN;
+    }
 
     public function index()
     {
@@ -61,7 +67,7 @@ class DomainController extends Controller
 
     public function create()
     {
-        return view('admin.domains.create', ['vendors' => $this->vendorOptions(), 'base' => self::BASE_DOMAIN]);
+        return view('admin.domains.create', ['vendors' => $this->vendorOptions(), 'base' => $this->baseDomain()]);
     }
 
     public function store(Request $request)
@@ -117,7 +123,7 @@ class DomainController extends Controller
         $linkedVendorId = optional(User::where('site_id', $id)->first())->id;
 
         return view('admin.domains.edit', [
-            'site' => $site, 'vendors' => $this->vendorOptions($linkedVendorId), 'base' => self::BASE_DOMAIN,
+            'site' => $site, 'vendors' => $this->vendorOptions($linkedVendorId), 'base' => $this->baseDomain(),
             'linkedVendorId' => $linkedVendorId,
         ]);
     }

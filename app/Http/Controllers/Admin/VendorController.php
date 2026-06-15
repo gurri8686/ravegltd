@@ -329,7 +329,14 @@ class VendorController extends Controller
      */
     private function baseDomain(): string
     {
-        return preg_replace('/^www\./', '', strtolower(request()->getHost() ?: 'ravegltd.com'));
+        // Prefer an explicitly configured base (TENANT_BASE_DOMAIN) so tenant
+        // subdomains are <vendor>.<base> regardless of which host the admin is
+        // browsing from. Without it we fall back to the current request host —
+        // which on a staging host like ravegltd.kodionsoftwares.com yields the
+        // longer <vendor>.ravegltd.kodionsoftwares.com.
+        $base = config('tenant.base_domain') ?: (request()->getHost() ?: 'ravegltd.com');
+
+        return preg_replace('/^www\./', '', strtolower($base));
     }
 
     /**
