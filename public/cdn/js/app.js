@@ -216553,7 +216553,7 @@ function NewSalesInvoiceApp(props) {
   };
   var currencyOptions = [{
     value: 'pound',
-    label: 'GBP/Pound'
+    label: 'GBP / Pound'
   }, {
     value: 'dollar',
     label: 'Dollar'
@@ -217096,150 +217096,269 @@ function NewSalesInvoiceApp(props) {
         style: {
           padding: isMobile ? '20px 16px' : '32px 28px'
         },
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
-          style: {
-            display: isMobile ? 'flex' : 'grid',
-            flexDirection: isMobile ? 'column' : undefined,
-            gridTemplateColumns: isMobile ? undefined : 'repeat(3, minmax(0, 1fr))',
-            columnGap: '28px',
-            rowGap: '22px'
-          },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("label", {
-              style: lblStyle,
-              children: ["First Name ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("span", {
-                style: {
-                  color: '#ef4444'
-                },
-                children: "*"
+        children: [function () {
+          var iconWrap = {
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center'
+          };
+          var leftIcon = {
+            position: 'absolute',
+            left: '14px',
+            display: 'flex',
+            alignItems: 'center',
+            color: '#9ca3af',
+            pointerEvents: 'none',
+            zIndex: 1
+          };
+          var ncInput = _objectSpread(_objectSpread({}, inputStyle), {}, {
+            height: '44px',
+            fontSize: '14px',
+            background: '#fff',
+            paddingLeft: '40px'
+          });
+          var ncField = function ncField(icon, input) {
+            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
+              style: iconWrap,
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("span", {
+                style: leftIcon,
+                children: icon
+              }), input]
+            });
+          };
+          var I = {
+            user: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("svg", {
+              width: "16",
+              height: "16",
+              viewBox: "0 0 24 24",
+              fill: "none",
+              stroke: "currentColor",
+              strokeWidth: "2",
+              strokeLinecap: "round",
+              strokeLinejoin: "round",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("circle", {
+                cx: "12",
+                cy: "8",
+                r: "4"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("path", {
+                d: "M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"
               })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("input", {
-              type: "text",
-              value: newCustomer.name,
-              autoFocus: true,
-              onChange: function onChange(e) {
-                return setNc('name', e.target.value);
-              },
-              placeholder: "e.g. AA Dream Ltd",
-              style: _objectSpread(_objectSpread({}, inputStyle), {}, {
-                height: '44px',
-                fontSize: '14px'
-              })
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("label", {
-              style: lblStyle,
-              children: ["Currency ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("span", {
-                style: {
-                  color: '#ef4444'
-                },
-                children: "*"
+            }),
+            currency: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("svg", {
+              width: "16",
+              height: "16",
+              viewBox: "0 0 24 24",
+              fill: "none",
+              stroke: "currentColor",
+              strokeWidth: "2",
+              strokeLinecap: "round",
+              strokeLinejoin: "round",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("circle", {
+                cx: "12",
+                cy: "12",
+                r: "8.5"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("path", {
+                d: "M3.5 12h17M12 3.5c2.5 2.5 2.5 14.5 0 17M12 3.5c-2.5 2.5-2.5 14.5 0 17"
               })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_select__WEBPACK_IMPORTED_MODULE_3__["default"], {
-              options: currencyOptions,
-              value: currencyOptions.find(function (o) {
-                return o.value === newCustomer.currency;
-              }) || null,
-              onChange: function onChange(sel) {
-                return setNc('currency', sel ? sel.value : '');
+            }),
+            mail: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("svg", {
+              width: "16",
+              height: "16",
+              viewBox: "0 0 24 24",
+              fill: "none",
+              stroke: "currentColor",
+              strokeWidth: "2",
+              strokeLinecap: "round",
+              strokeLinejoin: "round",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("rect", {
+                x: "3",
+                y: "5",
+                width: "18",
+                height: "14",
+                rx: "2"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("path", {
+                d: "M3 7l9 6 9-6"
+              })]
+            }),
+            phone: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("svg", {
+              width: "16",
+              height: "16",
+              viewBox: "0 0 24 24",
+              fill: "none",
+              stroke: "currentColor",
+              strokeWidth: "2",
+              strokeLinecap: "round",
+              strokeLinejoin: "round",
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("path", {
+                d: "M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"
+              })
+            }),
+            pound: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("span", {
+              style: {
+                fontSize: '15px',
+                fontWeight: '600'
               },
-              isSearchable: false,
-              menuPortalTarget: document.body,
-              styles: _objectSpread(_objectSpread({}, selectStyles), {}, {
-                control: function control(b, s) {
-                  return _objectSpread(_objectSpread({}, b), {}, {
-                    minHeight: '44px',
-                    height: '44px',
-                    borderRadius: '10px',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    border: s.isFocused ? '1.5px solid rgb(234, 88, 12)' : '1.5px solid #e2e8f0',
-                    boxShadow: 'none',
-                    background: '#f8fafc'
-                  });
+              children: "\xA3"
+            }),
+            pin: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("svg", {
+              width: "16",
+              height: "16",
+              viewBox: "0 0 24 24",
+              fill: "none",
+              stroke: "currentColor",
+              strokeWidth: "2",
+              strokeLinecap: "round",
+              strokeLinejoin: "round",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("path", {
+                d: "M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("circle", {
+                cx: "12",
+                cy: "10",
+                r: "3"
+              })]
+            })
+          };
+          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
+            style: {
+              display: isMobile ? 'flex' : 'grid',
+              flexDirection: isMobile ? 'column' : undefined,
+              gridTemplateColumns: isMobile ? undefined : 'repeat(3, minmax(0, 1fr))',
+              columnGap: '28px',
+              rowGap: '22px'
+            },
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("label", {
+                style: lblStyle,
+                children: ["First Name ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("span", {
+                  style: {
+                    color: '#ef4444'
+                  },
+                  children: "*"
+                })]
+              }), ncField(I.user, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("input", {
+                type: "text",
+                value: newCustomer.name,
+                autoFocus: true,
+                onChange: function onChange(e) {
+                  return setNc('name', e.target.value);
                 },
-                valueContainer: function valueContainer(b) {
-                  return _objectSpread(_objectSpread({}, b), {}, {
-                    padding: '0 14px',
-                    height: '44px'
-                  });
+                placeholder: "e.g. AA Dream Ltd",
+                style: ncInput
+              }))]
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("label", {
+                style: lblStyle,
+                children: ["Currency ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("span", {
+                  style: {
+                    color: '#ef4444'
+                  },
+                  children: "*"
+                })]
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
+                style: iconWrap,
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("span", {
+                  style: leftIcon,
+                  children: I.currency
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("div", {
+                  style: {
+                    width: '100%'
+                  },
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_select__WEBPACK_IMPORTED_MODULE_3__["default"], {
+                    options: currencyOptions,
+                    value: currencyOptions.find(function (o) {
+                      return o.value === newCustomer.currency;
+                    }) || null,
+                    onChange: function onChange(sel) {
+                      return setNc('currency', sel ? sel.value : '');
+                    },
+                    isSearchable: false,
+                    menuPortalTarget: document.body,
+                    styles: _objectSpread(_objectSpread({}, selectStyles), {}, {
+                      control: function control(b, s) {
+                        return _objectSpread(_objectSpread({}, b), {}, {
+                          minHeight: '44px',
+                          height: '44px',
+                          borderRadius: '10px',
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          border: s.isFocused ? '1.5px solid rgb(234, 88, 12)' : '1.5px solid #e2e8f0',
+                          boxShadow: 'none',
+                          background: '#fff'
+                        });
+                      },
+                      valueContainer: function valueContainer(b) {
+                        return _objectSpread(_objectSpread({}, b), {}, {
+                          padding: '0 14px 0 40px',
+                          height: '44px'
+                        });
+                      },
+                      indicatorsContainer: function indicatorsContainer(b) {
+                        return _objectSpread(_objectSpread({}, b), {}, {
+                          height: '44px'
+                        });
+                      }
+                    })
+                  })
+                })]
+              })]
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("label", {
+                style: lblStyle,
+                children: "Email"
+              }), ncField(I.mail, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("input", {
+                type: "email",
+                value: newCustomer.email,
+                onChange: function onChange(e) {
+                  return setNc('email', e.target.value);
                 },
-                indicatorsContainer: function indicatorsContainer(b) {
-                  return _objectSpread(_objectSpread({}, b), {}, {
-                    height: '44px'
-                  });
-                }
-              })
+                placeholder: "customer@email.com",
+                style: ncInput
+              }))]
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("label", {
+                style: lblStyle,
+                children: "Mobile"
+              }), ncField(I.phone, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("input", {
+                type: "text",
+                value: newCustomer.mobile,
+                onChange: function onChange(e) {
+                  return setNc('mobile', e.target.value);
+                },
+                placeholder: "+44  Enter Mobile",
+                style: ncInput
+              }))]
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("label", {
+                style: lblStyle,
+                children: "Credit Limit"
+              }), ncField(I.pound, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("input", {
+                type: "text",
+                value: newCustomer.credit_limit,
+                onChange: function onChange(e) {
+                  return setNc('credit_limit', e.target.value);
+                },
+                placeholder: "Enter Credit Limit",
+                style: ncInput
+              }))]
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("label", {
+                style: lblStyle,
+                children: "Address Line 1"
+              }), ncField(I.pin, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("input", {
+                type: "text",
+                value: newCustomer.address1,
+                onChange: function onChange(e) {
+                  return setNc('address1', e.target.value);
+                },
+                onKeyDown: function onKeyDown(e) {
+                  if (e.key === 'Enter' && !savingCustomer) saveNewCustomer();
+                },
+                placeholder: "Enter Address Line 1",
+                style: ncInput
+              }))]
             })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("label", {
-              style: lblStyle,
-              children: "Email"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("input", {
-              type: "email",
-              value: newCustomer.email,
-              onChange: function onChange(e) {
-                return setNc('email', e.target.value);
-              },
-              placeholder: "customer@email.com",
-              style: _objectSpread(_objectSpread({}, inputStyle), {}, {
-                height: '44px',
-                fontSize: '14px'
-              })
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("label", {
-              style: lblStyle,
-              children: "Mobile"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("input", {
-              type: "text",
-              value: newCustomer.mobile,
-              onChange: function onChange(e) {
-                return setNc('mobile', e.target.value);
-              },
-              placeholder: "Enter Mobile",
-              style: _objectSpread(_objectSpread({}, inputStyle), {}, {
-                height: '44px',
-                fontSize: '14px'
-              })
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("label", {
-              style: lblStyle,
-              children: "Credit Limit"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("input", {
-              type: "text",
-              value: newCustomer.credit_limit,
-              onChange: function onChange(e) {
-                return setNc('credit_limit', e.target.value);
-              },
-              placeholder: "Enter Credit Limit",
-              style: _objectSpread(_objectSpread({}, inputStyle), {}, {
-                height: '44px',
-                fontSize: '14px'
-              })
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("label", {
-              style: lblStyle,
-              children: "Address Line 1"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("input", {
-              type: "text",
-              value: newCustomer.address1,
-              onChange: function onChange(e) {
-                return setNc('address1', e.target.value);
-              },
-              onKeyDown: function onKeyDown(e) {
-                if (e.key === 'Enter' && !savingCustomer) saveNewCustomer();
-              },
-              placeholder: "Enter Address Line 1",
-              style: _objectSpread(_objectSpread({}, inputStyle), {}, {
-                height: '44px',
-                fontSize: '14px'
-              })
-            })]
-          })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
+          });
+        }(), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
           style: {
             display: 'flex',
             gap: '12px',

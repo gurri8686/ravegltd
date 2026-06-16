@@ -72,7 +72,7 @@ export default function NewSalesInvoiceApp(props) {
     const [newCustomer, setNewCustomer] = useState(emptyNewCustomer);
     const setNc = (key, val) => setNewCustomer(prev => ({...prev, [key]: val}));
     const currencyOptions = [
-        { value:'pound', label:'GBP/Pound' },
+        { value:'pound', label:'GBP / Pound' },
         { value:'dollar', label:'Dollar' },
         { value:'inr', label:'INR' },
     ];
@@ -343,53 +343,74 @@ export default function NewSalesInvoiceApp(props) {
                 </div>
             </div>
             <div style={{padding: isMobile ? '20px 16px' : '32px 28px'}}>
+                {(() => {
+                    const iconWrap = { position:'relative', display:'flex', alignItems:'center' };
+                    const leftIcon = { position:'absolute', left:'14px', display:'flex', alignItems:'center', color:'#9ca3af', pointerEvents:'none', zIndex:1 };
+                    const ncInput = { ...inputStyle, height:'44px', fontSize:'14px', background:'#fff', paddingLeft:'40px' };
+                    const ncField = (icon, input) => (<div style={iconWrap}><span style={leftIcon}>{icon}</span>{input}</div>);
+                    const I = {
+                        user: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>,
+                        currency: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.5 2.5 14.5 0 17M12 3.5c-2.5 2.5-2.5 14.5 0 17"/></svg>,
+                        mail: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>,
+                        phone: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>,
+                        pound: <span style={{fontSize:'15px',fontWeight:'600'}}>£</span>,
+                        pin: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>,
+                    };
+                    return (
                 <div style={{display: isMobile ? 'flex' : 'grid',flexDirection: isMobile ? 'column' : undefined,gridTemplateColumns: isMobile ? undefined : 'repeat(3, minmax(0, 1fr))',columnGap:'28px',rowGap:'22px'}}>
                     <div>
                         <label style={lblStyle}>First Name <span style={{color:'#ef4444'}}>*</span></label>
-                        <input type="text" value={newCustomer.name} autoFocus
+                        {ncField(I.user, <input type="text" value={newCustomer.name} autoFocus
                             onChange={e=>setNc('name', e.target.value)}
                             placeholder="e.g. AA Dream Ltd"
-                            style={{...inputStyle,height:'44px',fontSize:'14px'}} />
+                            style={ncInput} />)}
                     </div>
                     <div>
                         <label style={lblStyle}>Currency <span style={{color:'#ef4444'}}>*</span></label>
-                        <Select options={currencyOptions}
-                            value={currencyOptions.find(o=>o.value===newCustomer.currency) || null}
-                            onChange={sel=>setNc('currency', sel ? sel.value : '')}
-                            isSearchable={false} menuPortalTarget={document.body}
-                            styles={{...selectStyles, control:(b,s)=>({...b,minHeight:'44px',height:'44px',borderRadius:'10px',fontSize:'14px',fontWeight:'500',border:s.isFocused?'1.5px solid rgb(234, 88, 12)':'1.5px solid #e2e8f0',boxShadow:'none',background:'#f8fafc'}), valueContainer:(b)=>({...b,padding:'0 14px',height:'44px'}), indicatorsContainer:(b)=>({...b,height:'44px'})}}
-                        />
+                        <div style={iconWrap}>
+                            <span style={leftIcon}>{I.currency}</span>
+                            <div style={{width:'100%'}}>
+                            <Select options={currencyOptions}
+                                value={currencyOptions.find(o=>o.value===newCustomer.currency) || null}
+                                onChange={sel=>setNc('currency', sel ? sel.value : '')}
+                                isSearchable={false} menuPortalTarget={document.body}
+                                styles={{...selectStyles, control:(b,s)=>({...b,minHeight:'44px',height:'44px',borderRadius:'10px',fontSize:'14px',fontWeight:'500',border:s.isFocused?'1.5px solid rgb(234, 88, 12)':'1.5px solid #e2e8f0',boxShadow:'none',background:'#fff'}), valueContainer:(b)=>({...b,padding:'0 14px 0 40px',height:'44px'}), indicatorsContainer:(b)=>({...b,height:'44px'})}}
+                            />
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <label style={lblStyle}>Email</label>
-                        <input type="email" value={newCustomer.email}
+                        {ncField(I.mail, <input type="email" value={newCustomer.email}
                             onChange={e=>setNc('email', e.target.value)}
                             placeholder="customer@email.com"
-                            style={{...inputStyle,height:'44px',fontSize:'14px'}} />
+                            style={ncInput} />)}
                     </div>
                     <div>
                         <label style={lblStyle}>Mobile</label>
-                        <input type="text" value={newCustomer.mobile}
+                        {ncField(I.phone, <input type="text" value={newCustomer.mobile}
                             onChange={e=>setNc('mobile', e.target.value)}
-                            placeholder="Enter Mobile"
-                            style={{...inputStyle,height:'44px',fontSize:'14px'}} />
+                            placeholder="+44  Enter Mobile"
+                            style={ncInput} />)}
                     </div>
                     <div>
                         <label style={lblStyle}>Credit Limit</label>
-                        <input type="text" value={newCustomer.credit_limit}
+                        {ncField(I.pound, <input type="text" value={newCustomer.credit_limit}
                             onChange={e=>setNc('credit_limit', e.target.value)}
                             placeholder="Enter Credit Limit"
-                            style={{...inputStyle,height:'44px',fontSize:'14px'}} />
+                            style={ncInput} />)}
                     </div>
                     <div>
                         <label style={lblStyle}>Address Line 1</label>
-                        <input type="text" value={newCustomer.address1}
+                        {ncField(I.pin, <input type="text" value={newCustomer.address1}
                             onChange={e=>setNc('address1', e.target.value)}
                             onKeyDown={e=>{ if(e.key==='Enter' && !savingCustomer) saveNewCustomer(); }}
                             placeholder="Enter Address Line 1"
-                            style={{...inputStyle,height:'44px',fontSize:'14px'}} />
+                            style={ncInput} />)}
                     </div>
                 </div>
+                    );
+                })()}
                 <div style={{display:'flex',gap:'12px',marginTop:'30px',paddingTop:'24px',borderTop:'1px solid #f0f0f0'}}>
                     <button type="button" disabled={savingCustomer} onClick={saveNewCustomer} style={{
                         height:'44px',padding:'0 22px',borderRadius:'10px',border:'none',
