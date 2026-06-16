@@ -269619,38 +269619,51 @@ function DateRangePicker(_ref2) {
       return window.removeEventListener('resize', handle);
     };
   }, []);
+  var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  // Parse a "YYYY-MM-DD" string by its own parts — never via new Date(str), which
+  // interprets the string as UTC and shifts the displayed day in non-UTC timezones.
+  var parseYMD = function parseYMD(s) {
+    if (!s) return null;
+    var _String$split$map = String(s).split('-').map(Number),
+      _String$split$map2 = _slicedToArray(_String$split$map, 3),
+      y = _String$split$map2[0],
+      m = _String$split$map2[1],
+      d = _String$split$map2[2];
+    if (!y || !m || !d) return null;
+    return {
+      y: y,
+      m: m,
+      d: d
+    };
+  };
   var formatDisplay = function formatDisplay(date) {
-    if (!date) return '—';
-    var d = new Date(date + 'T00:00:00');
-    return d.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
+    var p = parseYMD(date);
+    if (!p) return '—';
+    return "".concat(String(p.d).padStart(2, '0'), " ").concat(MON[p.m - 1], " ").concat(p.y);
   };
 
   // Compact range for the labeled-card trigger: "01-31 May" (same month),
   // "01 May - 03 Jun" (same year), else full with years.
   var compactRange = function compactRange(f, t) {
-    var fd = new Date(f + 'T00:00:00'),
-      td = new Date(t + 'T00:00:00');
-    var day = function day(d) {
-      return String(d.getDate()).padStart(2, '0');
+    var fd = parseYMD(f),
+      td = parseYMD(t);
+    if (!fd || !td) return '';
+    var day = function day(p) {
+      return String(p.d).padStart(2, '0');
     };
-    var mon = function mon(d) {
-      return d.toLocaleDateString('en-GB', {
-        month: 'short'
-      });
-    };
-    var sameYear = fd.getFullYear() === td.getFullYear();
-    if (sameYear && fd.getMonth() === td.getMonth()) return "".concat(day(fd), "-").concat(day(td), " ").concat(mon(fd));
-    if (sameYear) return "".concat(day(fd), " ").concat(mon(fd), " - ").concat(day(td), " ").concat(mon(td));
-    return "".concat(day(fd), " ").concat(mon(fd), " ").concat(fd.getFullYear(), " - ").concat(day(td), " ").concat(mon(td), " ").concat(td.getFullYear());
+    var sameYear = fd.y === td.y;
+    if (sameYear && fd.m === td.m) return "".concat(day(fd), "-").concat(day(td), " ").concat(MON[fd.m - 1]);
+    if (sameYear) return "".concat(day(fd), " ").concat(MON[fd.m - 1], " - ").concat(day(td), " ").concat(MON[td.m - 1]);
+    return "".concat(day(fd), " ").concat(MON[fd.m - 1], " ").concat(fd.y, " - ").concat(day(td), " ").concat(MON[td.m - 1], " ").concat(td.y);
   };
   var toYMD = function toYMD(date) {
-    var y = date.getFullYear();
-    var m = String(date.getMonth() + 1).padStart(2, '0');
-    var d = String(date.getDate()).padStart(2, '0');
+    // Normalise to local noon first. react-datepicker can hand back a UTC-midnight
+    // Date; reading getDate() on it in a timezone behind UTC rolls back a day
+    // (e.g. picking the 12th showed 11). Noon is safe against any ±12h offset.
+    var safe = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
+    var y = safe.getFullYear();
+    var m = String(safe.getMonth() + 1).padStart(2, '0');
+    var d = String(safe.getDate()).padStart(2, '0');
     return "".concat(y, "-").concat(m, "-").concat(d);
   };
   var handleChange = function handleChange(dates) {

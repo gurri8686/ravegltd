@@ -107,28 +107,41 @@ export default function DateRangePicker({ fromDate, toDate, onFromChange, onToCh
         return () => window.removeEventListener('resize', handle);
     }, []);
 
+    const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    // Parse a "YYYY-MM-DD" string by its own parts — never via new Date(str), which
+    // interprets the string as UTC and shifts the displayed day in non-UTC timezones.
+    const parseYMD = (s) => {
+        if (!s) return null;
+        const [y, m, d] = String(s).split('-').map(Number);
+        if (!y || !m || !d) return null;
+        return { y, m, d };
+    };
     const formatDisplay = (date) => {
-        if (!date) return '—';
-        const d = new Date(date + 'T00:00:00');
-        return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+        const p = parseYMD(date);
+        if (!p) return '—';
+        return `${String(p.d).padStart(2,'0')} ${MON[p.m-1]} ${p.y}`;
     };
 
     // Compact range for the labeled-card trigger: "01-31 May" (same month),
     // "01 May - 03 Jun" (same year), else full with years.
     const compactRange = (f, t) => {
-        const fd = new Date(f + 'T00:00:00'), td = new Date(t + 'T00:00:00');
-        const day = (d) => String(d.getDate()).padStart(2, '0');
-        const mon = (d) => d.toLocaleDateString('en-GB', { month: 'short' });
-        const sameYear = fd.getFullYear() === td.getFullYear();
-        if (sameYear && fd.getMonth() === td.getMonth()) return `${day(fd)}-${day(td)} ${mon(fd)}`;
-        if (sameYear) return `${day(fd)} ${mon(fd)} - ${day(td)} ${mon(td)}`;
-        return `${day(fd)} ${mon(fd)} ${fd.getFullYear()} - ${day(td)} ${mon(td)} ${td.getFullYear()}`;
+        const fd = parseYMD(f), td = parseYMD(t);
+        if (!fd || !td) return '';
+        const day = (p) => String(p.d).padStart(2, '0');
+        const sameYear = fd.y === td.y;
+        if (sameYear && fd.m === td.m) return `${day(fd)}-${day(td)} ${MON[fd.m-1]}`;
+        if (sameYear) return `${day(fd)} ${MON[fd.m-1]} - ${day(td)} ${MON[td.m-1]}`;
+        return `${day(fd)} ${MON[fd.m-1]} ${fd.y} - ${day(td)} ${MON[td.m-1]} ${td.y}`;
     };
 
     const toYMD = (date) => {
-        const y = date.getFullYear();
-        const m = String(date.getMonth()+1).padStart(2,'0');
-        const d = String(date.getDate()).padStart(2,'0');
+        // Normalise to local noon first. react-datepicker can hand back a UTC-midnight
+        // Date; reading getDate() on it in a timezone behind UTC rolls back a day
+        // (e.g. picking the 12th showed 11). Noon is safe against any ±12h offset.
+        const safe = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
+        const y = safe.getFullYear();
+        const m = String(safe.getMonth()+1).padStart(2,'0');
+        const d = String(safe.getDate()).padStart(2,'0');
         return `${y}-${m}-${d}`;
     };
 
