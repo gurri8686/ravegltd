@@ -914,13 +914,16 @@ export default function CustomerInvoiceApp(props) {
     }
     const handleQtyChange = (index, evnt) => {
         const rowsInput = [...rowsData];
-        const qty = Math.max(1, Math.floor(+(evnt.target.value) || 1));
+        const raw = evnt.target.value;
+        // Let the field go empty while the user clears/retypes — don't force it back to 1.
+        const qty = raw === '' ? '' : Math.max(1, Math.floor(+raw || 1));
         rowsInput[index]['quantity'] = qty;
         clearFieldError(rowsInput, index, 'quantity');
-        rowsInput[index]['totalPrice'] = qty * (parseFloat(rowsInput[index]['price']) || 0);
+        const qtyNum = qty === '' ? 0 : qty;
+        rowsInput[index]['totalPrice'] = qtyNum * (parseFloat(rowsInput[index]['price']) || 0);
         // Per-supplier stock warning
         const avail = rowsInput[index]['available_qty'];
-        if(avail !== null && avail !== undefined && qty > avail){
+        if(avail !== null && avail !== undefined && qtyNum > avail){
             rowsInput[index]['qtyWarning'] = `You are adding ${qty} units but only ${avail} available from this supplier.`;
         } else {
             rowsInput[index]['qtyWarning'] = '';

@@ -183787,13 +183787,16 @@ function CustomerInvoiceApp(props) {
   };
   var handleQtyChange = function handleQtyChange(index, evnt) {
     var rowsInput = _toConsumableArray(rowsData);
-    var qty = Math.max(1, Math.floor(+evnt.target.value || 1));
+    var raw = evnt.target.value;
+    // Let the field go empty while the user clears/retypes — don't force it back to 1.
+    var qty = raw === '' ? '' : Math.max(1, Math.floor(+raw || 1));
     rowsInput[index]['quantity'] = qty;
     clearFieldError(rowsInput, index, 'quantity');
-    rowsInput[index]['totalPrice'] = qty * (parseFloat(rowsInput[index]['price']) || 0);
+    var qtyNum = qty === '' ? 0 : qty;
+    rowsInput[index]['totalPrice'] = qtyNum * (parseFloat(rowsInput[index]['price']) || 0);
     // Per-supplier stock warning
     var avail = rowsInput[index]['available_qty'];
-    if (avail !== null && avail !== undefined && qty > avail) {
+    if (avail !== null && avail !== undefined && qtyNum > avail) {
       rowsInput[index]['qtyWarning'] = "You are adding ".concat(qty, " units but only ").concat(avail, " available from this supplier.");
     } else {
       rowsInput[index]['qtyWarning'] = '';
