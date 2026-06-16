@@ -93,6 +93,15 @@ export default function NewSalesInvoiceApp(props) {
 
     const closeNewCustomer = () => { setShowNewCustomer(false); setNewCustomer(emptyNewCustomer); };
 
+    // Shown when a search matches no existing customer — lets the user create one right there.
+    const noCustomerOption = ({ inputValue }) => (
+        <div onMouseDown={(e) => { e.preventDefault(); setNewCustomer({ ...emptyNewCustomer, name: inputValue || '' }); setShowNewCustomer(true); }}
+            style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', padding:'10px 12px', cursor:'pointer', fontWeight:'700', color:'rgb(234, 88, 12)' }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            {inputValue ? `Create "${inputValue}"` : 'Create New Customer'}
+        </div>
+    );
+
     const saveNewCustomer = async () => {
         const name = newCustomer.name.trim();
         if (!name) { toast.error('Please enter a customer name'); return; }
@@ -465,6 +474,7 @@ export default function NewSalesInvoiceApp(props) {
                             <Select options={customerOptions} value={customer} onChange={onCustomerSelect}
                                 isSearchable placeholder="Select..." menuPortalTarget={document.body}
                                 formatOptionLabel={formatCustomerOption}
+                                noOptionsMessage={noCustomerOption}
                                 styles={{...selectStyles,
                                     control:(b,s)=>({...b,minHeight:'36px',height:'36px',fontSize:'13px',fontWeight:'600',borderRadius:'8px',border:s.isFocused?'1.5px solid rgb(234, 88, 12)':'1.5px solid #e5e7eb',boxShadow:s.isFocused?'0 0 0 3px rgba(234,88,12,0.08)':'none',background:'#fafafa'}),
                                     valueContainer:(b)=>({...b,padding:'0 10px',height:'36px'}),
@@ -551,6 +561,7 @@ export default function NewSalesInvoiceApp(props) {
                         <Select options={customerOptions} value={customer} onChange={onCustomerSelect}
                             isSearchable placeholder="Select Customer..." menuPortalTarget={document.body}
                             formatOptionLabel={formatCustomerOption}
+                            noOptionsMessage={noCustomerOption}
                             styles={{...selectStyles,
                                 control:(b,s)=>({...b,minHeight:'42px',height:'42px',fontSize:'13.5px',fontWeight:'500',borderRadius:'10px',border:s.isFocused?'1.5px solid rgb(234, 88, 12)':'1.5px solid #e8e8ec',boxShadow:'none',background:'#fff','&:hover':{borderColor:'rgb(234, 88, 12)'}}),
                                 valueContainer:(b)=>({...b,padding:'0 14px',height:'42px'}),

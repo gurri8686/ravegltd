@@ -216582,8 +216582,53 @@ function NewSalesInvoiceApp(props) {
     setShowNewCustomer(false);
     setNewCustomer(emptyNewCustomer);
   };
+
+  // Shown when a search matches no existing customer — lets the user create one right there.
+  var noCustomerOption = function noCustomerOption(_ref3) {
+    var inputValue = _ref3.inputValue;
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
+      onMouseDown: function onMouseDown(e) {
+        e.preventDefault();
+        setNewCustomer(_objectSpread(_objectSpread({}, emptyNewCustomer), {}, {
+          name: inputValue || ''
+        }));
+        setShowNewCustomer(true);
+      },
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '8px',
+        padding: '10px 12px',
+        cursor: 'pointer',
+        fontWeight: '700',
+        color: 'rgb(234, 88, 12)'
+      },
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("svg", {
+        width: "15",
+        height: "15",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2.4",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("line", {
+          x1: "12",
+          y1: "5",
+          x2: "12",
+          y2: "19"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("line", {
+          x1: "5",
+          y1: "12",
+          x2: "19",
+          y2: "12"
+        })]
+      }), inputValue ? "Create \"".concat(inputValue, "\"") : 'Create New Customer']
+    });
+  };
   var saveNewCustomer = /*#__PURE__*/function () {
-    var _ref3 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+    var _ref4 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
       var name, res, opt, _err$response, _err$response$data;
       return _regeneratorRuntime().wrap(function _callee$(_context) {
         while (1) {
@@ -216652,11 +216697,11 @@ function NewSalesInvoiceApp(props) {
       }, _callee, null, [[8, 15, 18, 21]]);
     }));
     return function saveNewCustomer() {
-      return _ref3.apply(this, arguments);
+      return _ref4.apply(this, arguments);
     };
   }();
   var handleContinue = /*#__PURE__*/function () {
-    var _ref4 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2() {
+    var _ref5 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2() {
       var res, _err$response2, _err$response2$data;
       return _regeneratorRuntime().wrap(function _callee2$(_context2) {
         while (1) {
@@ -216703,7 +216748,7 @@ function NewSalesInvoiceApp(props) {
       }, _callee2, null, [[4, 11, 14, 17]]);
     }));
     return function handleContinue() {
-      return _ref4.apply(this, arguments);
+      return _ref5.apply(this, arguments);
     };
   }();
   var _useState19 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(window.innerWidth <= 767),
@@ -216811,11 +216856,11 @@ function NewSalesInvoiceApp(props) {
           var opts = res.data.payload.flatMap(function (item) {
             var _item$supplier;
             return (((_item$supplier = item.supplier) === null || _item$supplier === void 0 ? void 0 : _item$supplier.invoices) || []).map(function (invoice) {
-              var _item$supplier2, _ref5, _invoice$quantity;
+              var _item$supplier2, _ref6, _invoice$quantity;
               return {
                 label: invoice.invoice_title || 'Untitled',
                 supplier_name: ((_item$supplier2 = item.supplier) === null || _item$supplier2 === void 0 ? void 0 : _item$supplier2.name) || 'Unknown',
-                available_qty: (_ref5 = (_invoice$quantity = invoice.quantity) !== null && _invoice$quantity !== void 0 ? _invoice$quantity : invoice.available_qty) !== null && _ref5 !== void 0 ? _ref5 : null,
+                available_qty: (_ref6 = (_invoice$quantity = invoice.quantity) !== null && _invoice$quantity !== void 0 ? _invoice$quantity : invoice.available_qty) !== null && _ref6 !== void 0 ? _ref6 : null,
                 value: {
                   supplier_invoice: invoice.supplier_invoice_id,
                   supplier: item.supplier_id,
@@ -216858,11 +216903,11 @@ function NewSalesInvoiceApp(props) {
       var opts = stock_suppliers.flatMap(function (item) {
         var _item$supplier3;
         return (((_item$supplier3 = item.supplier) === null || _item$supplier3 === void 0 ? void 0 : _item$supplier3.invoices) || []).map(function (invoice) {
-          var _item$supplier4, _ref6, _invoice$quantity2;
+          var _item$supplier4, _ref7, _invoice$quantity2;
           return {
             label: invoice.invoice_title || 'Untitled',
             supplier_name: ((_item$supplier4 = item.supplier) === null || _item$supplier4 === void 0 ? void 0 : _item$supplier4.name) || 'Unknown',
-            available_qty: (_ref6 = (_invoice$quantity2 = invoice.quantity) !== null && _invoice$quantity2 !== void 0 ? _invoice$quantity2 : invoice.available_qty) !== null && _ref6 !== void 0 ? _ref6 : null,
+            available_qty: (_ref7 = (_invoice$quantity2 = invoice.quantity) !== null && _invoice$quantity2 !== void 0 ? _invoice$quantity2 : invoice.available_qty) !== null && _ref7 !== void 0 ? _ref7 : null,
             value: {
               supplier_invoice: invoice.supplier_invoice_id,
               supplier: invoice.supplier_id,
@@ -216919,7 +216964,7 @@ function NewSalesInvoiceApp(props) {
     return sum + item.total;
   }, 0);
   var generateInvoice = /*#__PURE__*/function () {
-    var _ref7 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3() {
+    var _ref8 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3() {
       var res, _err$response3, _err$response3$data;
       return _regeneratorRuntime().wrap(function _callee3$(_context3) {
         while (1) {
@@ -216976,7 +217021,7 @@ function NewSalesInvoiceApp(props) {
       }, _callee3, null, [[4, 11, 14, 17]]);
     }));
     return function generateInvoice() {
-      return _ref7.apply(this, arguments);
+      return _ref8.apply(this, arguments);
     };
   }();
   var lblStyle = {
@@ -217566,6 +217611,7 @@ function NewSalesInvoiceApp(props) {
               placeholder: "Select...",
               menuPortalTarget: document.body,
               formatOptionLabel: formatCustomerOption,
+              noOptionsMessage: noCustomerOption,
               styles: _objectSpread(_objectSpread({}, selectStyles), {}, {
                 control: function control(b, s) {
                   return _objectSpread(_objectSpread({}, b), {}, {
@@ -217727,14 +217773,14 @@ function NewSalesInvoiceApp(props) {
                     }
                     setDateOpen(false);
                   },
-                  renderCustomHeader: function renderCustomHeader(_ref8) {
-                    var hd = _ref8.date,
-                      changeYear = _ref8.changeYear,
-                      changeMonth = _ref8.changeMonth,
-                      decreaseMonth = _ref8.decreaseMonth,
-                      increaseMonth = _ref8.increaseMonth,
-                      prevMonthButtonDisabled = _ref8.prevMonthButtonDisabled,
-                      nextMonthButtonDisabled = _ref8.nextMonthButtonDisabled;
+                  renderCustomHeader: function renderCustomHeader(_ref9) {
+                    var hd = _ref9.date,
+                      changeYear = _ref9.changeYear,
+                      changeMonth = _ref9.changeMonth,
+                      decreaseMonth = _ref9.decreaseMonth,
+                      increaseMonth = _ref9.increaseMonth,
+                      prevMonthButtonDisabled = _ref9.prevMonthButtonDisabled,
+                      nextMonthButtonDisabled = _ref9.nextMonthButtonDisabled;
                     var mnths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                     var cy = new Date().getFullYear();
                     var years = Array.from({
@@ -218048,6 +218094,7 @@ function NewSalesInvoiceApp(props) {
             placeholder: "Select Customer...",
             menuPortalTarget: document.body,
             formatOptionLabel: formatCustomerOption,
+            noOptionsMessage: noCustomerOption,
             styles: _objectSpread(_objectSpread({}, selectStyles), {}, {
               control: function control(b, s) {
                 return _objectSpread(_objectSpread({}, b), {}, {
@@ -218422,11 +218469,11 @@ function NewSalesInvoiceApp(props) {
               title: 'Continue',
               desc: 'Add products to your invoice',
               active: false
-            }].map(function (_ref9) {
-              var key = _ref9.key,
-                title = _ref9.title,
-                desc = _ref9.desc,
-                active = _ref9.active;
+            }].map(function (_ref0) {
+              var key = _ref0.key,
+                title = _ref0.title,
+                desc = _ref0.desc,
+                active = _ref0.active;
               return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
                 style: {
                   padding: '18px 18px 16px',
