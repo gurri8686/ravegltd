@@ -714,6 +714,12 @@ class ImportDataController extends Controller
         }
         $customer = new Customer();
         $customer->name = $name;
+        // Optional fields (sent by the Sales-page inline create form; import flow omits them).
+        $customer->email = $request->input('email');
+        $customer->mobile = $request->input('mobile');
+        $customer->address1 = $request->input('address1');
+        $customer->credit_limit = $request->input('credit_limit');
+        $customer->currency = $request->input('currency') ?: 'pound';
         $customer->is_active = 1;
         $customer->save();
         $customer->customer_id = 'C' . (100 + $customer->id);
@@ -771,6 +777,11 @@ class ImportDataController extends Controller
         }
         $product = new Product();
         $product->name = $name;
+        // Optional fields (sent by the Sales-page inline create form; import flow omits them).
+        $product->selling_price = $request->input('selling_price');
+        $product->tax_vat = $request->input('tax_vat');
+        $product->unit_weight = $request->input('unit_weight');
+        $product->description = $request->input('description');
         $product->is_active = 1;
         $product->user_id = Auth::user()->id;
         $product->save();

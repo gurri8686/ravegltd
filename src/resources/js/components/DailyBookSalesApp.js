@@ -203,7 +203,8 @@ function FilterAndOptionsPanel(props) {
         fetchCustomers();
     }, [props.customerListApi, dispatch]);
 
-    const customerOptions = customers.map(c => ({ value: c.id, label: c.name }));
+    const customerOptions = customers.map(c => ({ value: c.id, label: c.name }))
+        .sort((a, b) => String(a.label).localeCompare(String(b.label), undefined, { sensitivity: 'base' }));
 
     const handleCustomerChange = (selected) => {
         if (Array.isArray(selected) && selected.length > 0) {
@@ -810,7 +811,7 @@ function SupplierSelect({ apiUrl, onSubmit }) {
 		...customers.map(c => ({
 			value: c.id,
 			label: c.name,
-		})),
+		})).sort((a, b) => String(a.label).localeCompare(String(b.label), undefined, { sensitivity: 'base' })),
 	];
 	
 	const handleChange = (selected) => {

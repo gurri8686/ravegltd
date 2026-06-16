@@ -67,6 +67,11 @@ export default function DateRangePicker({ fromDate, toDate, onFromChange, onToCh
     // Spec-style trigger button is now the consistent design across every page.
     const isSpec = true;
     const [isOpen, setIsOpen] = useState(false);
+    // 'range' = pick a start + end; 'single' = pick one day (stored as from===to).
+    // Default to single when the current selection is already a single day.
+    const [mode, setMode] = useState(fromDate && toDate && fromDate === toDate ? 'single' : 'range');
+    const [modeDdOpen, setModeDdOpen] = useState(false);
+    const modeLabel = mode === 'single' ? 'Single Date' : 'Date Range';
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
     const [mMonthDd, setMMonthDd] = useState(false);
     const [mYearDd, setMYearDd] = useState(false);
@@ -152,7 +157,8 @@ export default function DateRangePicker({ fromDate, toDate, onFromChange, onToCh
         if (end) { onToChange(toYMD(end)); setIsOpen(false); }
     };
 
-    const applyPreset = (label) => {
+    // Resolve a preset label to its {from, to} YMD pair (null for Custom Range).
+    const presetRange = (label) => {
         const now = new Date();
         let from, to;
         if (label === 'Today') { from = to = now; }
@@ -160,12 +166,34 @@ export default function DateRangePicker({ fromDate, toDate, onFromChange, onToCh
         else if (label === 'Last 7 days') { from = new Date(now.getTime()-6*86400000); to = now; }
         else if (label === 'Last 30 days') { from = new Date(now.getTime()-29*86400000); to = now; }
         else if (label === 'This month') { from = new Date(now.getFullYear(), now.getMonth(), 1); to = now; }
-        onFromChange(toYMD(from)); onToChange(toYMD(to)); setIsOpen(false);
+        else return null;
+        return { from: toYMD(from), to: toYMD(to) };
+    };
+
+    const applyPreset = (label) => {
+        const r = presetRange(label);
+        if (!r) return;
+        onFromChange(r.from); onToChange(r.to); setIsOpen(false);
+    };
+
+    // Single-date mode: one click sets both from & to to the same day, then closes.
+    const handleSingleChange = (date) => {
+        if (!date) return;
+        const ymd = toYMD(date);
+        setPickState({ start: date, end: date });
+        onFromChange(ymd); onToChange(ymd);
+        setIsOpen(false);
     };
 
     // ── Mobile sheet helpers (staged selection + Apply) ──
     const fmtDispDate = (d) => d ? d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : 'Select';
     const handleMobilePick = (dates) => {
+        // Single mode: react-datepicker passes a single Date (not an array).
+        if (mode === 'single') {
+            const d = Array.isArray(dates) ? dates[0] : dates;
+            setMPendStart(d); setMPendEnd(d);
+            return;
+        }
         let [start, end] = dates;
         if (start && end && start > end) [start, end] = [end, start];
         setMPendStart(start); setMPendEnd(end || null);
@@ -214,14 +242,16 @@ export default function DateRangePicker({ fromDate, toDate, onFromChange, onToCh
             top = Math.max(MARGIN, vh - calHeight - MARGIN);
         }
 
-        // Horizontal: right-align to button's right edge, clamp within viewport.
-        // Avoid sliding under a fixed left sidebar — clamp the left edge to its right boundary.
+        // Horizontal: LEFT-align to the button's left edge so the panel stays put when
+        // its width changes (single ↔ range switch grows/shrinks only the right side,
+        // never shifting the box). Clamp within viewport, and keep clear of the sidebar.
         const sidebarEl = document.querySelector('.main-menu');
         const sidebarRight = sidebarEl ? sidebarEl.getBoundingClientRect().right : 0;
         const minLeft = Math.max(MARGIN, sidebarRight + MARGIN);
 
-        let left = r.right - calWidth;
+        let left = r.left;
         if (left < minLeft) left = minLeft;
+        // Only pull left if the panel would overflow the right viewport edge.
         if (left + calWidth > vw - MARGIN) left = Math.max(minLeft, vw - calWidth - MARGIN);
 
         return { top, left, bottom: undefined, right: undefined };
@@ -252,7 +282,7 @@ export default function DateRangePicker({ fromDate, toDate, onFromChange, onToCh
             }, 0);
             return () => clearTimeout(id);
         }
-    }, [isOpen, isMobile]);
+    }, [isOpen, isMobile, mode]);
 
     const calendarCSS = `
         @keyframes drpFadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
@@ -371,7 +401,13 @@ export default function DateRangePicker({ fromDate, toDate, onFromChange, onToCh
                 {isSpec
                     ? <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
                     : <i className="fa fa-calendar" style={{fontSize:'12px',color:'rgb(234, 88, 12)'}}></i>}
-                {fromDate && toDate ? (
+                {fromDate && toDate && fromDate === toDate ? (
+                    // Single day selected — show one date, no arrow.
+                    <>
+                        <span style={{fontSize:'13px',fontWeight:'500',color:'#0f1115'}}>{formatDisplay(fromDate)}</span>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0,marginLeft:'2px'}}><path d="M6 9l6 6 6-6"/></svg>
+                    </>
+                ) : fromDate && toDate ? (
                     isSpec ? (
                     <>
                         <span style={{fontSize:'13px',fontWeight:'500',color:'#0f1115'}}>{formatDisplay(fromDate)}</span>
@@ -415,6 +451,35 @@ export default function DateRangePicker({ fromDate, toDate, onFromChange, onToCh
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                         </button>
                     </div>
+                    {/* Mode dropdown: Single Date / Date Range */}
+                    <div style={{padding:'0 18px 14px'}}>
+                        <div style={{position:'relative'}}>
+                            <button type="button" onClick={() => setModeDdOpen(v=>!v)} style={{
+                                width:'100%',display:'flex',alignItems:'center',justifyContent:'space-between',
+                                border:'1.5px solid #fed7aa',borderRadius:'12px',background:'#fff7f0',
+                                color:'rgb(234, 88, 12)',fontSize:'14px',fontWeight:'700',padding:'11px 14px',cursor:'pointer',outline:'none',
+                            }}>
+                                <span style={{display:'inline-flex',alignItems:'center',gap:'8px'}}>
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgb(234, 88, 12)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                                    {modeLabel}
+                                </span>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgb(234, 88, 12)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
+                            {modeDdOpen && (
+                                <div style={{position:'absolute',top:'calc(100% + 4px)',left:0,right:0,zIndex:20,background:'#fff',border:'1.5px solid #fed7aa',borderRadius:'12px',boxShadow:'0 8px 24px rgba(0,0,0,0.12)',padding:'4px'}}>
+                                    {[{k:'single',label:'Single Date'},{k:'range',label:'Date Range'}].map(opt => {
+                                        const on = mode === opt.k;
+                                        return (
+                                            <div key={opt.k} onClick={() => { setMode(opt.k); if (opt.k === 'single') setMPendEnd(mPendStart); setModeDdOpen(false); }} style={{
+                                                padding:'11px 14px',fontSize:'14px',fontWeight: on ? '800' : '600',borderRadius:'9px',cursor:'pointer',
+                                                background: on ? 'rgb(234, 88, 12)' : 'transparent',color: on ? '#fff' : '#374151',
+                                            }}>{opt.label}</div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    </div>
                     <div style={{padding:'0 18px 14px'}}>
                         <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
                             <div style={{flex:1,background:'#fff',border:'2px solid '+(mPendStart?'rgb(234, 88, 12)':'#e5e7eb'),borderRadius:'12px',padding:'8px 12px',boxShadow:mPendStart?'0 0 0 3px rgba(234,88,12,0.08)':'none'}}>
@@ -436,6 +501,7 @@ export default function DateRangePicker({ fromDate, toDate, onFromChange, onToCh
                             </div>
                         </div>
                     </div>
+                    {mode === 'range' && (
                     <div className="sp-presets" style={{display:'flex',gap:'8px',padding:'0 18px 14px',overflowX:'auto',WebkitOverflowScrolling:'touch'}}>
                         {['Today','Yesterday','Last 7d','This month','Custom Range'].map(label => {
                             const pr=(()=>{const now=new Date();let f,t;if(label==='Today'){f=t=now;}else if(label==='Yesterday'){f=t=new Date(now.getTime()-86400000);}else if(label==='Last 7d'){f=new Date(now.getTime()-6*86400000);t=now;}else if(label==='This month'){f=new Date(now.getFullYear(),now.getMonth(),1);t=now;}else return {f:null,t:null};return {f:toYMD(f),t:toYMD(t)};})();
@@ -443,6 +509,7 @@ export default function DateRangePicker({ fromDate, toDate, onFromChange, onToCh
                             return (<button key={label} type="button" onClick={()=>applyMobilePreset(label)} style={{flexShrink:0,height:'34px',padding:'0 16px',borderRadius:'999px',border: active ? 'none' : '1.5px solid #e5e7eb',background: active ? '#111827' : '#fff',color: active ? '#fff' : '#475569',fontSize:'13px',fontWeight:'700',cursor:'pointer',outline:'none',whiteSpace:'nowrap'}}>{label}</button>);
                         })}
                     </div>
+                    )}
                     <style>{`.sp-range .react-datepicker{width:100%;border:none;font-family:inherit;background:#fff !important;box-shadow:none !important}.sp-range .react-datepicker__month-container{width:100%;float:none;background:#fff !important}.sp-range .react-datepicker__month{background:#fff !important;margin:0 !important}.sp-range .react-datepicker__week{background:#fff !important}.sp-range .react-datepicker__header{background:#fff !important;border-bottom:none;padding:0}.sp-range .react-datepicker__header--custom{background:#fff !important;border-bottom:none !important;padding:0 !important}.sp-range .react-datepicker__day-names,.sp-range .react-datepicker__week{display:flex;justify-content:space-around}.sp-range .react-datepicker__day-name{width:calc(100%/7);height:34px;line-height:34px;font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:0.5px;margin:0}.sp-range .react-datepicker__day{display:inline-flex;align-items:center;justify-content:center;width:calc(100%/7);height:42px;font-size:14px;font-weight:500;color:#334155;margin:0;border-radius:50%;transition:background 0.12s,color 0.12s;position:relative}.sp-range .react-datepicker__day:hover:not(.react-datepicker__day--selected):not(.react-datepicker__day--range-start):not(.react-datepicker__day--range-end){background:#f1f5f9;color:#0f172a}.sp-range .react-datepicker__day--today{font-weight:700;color:rgb(234, 88, 12);background:transparent}.sp-range .react-datepicker__day--in-range,.sp-range .react-datepicker__day--in-selecting-range:not(.react-datepicker__day--selecting-range-start){background:transparent !important;color:rgb(234, 88, 12) !important;font-weight:600;position:relative}.sp-range .react-datepicker__day--in-range::before,.sp-range .react-datepicker__day--in-selecting-range:not(.react-datepicker__day--selecting-range-start)::before{content:'';position:absolute;top:4px;bottom:4px;left:0;right:0;background:#fff7f0;z-index:-1}.sp-range .react-datepicker__day--selected,.sp-range .react-datepicker__day--range-start,.sp-range .react-datepicker__day--range-end,.sp-range .react-datepicker__day--selecting-range-start,.sp-range .react-datepicker__day--today.react-datepicker__day--selected,.sp-range .react-datepicker__day--today.react-datepicker__day--range-start,.sp-range .react-datepicker__day--today.react-datepicker__day--range-end{background:transparent !important;color:#fff !important;font-weight:800 !important;font-size:13px;position:relative;z-index:1}
 /* range band behind start/end (half-inset like reference) */
 .sp-range .react-datepicker__day--range-start:not(.react-datepicker__day--range-end)::after{content:'';position:absolute;top:4px;bottom:4px;left:50%;right:0;background:#fff7f0;z-index:-2}
@@ -450,7 +517,7 @@ export default function DateRangePicker({ fromDate, toDate, onFromChange, onToCh
 /* orange circle for selected/start/end */
 .sp-range .react-datepicker__day--selected::before,.sp-range .react-datepicker__day--range-start::before,.sp-range .react-datepicker__day--range-end::before,.sp-range .react-datepicker__day--selecting-range-start::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:34px;height:34px;border-radius:50%;background:rgb(234, 88, 12);box-shadow:rgba(234, 88, 12, 0.5) 0px 4px 10px -3px;z-index:-1}.sp-range .react-datepicker__day--range-start,.sp-range .react-datepicker__day--range-end,.sp-range .react-datepicker__day--range-start.react-datepicker__day--range-end{border-radius:50% !important}.sp-range .react-datepicker__day--outside-month{color:#d1d5db}.sp-range .react-datepicker__day--disabled{color:#e5e7eb !important;background:transparent !important}.sp-range .react-datepicker__day--keyboard-selected{background:transparent;color:#1e293b}.sp-range .react-datepicker__navigation{display:none !important}.sp-range .react-datepicker__current-month{display:none !important}.sp-dd{position:relative;display:inline-block}.sp-dd-btn{border:1.5px solid #e5e7eb;border-radius:9px;padding:7px 26px 7px 14px;font-size:13px;font-weight:700;color:#1e293b;cursor:pointer;outline:none;background:#f4f4f6;position:relative}.sp-dd-btn:focus,.sp-dd-btn:active{outline:none;border-color:rgb(234, 88, 12)}.sp-dd-btn::after{content:'';position:absolute;right:10px;top:50%;transform:translateY(-50%);border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #94a3b8}.sp-dd-list{position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%);background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.12);z-index:99;max-height:180px;overflow-y:auto;min-width:84px;padding:4px}.sp-dd-list::-webkit-scrollbar{width:3px}.sp-dd-list::-webkit-scrollbar-thumb{background:#fed7aa;border-radius:3px}.sp-dd-item{padding:6px 12px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;text-align:center;color:#374151;transition:all 0.1s}.sp-dd-item:hover{background:#fff7ed;color:rgb(234, 88, 12)}.sp-dd-item.active{background:rgb(234, 88, 12);color:#fff;font-weight:700}.sp-presets{scrollbar-width:none;-ms-overflow-style:none}.sp-presets::-webkit-scrollbar{display:none;width:0;height:0}`}</style>
                     <div className="sp-range" style={{padding:'4px 16px 0'}}>
-                        <DatePicker inline selected={mPendStart} onChange={handleMobilePick} startDate={mPendStart} endDate={mPendEnd} selectsRange maxDate={new Date()} openToDate={mPendStart || openToDateRef.current}
+                        <DatePicker inline selected={mPendStart} onChange={handleMobilePick} startDate={mode==='single'?undefined:mPendStart} endDate={mode==='single'?undefined:mPendEnd} selectsRange={mode==='range'} maxDate={new Date()} openToDate={mPendStart || openToDateRef.current}
                             renderCustomHeader={({date,changeYear,changeMonth,decreaseMonth,increaseMonth,prevMonthButtonDisabled,nextMonthButtonDisabled})=>{
                                 const mnthsFull=['January','February','March','April','May','June','July','August','September','October','November','December'];
                                 const mnths=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -496,10 +563,17 @@ export default function DateRangePicker({ fromDate, toDate, onFromChange, onToCh
                 <div ref={dropdownRef} onMouseDown={e => e.stopPropagation()} style={{position:'fixed',...(dropdownPos.top!=null?{top:dropdownPos.top}:{}),...(dropdownPos.bottom!=null?{bottom:dropdownPos.bottom}:{}),...(dropdownPos.left!=null?{left:dropdownPos.left}:{right:dropdownPos.right}),zIndex:1000000,background:'#fff',borderRadius:'12px',boxShadow:'0 4px 20px rgba(0,0,0,0.18)',display:'flex',flexDirection:'row',overflow:'hidden',maxHeight:'calc(100vh - 24px)',animation:'drpFadeIn 0.15s ease-out'}}>
                     <style>{calendarCSS}</style>
                     {/* Left sidebar: presets */}
+                    {mode === 'range' && (
                     <div style={{display:'flex',flexDirection:'column',width:'150px',borderRight:'1px solid #e5e7eb',background:'#fff',flexShrink:0}}>
-                        {[...presets,'Custom Range'].map(label => {
+                        {(() => {
+                            // Which preset (if any) matches the current selection? Else Custom Range is active.
+                            const matched = fromDate && toDate
+                                ? presets.find(p => { const r = presetRange(p); return r && r.from === fromDate && r.to === toDate; })
+                                : null;
+                            const activeLabel = matched || 'Custom Range';
+                            return [...presets,'Custom Range'].map(label => {
                             const isCustom = label === 'Custom Range';
-                            const isActive = isCustom;
+                            const isActive = label === activeLabel;
                             return (
                                 <button key={label} type="button" onClick={() => { if (!isCustom) applyPreset(label); }} style={{
                                     border:'none',borderLeft: isActive ? '3px solid rgb(234, 88, 12)' : '3px solid transparent',
@@ -511,19 +585,52 @@ export default function DateRangePicker({ fromDate, toDate, onFromChange, onToCh
                                     {label}
                                 </button>
                             );
-                        })}
+                        });
+                        })()}
                     </div>
-                    {/* Right: calendar + range bar */}
+                    )}
+                    {/* Right: mode toggle + calendar + range bar */}
                     <div style={{display:'flex',flexDirection:'column'}}>
+                        {/* Mode dropdown: Single Date / Date Range */}
+                        <div style={{padding:'12px 16px 4px',display:'flex',justifyContent:'flex-start'}}>
+                            <div style={{position:'relative'}}>
+                                <button type="button" onClick={() => setModeDdOpen(v=>!v)} style={{
+                                    display:'inline-flex',alignItems:'center',gap:'8px',
+                                    border:'1.5px solid #fed7aa',borderRadius:'9px',background:'#fff7f0',
+                                    color:'rgb(234, 88, 12)',fontSize:'13px',fontWeight:'700',
+                                    padding:'7px 12px',cursor:'pointer',outline:'none',whiteSpace:'nowrap',
+                                }}>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgb(234, 88, 12)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                                    {modeLabel}
+                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgb(234, 88, 12)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:'2px'}}><polyline points="6 9 12 15 18 9"/></svg>
+                                </button>
+                                {modeDdOpen && (
+                                    <div style={{position:'absolute',top:'calc(100% + 4px)',left:0,zIndex:20,background:'#fff',border:'1.5px solid #fed7aa',borderRadius:'10px',boxShadow:'0 8px 24px rgba(0,0,0,0.12)',padding:'4px',minWidth:'150px'}}>
+                                        {[{k:'single',label:'Single Date'},{k:'range',label:'Date Range'}].map(opt => {
+                                            const on = mode === opt.k;
+                                            return (
+                                                <div key={opt.k} onClick={() => { setMode(opt.k); setModeDdOpen(false); }} style={{
+                                                    padding:'8px 12px',fontSize:'13px',fontWeight: on ? '700' : '500',borderRadius:'7px',cursor:'pointer',
+                                                    background: on ? 'rgb(234, 88, 12)' : 'transparent',color: on ? '#fff' : '#374151',transition:'background 0.1s',
+                                                }}
+                                                onMouseEnter={e=>{ if(!on){ e.currentTarget.style.background='#fff5ed'; e.currentTarget.style.color='rgb(234, 88, 12)'; }}}
+                                                onMouseLeave={e=>{ if(!on){ e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#374151'; }}}
+                                                >{opt.label}</div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                         <div style={{padding:'0 0 4px'}} className="drp-cal">
                             <DatePicker
                                 selected={pickState.start}
-                                onChange={handleChange}
-                                startDate={pickState.start}
-                                endDate={pickState.end}
-                                selectsRange
+                                onChange={mode === 'single' ? handleSingleChange : handleChange}
+                                startDate={mode === 'single' ? undefined : pickState.start}
+                                endDate={mode === 'single' ? undefined : pickState.end}
+                                selectsRange={mode === 'range'}
                                 inline
-                                monthsShown={2}
+                                monthsShown={mode === 'single' ? 1 : 2}
                                 maxDate={new Date()}
                                 openToDate={openToDateRef.current}
                                 renderCustomHeader={({
@@ -546,7 +653,7 @@ export default function DateRangePicker({ fromDate, toDate, onFromChange, onToCh
                                                 <DrpDropdown value={monthDate.getMonth()} options={months.map((m,i)=>({value:i,label:m}))} onChange={v=>changeMonth(v)} />
                                                 <DrpDropdown value={monthDate.getFullYear()} options={years.map(y=>({value:y,label:String(y)}))} onChange={v=>changeYear(v)} />
                                             </div>
-                                            {customHeaderCount === 1 ? (
+                                            {(customHeaderCount === 1 || mode === 'single') ? (
                                                 <button type="button" className="drp-cal-nav-btn" onClick={increaseMonth} disabled={nextMonthButtonDisabled}>
                                                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgb(234, 88, 12)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                                                 </button>
@@ -556,7 +663,7 @@ export default function DateRangePicker({ fromDate, toDate, onFromChange, onToCh
                                 }}
                             />
                         </div>
-                        {rangeDisplay}
+                        {mode === 'range' && rangeDisplay}
                     </div>
                 </div>
                 </>,

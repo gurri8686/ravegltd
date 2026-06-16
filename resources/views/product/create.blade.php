@@ -19,6 +19,19 @@
 .toggle-active-yes { background: rgb(234, 88, 12); color: #fff; }
 .toggle-inactive-yes { background: #fff; color: #94a3b8; }
 
+/* Active field: stacked like the others (label on its own line, toggle below)
+   and the No/Yes buttons match the input height so the two columns align. */
+.col-active .form-group { display:block !important; }
+.col-active .form-group label { display:block !important; margin-bottom:8px !important; }
+/* Same height for the text inputs and the Active toggle so the two
+   columns line up exactly (height + vertical center). */
+input.form-control { height: 48px !important; }
+.col-active .toggle-active-no, .col-active .toggle-inactive-no,
+.col-active .toggle-active-yes, .col-active .toggle-inactive-yes {
+    height: 48px !important; padding: 0 28px !important;
+    display: inline-flex !important; align-items: center !important; justify-content: center !important;
+}
+
 /* Input with icon */
 .input-icon-wrap { position: relative; display: flex; align-items: center; }
 .input-icon {
@@ -302,50 +315,6 @@ input.switch ~ .btn-group .btn-success,
                                         <div class="row"><div class="col-sm-12" data-validate="name"></div></div>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="selling_price">Selling Price</label>
-                                        <div class="input-icon-wrap">
-                                            <span class="input-icon" style="font-weight:600;font-size:15px;">$</span>
-                                            <input type="text" id="selling_price" class="form-control input-with-icon" placeholder="0.00" name="selling_price">
-                                        </div>
-                                        <div class="row"><div class="col-sm-12" data-validate="selling_price"></div></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="tax_vat">Tax/Vat (%)</label>
-                                        <div class="input-icon-wrap">
-                                            <i class="fa fa-info-circle input-icon"></i>
-                                            <input type="text" id="tax_vat" class="form-control input-with-icon" placeholder="Enter Tax/Vat percentage" name="tax_vat">
-                                        </div>
-                                        <div class="row"><div class="col-sm-12" data-validate="tax_vat"></div></div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="unit_weight">Unit Weight (kg)</label>
-                                        <div class="input-icon-wrap">
-                                            <i class="fa fa-clipboard input-icon"></i>
-                                            <input type="text" id="unit_weight" class="form-control input-with-icon" placeholder="Enter Unit Weight" name="unit_weight">
-                                        </div>
-                                        <div class="row"><div class="col-sm-12" data-validate="unit_weight"></div></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="description">Description</label>
-                                        <div class="input-icon-wrap" style="align-items:flex-start;">
-                                            <i class="fa fa-file-text input-icon" style="top:16px;position:absolute;"></i>
-                                            <textarea id="description" class="form-control input-with-icon" placeholder="Enter short description about the product..." name="description"></textarea>
-                                        </div>
-                                        <div class="row"><div class="col-sm-12" data-validate="description"></div></div>
-                                    </div>
-                                </div>
                                 <div class="col-lg-6 col-md-6 col-active">
                                     <div class="form-group">
                                         <label for="status">Active</label>
@@ -356,6 +325,50 @@ input.switch ~ .btn-group .btn-success,
                                             <button type="button" id="toggleYes" onclick="document.getElementById('is_active_val').value='1';document.getElementById('toggleYes').className='toggle-active-yes';document.getElementById('toggleNo').className='toggle-inactive-no';"
                                                 class="toggle-active-yes">Yes</button>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="selling_price">Selling Price</label>
+                                        <div class="input-icon-wrap">
+                                            <span class="input-icon" style="font-weight:600;font-size:15px;">$</span>
+                                            <input type="text" id="selling_price" class="form-control input-with-icon" placeholder="0.00" name="selling_price">
+                                        </div>
+                                        <div class="row"><div class="col-sm-12" data-validate="selling_price"></div></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="tax_vat">Tax/Vat (%)</label>
+                                        <div class="input-icon-wrap">
+                                            <i class="fa fa-info-circle input-icon"></i>
+                                            <input type="text" id="tax_vat" class="form-control input-with-icon" placeholder="Enter Tax/Vat percentage" name="tax_vat">
+                                        </div>
+                                        <div class="row"><div class="col-sm-12" data-validate="tax_vat"></div></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="unit_weight">Unit Weight (kg)</label>
+                                        <div class="input-icon-wrap">
+                                            <i class="fa fa-clipboard input-icon"></i>
+                                            <input type="text" id="unit_weight" class="form-control input-with-icon" placeholder="Enter Unit Weight" name="unit_weight">
+                                        </div>
+                                        <div class="row"><div class="col-sm-12" data-validate="unit_weight"></div></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="description">Description</label>
+                                        <div class="input-icon-wrap" style="align-items:flex-start;">
+                                            <i class="fa fa-file-text input-icon" style="top:16px;position:absolute;"></i>
+                                            <textarea id="description" class="form-control input-with-icon" placeholder="Enter short description about the product..." name="description"></textarea>
+                                        </div>
+                                        <div class="row"><div class="col-sm-12" data-validate="description"></div></div>
                                     </div>
                                 </div>
                             </div>

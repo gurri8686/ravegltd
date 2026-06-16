@@ -77,13 +77,14 @@ export default function NewPurchaseInvoiceApp(props) {
     }, []);
 
     useEffect(() => {
+        const byLabel = (a, b) => String(a.label).localeCompare(String(b.label), undefined, { sensitivity: 'base' });
         axios.get(props.suppliersApi).then(res => {
-            if (res.data.success) setSuppliers(res.data.payload.map(s => ({value:s.id,label:s.name})));
+            if (res.data.success) setSuppliers(res.data.payload.map(s => ({value:s.id,label:s.name})).sort(byLabel));
         });
         axios.get(props.productsApi).then(res => {
             if (res.data.success !== false) {
                 const list = Array.isArray(res.data) ? res.data : (res.data.payload || []);
-                setProducts(list.map(p => ({value:p.id,label:p.name || p.product_name || ('Product #'+p.id)})));
+                setProducts(list.map(p => ({value:p.id,label:p.name || p.product_name || ('Product #'+p.id)})).sort(byLabel));
             }
         }).catch(() => {});
     }, []);

@@ -19,6 +19,19 @@
 .toggle-active-yes { background: rgb(234, 88, 12); color: #fff; }
 .toggle-inactive-yes { background: #fff; color: #94a3b8; }
 
+/* Active field: stacked like the others (label on its own line, toggle below)
+   and the No/Yes buttons match the input height so the two columns align. */
+.col-active .form-group { display:block !important; }
+.col-active .form-group label { display:block !important; margin-bottom:8px !important; }
+/* Same height for the text inputs and the Active toggle so the two
+   columns line up exactly (height + vertical center). */
+input.form-control { height: 48px !important; }
+.col-active .toggle-active-no, .col-active .toggle-inactive-no,
+.col-active .toggle-active-yes, .col-active .toggle-inactive-yes {
+    height: 48px !important; padding: 0 28px !important;
+    display: inline-flex !important; align-items: center !important; justify-content: center !important;
+}
+
 /* ── Tablet / iPad (768px – 1024px) ── */
 @media (min-width: 768px) and (max-width: 1024px) {
 
@@ -331,7 +344,7 @@ input.switch ~ .btn-group .btn-success,
                                 <span style="font-size:11px;font-weight:700;color:#64748b;letter-spacing:0.8px;text-transform:uppercase;">Product Information</span>
                             </div>
 
-                            <div class="row">
+                            <div class="row desc-active-row">
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="name">Product Name<span class="text-danger">*</span></label>
@@ -339,42 +352,9 @@ input.switch ~ .btn-group .btn-success,
                                         <div class="row"><div class="col-sm-12" data-validate="name"></div></div>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="selling_price">Selling Price</label>
-                                        <input type="text" id="selling_price" class="form-control" placeholder="Enter Selling Price" name="selling_price" value="{{$data->selling_price}}">
-                                        <div class="row"><div class="col-sm-12" data-validate="selling_price"></div></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="tax_vat">Tax/Vat (%)</label>
-                                        <input type="text" id="tax_vat" class="form-control" placeholder="Enter Tax/Vat" name="tax_vat" value="{{$data->tax_vat}}">
-                                        <div class="row"><div class="col-sm-12" data-validate="tax_vat"></div></div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="unit_weight">Unit Weight (kg)</label>
-                                        <input type="text" id="unit_weight" class="form-control" placeholder="Enter Unit Weight" name="unit_weight" value="{{$data->unit_weight}}">
-                                        <div class="row"><div class="col-sm-12" data-validate="unit_weight"></div></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row desc-active-row">
-                                <div class="col-md-6 col-desc">
-                                    <div class="form-group">
-                                        <label for="description">Description</label>
-                                        <textarea id="description" class="form-control" placeholder="Enter detailed product description..." name="description">{{$data->description}}</textarea>
-                                        <div class="row"><div class="col-sm-12" data-validate="description"></div></div>
-                                    </div>
-                                </div>
                                 <div class="col-lg-6 col-md-6 col-active">
                                     <div class="form-group">
-                                        <label for="status">Active Status</label>
-                                        <div style="font-size:11px;color:#94a3b8;margin-bottom:10px;">Is this product available for sale?</div>
+                                        <label for="status">Active</label>
                                         <input type="hidden" name="is_active" id="is_active_val" value="{{ $data->is_active ? '1' : '0' }}">
                                         <div style="display:inline-flex;border-radius:10px;overflow:hidden;border:1.5px solid #e2e8f0;background:#fff;">
                                             <button type="button" id="toggleNo" onclick="document.getElementById('is_active_val').value='0';document.getElementById('toggleNo').className='toggle-active-no';document.getElementById('toggleYes').className='toggle-inactive-yes';"
@@ -382,6 +362,38 @@ input.switch ~ .btn-group .btn-success,
                                             <button type="button" id="toggleYes" onclick="document.getElementById('is_active_val').value='1';document.getElementById('toggleYes').className='toggle-active-yes';document.getElementById('toggleNo').className='toggle-inactive-no';"
                                                 class="{{ $data->is_active ? 'toggle-active-yes' : 'toggle-inactive-yes' }}">Yes</button>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="selling_price">Selling Price</label>
+                                        <input type="text" id="selling_price" class="form-control" placeholder="Enter Selling Price" name="selling_price" value="{{$data->selling_price}}">
+                                        <div class="row"><div class="col-sm-12" data-validate="selling_price"></div></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="tax_vat">Tax/Vat (%)</label>
+                                        <input type="text" id="tax_vat" class="form-control" placeholder="Enter Tax/Vat" name="tax_vat" value="{{$data->tax_vat}}">
+                                        <div class="row"><div class="col-sm-12" data-validate="tax_vat"></div></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="unit_weight">Unit Weight (kg)</label>
+                                        <input type="text" id="unit_weight" class="form-control" placeholder="Enter Unit Weight" name="unit_weight" value="{{$data->unit_weight}}">
+                                        <div class="row"><div class="col-sm-12" data-validate="unit_weight"></div></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="description">Description</label>
+                                        <textarea id="description" class="form-control" placeholder="Enter detailed product description..." name="description">{{$data->description}}</textarea>
+                                        <div class="row"><div class="col-sm-12" data-validate="description"></div></div>
                                     </div>
                                 </div>
                             </div>

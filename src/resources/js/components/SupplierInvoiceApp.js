@@ -80,7 +80,8 @@ export default function SupplierInvoiceApp(props) {
 		try {
 			const res = await axios.get('/payments/supplier_payment/create/suppliers/list');
 			if (res.data.success) {
-				setSuppliersList(res.data.payload.map(s => ({ value: s.id, label: s.name })));
+				setSuppliersList(res.data.payload.map(s => ({ value: s.id, label: s.name }))
+					.sort((a, b) => String(a.label).localeCompare(String(b.label), undefined, { sensitivity: 'base' })));
 			}
 		} catch(err) { console.error('Failed to load suppliers', err); }
 	};
@@ -606,7 +607,7 @@ export default function SupplierInvoiceApp(props) {
 			label: product.name,
 			value: product.id
 		};
-	});
+	}).sort((a, b) => String(a.label).localeCompare(String(b.label), undefined, { sensitivity: 'base' }));
 
     return (
         <>

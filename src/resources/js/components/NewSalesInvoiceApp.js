@@ -45,6 +45,18 @@ const formatSupplierOption = (option, { context }) => {
     );
 };
 
+const formatCustomerOption = (option, { context }) => {
+    if (context === 'menu' && option.isCreateNew) {
+        return (
+            <span style={{display:'inline-flex',alignItems:'center',gap:'8px',fontWeight:'700',color:'rgb(234, 88, 12)'}}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Create New Customer
+            </span>
+        );
+    }
+    return <span>{option.label}</span>;
+};
+
 export default function NewSalesInvoiceApp(props) {
     const [customers, setCustomers] = useState([]);
     const [products, setProducts] = useState([]);
@@ -53,6 +65,64 @@ export default function NewSalesInvoiceApp(props) {
     const [items, setItems] = useState([]);
     const [generating, setGenerating] = useState(false);
     const [continued, setContinued] = useState(false);
+    // New-customer inline create panel
+    const [showNewCustomer, setShowNewCustomer] = useState(false);
+    const [savingCustomer, setSavingCustomer] = useState(false);
+    const emptyNewCustomer = { name:'', currency:'pound', email:'', mobile:'', credit_limit:'', address1:'' };
+    const [newCustomer, setNewCustomer] = useState(emptyNewCustomer);
+    const setNc = (key, val) => setNewCustomer(prev => ({...prev, [key]: val}));
+    const currencyOptions = [
+        { value:'pound', label:'GBP/Pound' },
+        { value:'dollar', label:'Dollar' },
+        { value:'inr', label:'INR' },
+    ];
+
+    const CREATE_NEW_CUSTOMER = '__create_new_customer__';
+    const customerOptions = [
+        { value: CREATE_NEW_CUSTOMER, label: '+ Create New Customer', isCreateNew: true },
+        ...customers,
+    ];
+    const onCustomerSelect = (selected) => {
+        if (selected && selected.value === CREATE_NEW_CUSTOMER) {
+            setNewCustomer(emptyNewCustomer);
+            setShowNewCustomer(true);
+            return;
+        }
+        setCustomer(selected);
+    };
+
+    const closeNewCustomer = () => { setShowNewCustomer(false); setNewCustomer(emptyNewCustomer); };
+
+    const saveNewCustomer = async () => {
+        const name = newCustomer.name.trim();
+        if (!name) { toast.error('Please enter a customer name'); return; }
+        if (!newCustomer.currency) { toast.error('Please select a currency'); return; }
+        setSavingCustomer(true);
+        try {
+            const res = await axios.post(props.customerCreateApi || '/management/settings/import/entities/customer-quick-add', {
+                name,
+                currency: newCustomer.currency,
+                email: newCustomer.email.trim(),
+                mobile: newCustomer.mobile.trim(),
+                credit_limit: newCustomer.credit_limit.trim(),
+                address1: newCustomer.address1.trim(),
+            });
+            if (res.data.success && res.data.item) {
+                const opt = { value: res.data.item.id, label: res.data.item.name };
+                setCustomers(prev => {
+                    if (prev.some(c => c.value === opt.value)) return prev;
+                    return [...prev, opt];
+                });
+                setCustomer(opt);
+                closeNewCustomer();
+                toast.success(res.data.reused ? 'Customer already existed — selected it' : 'Customer created!');
+            } else {
+                toast.error(res.data.message || 'Failed to create customer');
+            }
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to create customer');
+        } finally { setSavingCustomer(false); }
+    };
 
     const handleContinue = async () => {
         if (!customer) { toast.error('Please select a customer'); return; }
@@ -259,8 +329,88 @@ export default function NewSalesInvoiceApp(props) {
             .inv-date-picker{padding:0;font-size:13px;font-weight:600;border:none;height:100%;color:#1e293b;outline:none;cursor:pointer;background:transparent;width:110px;letter-spacing:0.2px;-webkit-appearance:none;appearance:none;}
             .inv-date-picker::placeholder{color:#94a3b8;font-weight:500;}
         `}</style>
+        {/* New Customer create panel — replaces the header + wizard cards while open */}
+        {showNewCustomer && (
+        <div style={{background:'#fff',borderRadius:'14px',border:'1px solid #e5e7eb',boxShadow:'0 2px 12px rgba(0,0,0,0.06)',overflow:'hidden'}}>
+            <div style={{display:'flex',alignItems:'center',gap:'12px',padding: isMobile ? '14px 16px' : '16px 22px',borderBottom:'1px solid #f0f0f0'}}>
+                <button type="button" onClick={closeNewCustomer}
+                    style={{width:'38px',height:'38px',borderRadius:'10px',flexShrink:0,background:'rgb(234, 88, 12)',border:'none',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 6px rgba(234,88,12,0.3)'}} title="Back">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                </button>
+                <div>
+                    <div style={{fontSize: isMobile ? '17px' : '19px',fontWeight:'800',color:'#0f1115',letterSpacing:'-0.3px'}}>Create New Customer</div>
+                    <div style={{fontSize:'12.5px',color:'#6b7280',marginTop:'2px'}}>Add a customer, then continue with the invoice.</div>
+                </div>
+            </div>
+            <div style={{padding: isMobile ? '20px 16px' : '32px 28px'}}>
+                <div style={{display: isMobile ? 'flex' : 'grid',flexDirection: isMobile ? 'column' : undefined,gridTemplateColumns: isMobile ? undefined : 'repeat(3, minmax(0, 1fr))',columnGap:'28px',rowGap:'22px'}}>
+                    <div>
+                        <label style={lblStyle}>First Name <span style={{color:'#ef4444'}}>*</span></label>
+                        <input type="text" value={newCustomer.name} autoFocus
+                            onChange={e=>setNc('name', e.target.value)}
+                            placeholder="e.g. AA Dream Ltd"
+                            style={{...inputStyle,height:'44px',fontSize:'14px'}} />
+                    </div>
+                    <div>
+                        <label style={lblStyle}>Currency <span style={{color:'#ef4444'}}>*</span></label>
+                        <Select options={currencyOptions}
+                            value={currencyOptions.find(o=>o.value===newCustomer.currency) || null}
+                            onChange={sel=>setNc('currency', sel ? sel.value : '')}
+                            isSearchable={false} menuPortalTarget={document.body}
+                            styles={{...selectStyles, control:(b,s)=>({...b,minHeight:'44px',height:'44px',borderRadius:'10px',fontSize:'14px',fontWeight:'500',border:s.isFocused?'1.5px solid rgb(234, 88, 12)':'1.5px solid #e2e8f0',boxShadow:'none',background:'#f8fafc'}), valueContainer:(b)=>({...b,padding:'0 14px',height:'44px'}), indicatorsContainer:(b)=>({...b,height:'44px'})}}
+                        />
+                    </div>
+                    <div>
+                        <label style={lblStyle}>Email</label>
+                        <input type="email" value={newCustomer.email}
+                            onChange={e=>setNc('email', e.target.value)}
+                            placeholder="customer@email.com"
+                            style={{...inputStyle,height:'44px',fontSize:'14px'}} />
+                    </div>
+                    <div>
+                        <label style={lblStyle}>Mobile</label>
+                        <input type="text" value={newCustomer.mobile}
+                            onChange={e=>setNc('mobile', e.target.value)}
+                            placeholder="Enter Mobile"
+                            style={{...inputStyle,height:'44px',fontSize:'14px'}} />
+                    </div>
+                    <div>
+                        <label style={lblStyle}>Credit Limit</label>
+                        <input type="text" value={newCustomer.credit_limit}
+                            onChange={e=>setNc('credit_limit', e.target.value)}
+                            placeholder="Enter Credit Limit"
+                            style={{...inputStyle,height:'44px',fontSize:'14px'}} />
+                    </div>
+                    <div>
+                        <label style={lblStyle}>Address Line 1</label>
+                        <input type="text" value={newCustomer.address1}
+                            onChange={e=>setNc('address1', e.target.value)}
+                            onKeyDown={e=>{ if(e.key==='Enter' && !savingCustomer) saveNewCustomer(); }}
+                            placeholder="Enter Address Line 1"
+                            style={{...inputStyle,height:'44px',fontSize:'14px'}} />
+                    </div>
+                </div>
+                <div style={{display:'flex',gap:'12px',marginTop:'30px',paddingTop:'24px',borderTop:'1px solid #f0f0f0'}}>
+                    <button type="button" disabled={savingCustomer} onClick={saveNewCustomer} style={{
+                        height:'44px',padding:'0 22px',borderRadius:'10px',border:'none',
+                        background: savingCustomer ? '#f1f1f4' : 'rgb(234, 88, 12)',
+                        color: savingCustomer ? '#9ca3af' : '#fff',fontWeight:'700',fontSize:'14px',
+                        cursor: savingCustomer ? 'not-allowed' : 'pointer',display:'inline-flex',alignItems:'center',gap:'8px',
+                        boxShadow: savingCustomer ? 'none' : '0 3px 10px rgba(234,88,12,0.3)',
+                    }}>
+                        {savingCustomer ? <><i className="fa fa-spinner fa-spin"></i> Saving...</> : <>Save Customer</>}
+                    </button>
+                    <button type="button" disabled={savingCustomer} onClick={closeNewCustomer} style={{
+                        height:'44px',padding:'0 20px',borderRadius:'10px',border:'1.5px solid #e8e8ec',background:'#fff',color:'#6b7280',fontWeight:'700',fontSize:'14px',cursor: savingCustomer ? 'not-allowed' : 'pointer',
+                    }}>Cancel</button>
+                </div>
+            </div>
+        </div>
+        )}
+
         {/* Header bar. On mobile we let the calendar overlay float without expanding the card,
             so overflow must stay visible there (desktop keeps overflow:hidden for its rounded corners). */}
+        {!showNewCustomer && (
         <div style={{background:'#fff',borderRadius:'14px',border:'1px solid #e5e7eb',boxShadow:'0 2px 12px rgba(0,0,0,0.06)',overflow:isMobile?'visible':'hidden',marginBottom:'16px'}}>
             {isMobile ? (
                 /* ── Mobile header: modern clean layout ── */
@@ -291,8 +441,9 @@ export default function NewSalesInvoiceApp(props) {
                     <div style={{display:'flex',alignItems:'stretch',borderBottom:'1px solid #f0f0f0',position:'relative'}}>
                         <div style={{flex:'0 1 55%',padding:'12px 10px 12px 14px',borderRight:'1px solid #f0f0f0',minWidth:0,display:'flex',flexDirection:'column',justifyContent:'center'}}>
                             <div style={{fontSize:'10px',fontWeight:'700',color:'#64748b',letterSpacing:'0.5px',textTransform:'uppercase',marginBottom:'6px'}}><i className="fa fa-user" style={{fontSize:'9px',color:'rgb(234, 88, 12)',marginRight:'4px'}}></i>Customer</div>
-                            <Select options={customers} value={customer} onChange={setCustomer}
+                            <Select options={customerOptions} value={customer} onChange={onCustomerSelect}
                                 isSearchable placeholder="Select..." menuPortalTarget={document.body}
+                                formatOptionLabel={formatCustomerOption}
                                 styles={{...selectStyles,
                                     control:(b,s)=>({...b,minHeight:'36px',height:'36px',fontSize:'13px',fontWeight:'600',borderRadius:'8px',border:s.isFocused?'1.5px solid rgb(234, 88, 12)':'1.5px solid #e5e7eb',boxShadow:s.isFocused?'0 0 0 3px rgba(234,88,12,0.08)':'none',background:'#fafafa'}),
                                     valueContainer:(b)=>({...b,padding:'0 10px',height:'36px'}),
@@ -376,8 +527,9 @@ export default function NewSalesInvoiceApp(props) {
                     {/* Customer */}
                     <div style={{flex:'1 1 0%',padding:'10px 16px',minWidth:'280px',display:'flex',flexDirection:'column',justifyContent:'center',gap:'6px'}}>
                         <span style={{fontSize:'10.5px',fontWeight:'800',letterSpacing:'0.8px',color:'#6b7280',textTransform:'uppercase'}}>Customer</span>
-                        <Select options={customers} value={customer} onChange={setCustomer}
+                        <Select options={customerOptions} value={customer} onChange={onCustomerSelect}
                             isSearchable placeholder="Select Customer..." menuPortalTarget={document.body}
+                            formatOptionLabel={formatCustomerOption}
                             styles={{...selectStyles,
                                 control:(b,s)=>({...b,minHeight:'42px',height:'42px',fontSize:'13.5px',fontWeight:'500',borderRadius:'10px',border:s.isFocused?'1.5px solid rgb(234, 88, 12)':'1.5px solid #e8e8ec',boxShadow:'none',background:'#fff','&:hover':{borderColor:'rgb(234, 88, 12)'}}),
                                 valueContainer:(b)=>({...b,padding:'0 14px',height:'42px'}),
@@ -426,9 +578,10 @@ export default function NewSalesInvoiceApp(props) {
                 </div>
             )}
         </div>
+        )}
 
         {/* Step indicator + helper (before continue) */}
-        {!continued && (
+        {!continued && !showNewCustomer && (
         <div style={{marginTop: isMobile ? '12px' : '16px',minHeight: isMobile ? 'calc(100vh - 220px)' : 'calc(100vh - 200px)',display:'flex',flexDirection:'column'}}>
             {/* Stepper card — exact spec UI */}
             <div style={{background:'#fff',borderRadius:'12px',border:'1px solid #e8e8ec',boxShadow:'0 1px 2px rgba(15,17,21,0.04),0 6px 18px -8px rgba(15,17,21,0.12)',padding: isMobile ? '12px 16px' : '14px 22px',display:'flex',alignItems:'center',gap:'12px',marginBottom: isMobile ? '12px' : '16px',flexWrap:'wrap'}}>

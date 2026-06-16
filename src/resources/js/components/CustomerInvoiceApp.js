@@ -16,6 +16,7 @@ import { compareAsc, format } from 'date-fns';
 import dateFormat from 'dateformat';
 import {AlertProvider, useAlert } from "./../hooks/AlertContext";
 import AddStock from "./../elements/AddStock";
+import AddProduct from "./../elements/AddProduct";
 import { formatTwoDecimal, parseErrorMessage } from './../hooks/utils';
 import { useWindowSize } from "./../hooks/useWindowSize";
 import CustomerInvoicePaymentsPopup from "./../elements/CustomerInvoicePaymentsPopup"
@@ -382,6 +383,21 @@ export default function CustomerInvoiceApp(props) {
         fetchInvoiceDetail({ getInvoiceId: props.id });
 
     }, []);
+
+    // A product just created from the inline "+ Add" popup — add it to the list,
+    // refresh the cache, and auto-select it into the row that triggered the popup.
+    const onProductCreated = (item, reused, rowIndex) => {
+        if (!item) return;
+        setProductsList(prev => {
+            const exists = prev.some(p => String(p.id) === String(item.id));
+            const next = exists ? prev : [...prev, { id: item.id, name: item.name }];
+            _cacheSet('ci_productsList', next);
+            return next;
+        });
+        if (rowIndex !== undefined && rowIndex !== null) {
+            handleProductChange(rowIndex, { label: item.name, value: item.id });
+        }
+    };
 
     useEffect(() => {
       if (invoiceDetail.created_date) {
@@ -1070,7 +1086,7 @@ export default function CustomerInvoiceApp(props) {
                                     supplier_invoice_product_id: invoice.id
                                 }
                             }))
-                        )
+                        ).sort((a, b) => String(a.supplier_name).localeCompare(String(b.supplier_name), undefined, { sensitivity: 'base' }))
                     ];
                     setRowsData(prev => {
                         const updated = [...prev];
@@ -1257,7 +1273,7 @@ export default function CustomerInvoiceApp(props) {
 			label: product.name,
 			value: product.id
 		};
-	});
+	}).sort((a, b) => String(a.label).localeCompare(String(b.label), undefined, { sensitivity: 'base' }));
 	
 	let allSuppliers = [{label:"A",value:10},{label:"B",value:12}];
 
@@ -1304,7 +1320,9 @@ export default function CustomerInvoiceApp(props) {
       SalesService.FetchUser()
           .then(response => {
               if (response.data.success === true) {
-                  setCustomersList(response.data.payload)
+                  const sorted = [...(response.data.payload || [])].sort((a, b) =>
+                      String(a.name).localeCompare(String(b.name), undefined, { sensitivity: 'base' }));
+                  setCustomersList(sorted)
               }else{
                   alert('There is Some Error!')
               }
@@ -1954,7 +1972,7 @@ export default function CustomerInvoiceApp(props) {
 									<div style={{display:'flex',alignItems:'flex-end',gap:'10px'}}>
 										<div style={{flex: showSuppliers ? 1 : 1.6, minWidth:0, position:'relative'}}>
 											<div style={{display:'flex',alignItems:'center',justifyContent:'flex-start',gap:'8px',marginBottom:'6px'}}>
-												<span style={{fontSize:'10px',fontWeight:'700',color:'#64748b',letterSpacing:'0.8px',textTransform:'uppercase'}}>Product</span>
+												<span style={{fontSize:'10px',fontWeight:'700',color:'#64748b',letterSpacing:'0.8px',textTransform:'uppercase'}}>Product</span><AddProduct existingProducts={productsList} onCreated={(item, reused) => onProductCreated(item, reused, addIdx)} />
 												<div style={{display:'flex',alignItems:'center',gap:'5px',marginLeft:'auto'}}>
 													<span style={{fontSize:'10px',fontWeight:'600',color:showSuppliers?'rgb(234, 88, 12)':'#94a3b8',transition:'color 0.2s'}}>Supplier</span>
 													<div onClick={savingToggle ? undefined : handleSupplierToggle} style={{position:'relative',width:'30px',height:'17px',cursor:savingToggle?'not-allowed':'pointer',display:'block',opacity:savingToggle?0.6:1,flexShrink:0,background:showSuppliers?'rgb(234, 88, 12)':'#d1d5db',borderRadius:'17px',transition:'background 0.2s'}}>
@@ -2025,7 +2043,7 @@ export default function CustomerInvoiceApp(props) {
 									<div style={{display:'flex',gap:'10px',marginBottom:'12px'}}>
 										<div style={{flex:1,minWidth:0,position:'relative'}}>
 											<div style={{display:'flex',alignItems:'center',justifyContent:'flex-start',gap:'8px',marginBottom:'6px'}}>
-												<span style={{fontSize:'10px',fontWeight:'700',color:'#64748b',letterSpacing:'0.8px',textTransform:'uppercase'}}>Product</span>
+												<span style={{fontSize:'10px',fontWeight:'700',color:'#64748b',letterSpacing:'0.8px',textTransform:'uppercase'}}>Product</span><AddProduct existingProducts={productsList} onCreated={(item, reused) => onProductCreated(item, reused, addIdx)} />
 												<div style={{display:'flex',alignItems:'center',gap:'5px'}}>
 													<span style={{fontSize:'10px',fontWeight:'600',color:showSuppliers?'rgb(234, 88, 12)':'#94a3b8',transition:'color 0.2s'}}>Supplier</span>
 													<div onClick={savingToggle ? undefined : handleSupplierToggle} style={{position:'relative',width:'30px',height:'17px',cursor:savingToggle?'not-allowed':'pointer',display:'block',opacity:savingToggle?0.6:1,flexShrink:0,background:showSuppliers?'rgb(234, 88, 12)':'#d1d5db',borderRadius:'17px',transition:'background 0.2s'}}>
@@ -2356,7 +2374,8 @@ export default function CustomerInvoiceApp(props) {
                             <div style={{marginBottom:'14px'}}>
                                 <div style={{display:'flex',alignItems:'center',justifyContent:'flex-start',gap:'8px',marginBottom:'6px'}}>
                                     <label style={{...lbl,marginBottom:0}}>Product</label>
-                                    <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
+                                    <AddProduct existingProducts={productsList} onCreated={(item, reused) => onProductCreated(item, reused, panelIndex)} />
+                                    <div style={{display:'flex',alignItems:'center',gap:'6px',marginLeft:'auto'}}>
                                         <span style={{fontSize:'10px',fontWeight:'700',color:showSuppliers?'rgb(234, 88, 12)':'#94a3b8',letterSpacing:'0.3px'}}>Supplier</span>
                                         <div onClick={savingToggle ? undefined : handleSupplierToggle} style={{position:'relative',width:'34px',height:'18px',cursor:savingToggle?'not-allowed':'pointer',display:'block',opacity:savingToggle?0.6:1,flexShrink:0,background:showSuppliers?'rgb(234, 88, 12)':'#d1d5db',borderRadius:'17px',transition:'background 0.2s'}}>
                                             <span style={{position:'absolute',width:'12px',height:'12px',left:showSuppliers?'19px':'3px',bottom:'3px',background:'#fff',borderRadius:'50%',boxShadow:'0 1px 3px rgba(0,0,0,0.25)',transition:'left 0.2s',display:'block'}}></span>
