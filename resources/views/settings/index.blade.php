@@ -231,8 +231,12 @@ html { scrollbar-gutter: stable; overflow-y: scroll; }
        the title nor subtitle ever sits under it. */
     .settings-nav-left { min-width: 0 !important; flex: 1 1 auto !important; gap: 11px !important; }
     .settings-nav-left > div:last-child { min-width: 0 !important; flex: 1 1 auto !important; padding-right: 110px !important; }
-    /* "Roles" dropdown — vertically centred on the right edge, styled as an orange pill */
-    .settings-tabs-strip { top: 50% !important; transform: translateY(-50%) !important; right: 14px !important; }
+    /* "Roles" dropdown — pinned to the TOP-right (aligned with the title row), not
+       vertically centred, so a long label (e.g. "Delete Data") never overlaps the
+       "Manage your workspace" subtitle sitting below the title. */
+    /* Align the dropdown vertically with the "Settings" title text (centre of the
+       title row / icon), sitting to its right — not centred on the whole card. */
+    .settings-tabs-strip { top: 28px !important; transform: translateY(-50%) !important; right: 14px !important; }
     .settings-tabs-mobile-dd .stmdd-trigger {
         width: auto !important;
         min-width: 84px !important;
@@ -258,10 +262,18 @@ html { scrollbar-gutter: stable; overflow-y: scroll; }
         margin-top: 14px !important;
     }
 
-    /* Account + General + Delete Data tabs — un-merge from the Settings header card:
-       give a gap and full rounded standalone cards (like Roles/Users/Permissions). */
+    /* Account + General tabs — no outer background card; inner cards float on their own. */
     #tab-account.tab-content-section.active,
-    #tab-general.tab-content-section.active,
+    #tab-general.tab-content-section.active {
+        margin-top: 14px !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        overflow: visible !important;
+    }
+
+    /* Delete Data tab — left transparent because it splits into its own inner cards below. */
     #tab-deletedata.tab-content-section.active {
         margin-top: 14px !important;
         background: transparent !important;
@@ -457,9 +469,9 @@ html { scrollbar-gutter: stable; overflow-y: scroll; }
     .settings-tab i { font-size: 12px; }
 }
 @media (max-width: 520px) {
-    .settings-nav-bar { padding: 12px 14px; gap: 10px; }
+    .settings-nav-bar { padding: 0; gap: 10px; }
     .settings-nav-left { gap: 10px; }
-    .settings-nav-icon { width: 36px; height: 36px; border-radius: 10px; }
+    .settings-nav-icon { width: 42px; height: 42px; border-radius: 10px; }
     .settings-nav-icon i { font-size: 16px !important; }
     .settings-tabs {
         width: 100%;
@@ -650,6 +662,13 @@ textarea.sform-control { height: auto; padding: 10px 14px; resize: vertical; }
 
     /* Merge two cards — no gap, clean divider */
     .sa-account-row { --bs-gutter-y: 0 !important; row-gap: 0 !important; }
+    /* Make the Profile card exactly as wide as the Settings header card above:
+       kill the Bootstrap row's negative margins AND the column's gutter padding,
+       so the card runs edge-to-edge of the page like the header card. */
+    #tab-account .sa-account-row { margin: 0 !important; --bs-gutter-x: 0 !important; }
+    #tab-account .sa-account-col-profile,
+    #tab-account .sa-account-col-pw { padding-left: 0 !important; padding-right: 0 !important; }
+    #tab-account .sform-card { width: 100% !important; margin: 0 !important; }
     .sa-account-col-profile, .sa-account-col-pw { padding-bottom: 0 !important; }
     .sa-profile-card {
         border-radius: 16px 16px 0 0 !important;
@@ -1982,7 +2001,7 @@ button:focus, button:active, .btn:focus, .btn:active,
         border: 1px solid #eaecf2 !important;          /* full border all around the card */
         border-radius: 16px !important;                /* round all 4 corners */
         box-shadow: 0 4px 16px rgba(0,0,0,0.05) !important;
-        margin: 12px 14px 0 !important;                /* gap above + on both sides so the white card floats on the grey page */
+        margin: 12px 0px 0 !important;                /* gap above only; full-width card */
         overflow: hidden !important;
     }
     /* ── Preview-active: split the Import-Data block and the Data-Preview block into
@@ -4708,7 +4727,9 @@ function showSettingsToast(message, type) {
     var icon = type === 'success' ? 'fa-check-circle' : 'fa-times-circle';
     var el = document.createElement('div');
     el.id = 'settings-toast';
-    el.style.cssText = 'position:fixed;top:24px;right:24px;z-index:99999;background:'+bg+';color:#fff;padding:14px 20px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,0.15);display:flex;align-items:center;gap:10px;max-width:340px;transition:opacity 0.3s;';
+    // On mobile push the toast below the fixed header so it doesn't overlap the nav bar.
+    var topPos = window.innerWidth <= 767 ? '74px' : '24px';
+    el.style.cssText = 'position:fixed;top:'+topPos+';right:24px;z-index:99999;background:'+bg+';color:#fff;padding:14px 20px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,0.15);display:flex;align-items:center;gap:10px;max-width:340px;transition:opacity 0.3s;';
     el.innerHTML = '<i class="fa '+icon+'" style="font-size:16px;"></i><span>'+message+'</span>';
     document.body.appendChild(el);
     setTimeout(function(){ el.style.opacity='0'; setTimeout(function(){ el.remove(); }, 350); }, 3000);

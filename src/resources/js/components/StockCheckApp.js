@@ -176,7 +176,10 @@ function List(props) {
 
   const fmtDisplay = (v) => {
     if (!v) return '';
-    try { const d = new Date(v+'T00:00:00'); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); } catch { return v; }
+    const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const [y,m,d]=String(v).split('-').map(Number);
+    if(!y||!m||!d) return v;
+    return `${String(d).padStart(2,'0')} ${MON[m-1]} ${y}`;
   };
   const handleDateSelect = (selectedDate) => {
     if (!selectedDate) return;

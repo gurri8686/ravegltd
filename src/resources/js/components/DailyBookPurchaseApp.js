@@ -495,12 +495,13 @@ function FilterOptionsSearchPanel(props) {
     const [rangeStart, setRangeStart] = useState(null);
     const [rangeEnd, setRangeEnd] = useState(null);
     const [sMonthDd, setSMonthDd] = useState(false);
+    const [mobileDateMode, setMobileDateMode] = useState('range');
     const [sYearDd, setSYearDd] = useState(false);
     const [activePreset, setActivePreset] = useState(null);
     const hasActiveFilter = !!(fromDate || toDate || currentSupplier);
 
     const toYMD = (d) => { const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${dd}`; };
-    const fmtDisp = (v) => { if (!v) return ''; const d=new Date(v+'T00:00:00'); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); };
+    const fmtDisp = (v) => { if (!v) return ''; const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; const [y,m,d]=String(v).split('-').map(Number); if(!y||!m||!d) return ''; return `${String(d).padStart(2,'0')} ${MON[m-1]} ${y}`; };
     const handleRangeChange = (dates) => {
         let [s,e]=dates;
         if (s && e && s > e) { const t=s; s=e; e=t; }
@@ -523,6 +524,14 @@ function FilterOptionsSearchPanel(props) {
         setPendingFrom(toYMD(from)); setPendingTo(toYMD(to));
         setRangeStart(from); setRangeEnd(to);
         setActivePreset(label);
+    };
+    const handleSingleChange = (d) => {
+        const day = Array.isArray(d) ? d[0] : d;
+        if (!day) return;
+        setRangeStart(day); setRangeEnd(day);
+        const ymd = toYMD(day);
+        setPendingFrom(ymd); setPendingTo(ymd);
+        setActivePreset(null);
     };
     const openPurchaseCalendar = () => { setRangeStart(pendingFrom?new Date(pendingFrom+'T00:00:00'):null); setRangeEnd(pendingTo?new Date(pendingTo+'T00:00:00'):null); setCalendarOpen(true); setMobileFilterOpen(false); };
 
@@ -645,13 +654,32 @@ function FilterOptionsSearchPanel(props) {
                         <div style={{width:'30px',height:'30px',borderRadius:'9px',background:'#fff7ed',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgb(234, 88, 12)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                         </div>
-                        <span style={{fontSize:'16px',fontWeight:'800',color:'#0f172a'}}>Select Date Range</span>
+                        <span style={{fontSize:'16px',fontWeight:'800',color:'#0f172a'}}>{mobileDateMode==='single'?'Select Date':'Select Date Range'}</span>
                     </div>
                     <button type="button" onClick={()=>setCalendarOpen(false)} style={{background:'#f1f5f9',border:'none',outline:'none',borderRadius:'50%',width:'30px',height:'30px',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                     </button>
                 </div>
+                {/* Single / Range toggle */}
                 <div style={{padding:'0 18px 14px'}}>
+                    <div style={{display:'inline-flex',width:'100%',background:'#f4f4f6',borderRadius:'12px',padding:'4px',gap:'4px'}}>
+                        {[{k:'single',label:'Single Date'},{k:'range',label:'Date Range'}].map(opt=>{
+                            const on=mobileDateMode===opt.k;
+                            return (<button key={opt.k} type="button" onClick={()=>{ setMobileDateMode(opt.k); if(opt.k==='single'){ setRangeEnd(rangeStart); if(pendingFrom) setPendingTo(pendingFrom); } }}
+                                style={{flex:1,border:'none',outline:'none',cursor:'pointer',borderRadius:'9px',padding:'9px 0',fontSize:'13.5px',fontWeight:on?'800':'600',background:on?'#fff':'transparent',color:on?'rgb(234, 88, 12)':'#6b7280',boxShadow:on?'0 1px 3px rgba(15,17,21,0.12)':'none',transition:'all 0.12s'}}>{opt.label}</button>);
+                        })}
+                    </div>
+                </div>
+                <div style={{padding:'0 18px 14px'}}>
+                    {mobileDateMode==='single' ? (
+                    <div style={{background:'#fff',border:'2px solid '+(pendingFrom?'rgb(234, 88, 12)':'#e5e7eb'),borderRadius:'12px',padding:'10px 14px',boxShadow:pendingFrom?'0 0 0 3px rgba(234,88,12,0.08)':'none'}}>
+                        <div style={{display:'flex',alignItems:'center',gap:'5px',marginBottom:'3px'}}>
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgb(234, 88, 12)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            <span style={{fontSize:'10px',fontWeight:'800',color:'rgb(234, 88, 12)',letterSpacing:'0.6px',textTransform:'uppercase'}}>Date</span>
+                        </div>
+                        <div style={{fontSize:'14px',fontWeight:'700',color:pendingFrom?'#0f172a':'#cbd5e1',whiteSpace:'nowrap'}}>{pendingFrom?fmtDisp(pendingFrom):'Select'}</div>
+                    </div>
+                    ) : (
                     <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
                         <div style={{flex:1,background:'#fff',border:'2px solid '+(pendingFrom?'rgb(234, 88, 12)':'#e5e7eb'),borderRadius:'12px',padding:'8px 12px',boxShadow:pendingFrom?'0 0 0 3px rgba(234,88,12,0.08)':'none',transition:'all 0.15s'}}>
                             <div style={{display:'flex',alignItems:'center',gap:'5px',marginBottom:'3px'}}>
@@ -671,8 +699,10 @@ function FilterOptionsSearchPanel(props) {
                             <div style={{fontSize:'14px',fontWeight:'700',color:pendingTo?'#0f172a':'#cbd5e1',whiteSpace:'nowrap'}}>{pendingTo?fmtDisp(pendingTo):'Select'}</div>
                         </div>
                     </div>
+                    )}
                 </div>
-                {/* Quick preset chips — horizontal scroll, hidden scrollbar */}
+                {/* Quick preset chips — only in Range mode */}
+                {mobileDateMode==='range' && (
                 <div className="sp-presets" style={{display:'flex',gap:'8px',padding:'0 18px 14px',overflowX:'auto',WebkitOverflowScrolling:'touch'}}>
                     {['Today','Yesterday','Last 7d','This month','Custom Range'].map(label => {
                         const presetRange = (() => {
@@ -693,6 +723,7 @@ function FilterOptionsSearchPanel(props) {
                         );
                     })}
                 </div>
+                )}
                 <style>{`.sp-range .react-datepicker{width:100%;border:none;font-family:inherit;background:#fff !important;box-shadow:none !important}.sp-range .react-datepicker__month-container{width:100%;float:none;background:#fff !important}.sp-range .react-datepicker__month{background:#fff !important;margin:0 !important}.sp-range .react-datepicker__week{background:#fff !important}.sp-range .react-datepicker__header{background:#fff !important;border-bottom:none;padding:0}.sp-range .react-datepicker__header--custom{background:#fff !important;border-bottom:none !important;padding:0 !important}.sp-range .react-datepicker__day-names,.sp-range .react-datepicker__week{display:flex;justify-content:space-around}.sp-range .react-datepicker__day-name{width:calc(100%/7);height:34px;line-height:34px;font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:0.5px;margin:0}.sp-range .react-datepicker__day{display:inline-flex;align-items:center;justify-content:center;width:calc(100%/7);height:42px;font-size:14px;font-weight:500;color:#334155;margin:0;border-radius:50%;transition:background 0.12s,color 0.12s;position:relative}.sp-range .react-datepicker__day:hover:not(.react-datepicker__day--selected):not(.react-datepicker__day--range-start):not(.react-datepicker__day--range-end){background:#f1f5f9;color:#0f172a}.sp-range .react-datepicker__day--today{font-weight:700;color:rgb(234, 88, 12);background:transparent}.sp-range .react-datepicker__day--in-range,.sp-range .react-datepicker__day--in-selecting-range:not(.react-datepicker__day--selecting-range-start){background:transparent !important;color:rgb(234, 88, 12) !important;font-weight:600;position:relative}.sp-range .react-datepicker__day--in-range::before,.sp-range .react-datepicker__day--in-selecting-range:not(.react-datepicker__day--selecting-range-start)::before{content:'';position:absolute;top:4px;bottom:4px;left:0;right:0;background:#fff7f0;z-index:-1}.sp-range .react-datepicker__day--selected,.sp-range .react-datepicker__day--range-start,.sp-range .react-datepicker__day--range-end,.sp-range .react-datepicker__day--selecting-range-start,.sp-range .react-datepicker__day--today.react-datepicker__day--selected,.sp-range .react-datepicker__day--today.react-datepicker__day--range-start,.sp-range .react-datepicker__day--today.react-datepicker__day--range-end{background:transparent !important;color:#fff !important;font-weight:800 !important;font-size:13px;position:relative;z-index:1}
 /* range band behind start/end (half-inset like reference) */
 .sp-range .react-datepicker__day--range-start:not(.react-datepicker__day--range-end)::after{content:'';position:absolute;top:4px;bottom:4px;left:50%;right:0;background:#fff7f0;z-index:-2}
@@ -700,7 +731,7 @@ function FilterOptionsSearchPanel(props) {
 /* orange circle for selected/start/end */
 .sp-range .react-datepicker__day--selected::before,.sp-range .react-datepicker__day--range-start::before,.sp-range .react-datepicker__day--range-end::before,.sp-range .react-datepicker__day--selecting-range-start::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:34px;height:34px;border-radius:50%;background:rgb(234, 88, 12);box-shadow:rgba(234, 88, 12, 0.5) 0px 4px 10px -3px;z-index:-1}.sp-range .react-datepicker__day--range-start,.sp-range .react-datepicker__day--range-end,.sp-range .react-datepicker__day--range-start.react-datepicker__day--range-end{border-radius:50% !important}.sp-range .react-datepicker__day--outside-month{color:#d1d5db}.sp-range .react-datepicker__day--disabled{color:#e5e7eb !important;background:transparent !important}.sp-range .react-datepicker__day--keyboard-selected{background:transparent;color:#1e293b}.sp-range .react-datepicker__navigation{display:none !important}.sp-range .react-datepicker__current-month{display:none !important}.sp-dd{position:relative;display:inline-block}.sp-dd-btn{border:1.5px solid #e5e7eb;border-radius:9px;padding:7px 26px 7px 14px;font-size:13px;font-weight:700;color:#1e293b;cursor:pointer;outline:none;background:#f4f4f6;position:relative}.sp-dd-btn:focus,.sp-dd-btn:active{outline:none;border-color:rgb(234, 88, 12)}.sp-dd-btn::after{content:'';position:absolute;right:10px;top:50%;transform:translateY(-50%);border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #94a3b8}.sp-dd-list{position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%);background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.12);z-index:99;max-height:180px;overflow-y:auto;min-width:84px;padding:4px}.sp-dd-list::-webkit-scrollbar{width:3px}.sp-dd-list::-webkit-scrollbar-thumb{background:#fed7aa;border-radius:3px}.sp-dd-item{padding:6px 12px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;text-align:center;color:#374151;transition:all 0.1s}.sp-dd-item:hover{background:#fff7ed;color:rgb(234, 88, 12)}.sp-dd-item.active{background:rgb(234, 88, 12);color:#fff;font-weight:700}.sp-presets{scrollbar-width:none;-ms-overflow-style:none}.sp-presets::-webkit-scrollbar{display:none;width:0;height:0}`}</style>
                 <div className="sp-range" style={{padding:'4px 16px 0'}}>
-                    <ReactDatePicker inline selected={rangeStart} onChange={handleRangeChange} startDate={rangeStart} endDate={rangeEnd} selectsRange maxDate={new Date()}
+                    <ReactDatePicker inline selected={rangeStart} onChange={mobileDateMode==='single'?handleSingleChange:handleRangeChange} startDate={mobileDateMode==='single'?undefined:rangeStart} endDate={mobileDateMode==='single'?undefined:rangeEnd} selectsRange={mobileDateMode==='range'} maxDate={new Date()}
                         renderCustomHeader={({date,changeYear,changeMonth,decreaseMonth,increaseMonth,prevMonthButtonDisabled,nextMonthButtonDisabled})=>{
                             const mnthsFull=['January','February','March','April','May','June','July','August','September','October','November','December'];
                             const mnths=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -736,11 +767,13 @@ function FilterOptionsSearchPanel(props) {
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                         Cancel
                     </button>
-                    <button type="button" onClick={()=>{setCalendarOpen(false);setMobileFilterOpen(true);}} disabled={!pendingFrom||!pendingTo}
-                        style={{height:'52px',borderRadius:'14px',border:'none',background:(!pendingFrom||!pendingTo)?'#e2e8f0':'rgb(234, 88, 12)',color:(!pendingFrom||!pendingTo)?'#94a3b8':'#fff',fontSize:'15px',fontWeight:'800',letterSpacing:'0.2px',cursor:(!pendingFrom||!pendingTo)?'default':'pointer',outline:'none',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',boxShadow:(!pendingFrom||!pendingTo)?'none':'0 6px 16px rgba(234,88,12,0.35)'}}>
+                    {(() => { const applyDisabled = mobileDateMode==='single' ? !pendingFrom : (!pendingFrom||!pendingTo); return (
+                    <button type="button" onClick={()=>{setCalendarOpen(false);setMobileFilterOpen(true);}} disabled={applyDisabled}
+                        style={{height:'52px',borderRadius:'14px',border:'none',background:applyDisabled?'#e2e8f0':'rgb(234, 88, 12)',color:applyDisabled?'#94a3b8':'#fff',fontSize:'15px',fontWeight:'800',letterSpacing:'0.2px',cursor:applyDisabled?'default':'pointer',outline:'none',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',boxShadow:applyDisabled?'none':'0 6px 16px rgba(234,88,12,0.35)'}}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                         Apply
                     </button>
+                    ); })()}
                 </div>
             </div>
         </>)}
@@ -1500,8 +1533,10 @@ function DateRangePickerLocal_UNUSED({ fromDate, toDate, onFromChange, onToChang
 
     const formatDisplay = (date) => {
         if (!date) return '—';
-        const d = new Date(date + 'T00:00:00');
-        return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+        const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const [y,m,d]=String(date).split('-').map(Number);
+        if(!y||!m||!d) return '—';
+        return `${String(d).padStart(2,'0')} ${MON[m-1]} ${y}`;
     };
     const toYMD = (date) => { const y=date.getFullYear(),m=String(date.getMonth()+1).padStart(2,'0'),d=String(date.getDate()).padStart(2,'0'); return `${y}-${m}-${d}`; };
     const handleChange = (dates) => { const [start,end]=dates; if(start) onFromChange(toYMD(start)); if(end){onToChange(toYMD(end));setIsOpen(false);} else{onToChange('');} };

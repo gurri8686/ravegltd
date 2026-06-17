@@ -185027,11 +185027,15 @@ function CustomerInvoiceApp(props) {
                     flex: 1,
                     textAlign: 'left'
                   },
-                  children: selectedDate ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-GB', {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric'
-                  }) : 'Select date'
+                  children: selectedDate ? function () {
+                    var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    var _String$split$map = String(selectedDate).split('-').map(Number),
+                      _String$split$map2 = _slicedToArray(_String$split$map, 3),
+                      y = _String$split$map2[0],
+                      m = _String$split$map2[1],
+                      d = _String$split$map2[2];
+                    return "".concat(String(d).padStart(2, '0'), " ").concat(MON[m - 1], " ").concat(y);
+                  }() : 'Select date'
                 }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("i", {
                   className: "fa fa-chevron-right",
                   style: {
@@ -200460,14 +200464,18 @@ function FilterOptionsSearchPanel(props) {
     _useState26 = _slicedToArray(_useState25, 2),
     sMonthDd = _useState26[0],
     setSMonthDd = _useState26[1];
-  var _useState27 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+  var _useState27 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('range'),
     _useState28 = _slicedToArray(_useState27, 2),
-    sYearDd = _useState28[0],
-    setSYearDd = _useState28[1];
-  var _useState29 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
+    mobileDateMode = _useState28[0],
+    setMobileDateMode = _useState28[1];
+  var _useState29 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
     _useState30 = _slicedToArray(_useState29, 2),
-    activePreset = _useState30[0],
-    setActivePreset = _useState30[1];
+    sYearDd = _useState30[0],
+    setSYearDd = _useState30[1];
+  var _useState31 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
+    _useState32 = _slicedToArray(_useState31, 2),
+    activePreset = _useState32[0],
+    setActivePreset = _useState32[1];
   var hasActiveFilter = !!(fromDate || toDate || currentSupplier);
   var toYMD = function toYMD(d) {
     var y = d.getFullYear(),
@@ -200477,12 +200485,14 @@ function FilterOptionsSearchPanel(props) {
   };
   var fmtDisp = function fmtDisp(v) {
     if (!v) return '';
-    var d = new Date(v + 'T00:00:00');
-    return d.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
+    var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    var _String$split$map = String(v).split('-').map(Number),
+      _String$split$map2 = _slicedToArray(_String$split$map, 3),
+      y = _String$split$map2[0],
+      m = _String$split$map2[1],
+      d = _String$split$map2[2];
+    if (!y || !m || !d) return '';
+    return "".concat(String(d).padStart(2, '0'), " ").concat(MON[m - 1], " ").concat(y);
   };
   var handleRangeChange = function handleRangeChange(dates) {
     var _dates = _slicedToArray(dates, 2),
@@ -200525,6 +200535,16 @@ function FilterOptionsSearchPanel(props) {
     setRangeStart(from);
     setRangeEnd(to);
     setActivePreset(label);
+  };
+  var handleSingleChange = function handleSingleChange(d) {
+    var day = Array.isArray(d) ? d[0] : d;
+    if (!day) return;
+    setRangeStart(day);
+    setRangeEnd(day);
+    var ymd = toYMD(day);
+    setPendingFrom(ymd);
+    setPendingTo(ymd);
+    setActivePreset(null);
   };
   var openPurchaseCalendar = function openPurchaseCalendar() {
     setRangeStart(pendingFrom ? new Date(pendingFrom + 'T00:00:00') : null);
@@ -201260,7 +201280,7 @@ function FilterOptionsSearchPanel(props) {
                 fontWeight: '800',
                 color: '#0f172a'
               },
-              children: "Select Date Range"
+              children: mobileDateMode === 'single' ? 'Select Date' : 'Select Date Range'
             })]
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("button", {
             type: "button",
@@ -201305,7 +201325,120 @@ function FilterOptionsSearchPanel(props) {
           style: {
             padding: '0 18px 14px'
           },
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("div", {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("div", {
+            style: {
+              display: 'inline-flex',
+              width: '100%',
+              background: '#f4f4f6',
+              borderRadius: '12px',
+              padding: '4px',
+              gap: '4px'
+            },
+            children: [{
+              k: 'single',
+              label: 'Single Date'
+            }, {
+              k: 'range',
+              label: 'Date Range'
+            }].map(function (opt) {
+              var on = mobileDateMode === opt.k;
+              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("button", {
+                type: "button",
+                onClick: function onClick() {
+                  setMobileDateMode(opt.k);
+                  if (opt.k === 'single') {
+                    setRangeEnd(rangeStart);
+                    if (pendingFrom) setPendingTo(pendingFrom);
+                  }
+                },
+                style: {
+                  flex: 1,
+                  border: 'none',
+                  outline: 'none',
+                  cursor: 'pointer',
+                  borderRadius: '9px',
+                  padding: '9px 0',
+                  fontSize: '13.5px',
+                  fontWeight: on ? '800' : '600',
+                  background: on ? '#fff' : 'transparent',
+                  color: on ? 'rgb(234, 88, 12)' : '#6b7280',
+                  boxShadow: on ? '0 1px 3px rgba(15,17,21,0.12)' : 'none',
+                  transition: 'all 0.12s'
+                },
+                children: opt.label
+              }, opt.k);
+            })
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("div", {
+          style: {
+            padding: '0 18px 14px'
+          },
+          children: mobileDateMode === 'single' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("div", {
+            style: {
+              background: '#fff',
+              border: '2px solid ' + (pendingFrom ? 'rgb(234, 88, 12)' : '#e5e7eb'),
+              borderRadius: '12px',
+              padding: '10px 14px',
+              boxShadow: pendingFrom ? '0 0 0 3px rgba(234,88,12,0.08)' : 'none'
+            },
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("div", {
+              style: {
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                marginBottom: '3px'
+              },
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("svg", {
+                width: "11",
+                height: "11",
+                viewBox: "0 0 24 24",
+                fill: "none",
+                stroke: "rgb(234, 88, 12)",
+                strokeWidth: "2.2",
+                strokeLinecap: "round",
+                strokeLinejoin: "round",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("rect", {
+                  x: "3",
+                  y: "4",
+                  width: "18",
+                  height: "18",
+                  rx: "2"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("line", {
+                  x1: "16",
+                  y1: "2",
+                  x2: "16",
+                  y2: "6"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("line", {
+                  x1: "8",
+                  y1: "2",
+                  x2: "8",
+                  y2: "6"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("line", {
+                  x1: "3",
+                  y1: "10",
+                  x2: "21",
+                  y2: "10"
+                })]
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("span", {
+                style: {
+                  fontSize: '10px',
+                  fontWeight: '800',
+                  color: 'rgb(234, 88, 12)',
+                  letterSpacing: '0.6px',
+                  textTransform: 'uppercase'
+                },
+                children: "Date"
+              })]
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("div", {
+              style: {
+                fontSize: '14px',
+                fontWeight: '700',
+                color: pendingFrom ? '#0f172a' : '#cbd5e1',
+                whiteSpace: 'nowrap'
+              },
+              children: pendingFrom ? fmtDisp(pendingFrom) : 'Select'
+            })]
+          }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("div", {
             style: {
               display: 'flex',
               alignItems: 'center',
@@ -201477,7 +201610,7 @@ function FilterOptionsSearchPanel(props) {
               })]
             })]
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("div", {
+        }), mobileDateMode === 'range' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("div", {
           className: "sp-presets",
           style: {
             display: 'flex',
@@ -201543,10 +201676,10 @@ function FilterOptionsSearchPanel(props) {
           children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)(ReactDatePicker, {
             inline: true,
             selected: rangeStart,
-            onChange: handleRangeChange,
-            startDate: rangeStart,
-            endDate: rangeEnd,
-            selectsRange: true,
+            onChange: mobileDateMode === 'single' ? handleSingleChange : handleRangeChange,
+            startDate: mobileDateMode === 'single' ? undefined : rangeStart,
+            endDate: mobileDateMode === 'single' ? undefined : rangeEnd,
+            selectsRange: mobileDateMode === 'range',
             maxDate: new Date(),
             renderCustomHeader: function renderCustomHeader(_ref4) {
               var date = _ref4.date,
@@ -201781,44 +201914,47 @@ function FilterOptionsSearchPanel(props) {
                 y2: "18"
               })]
             }), "Cancel"]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("button", {
-            type: "button",
-            onClick: function onClick() {
-              setCalendarOpen(false);
-              setMobileFilterOpen(true);
-            },
-            disabled: !pendingFrom || !pendingTo,
-            style: {
-              height: '52px',
-              borderRadius: '14px',
-              border: 'none',
-              background: !pendingFrom || !pendingTo ? '#e2e8f0' : 'rgb(234, 88, 12)',
-              color: !pendingFrom || !pendingTo ? '#94a3b8' : '#fff',
-              fontSize: '15px',
-              fontWeight: '800',
-              letterSpacing: '0.2px',
-              cursor: !pendingFrom || !pendingTo ? 'default' : 'pointer',
-              outline: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              boxShadow: !pendingFrom || !pendingTo ? 'none' : '0 6px 16px rgba(234,88,12,0.35)'
-            },
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("svg", {
-              width: "16",
-              height: "16",
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2.6",
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("polyline", {
-                points: "20 6 9 17 4 12"
-              })
-            }), "Apply"]
-          })]
+          }), function () {
+            var applyDisabled = mobileDateMode === 'single' ? !pendingFrom : !pendingFrom || !pendingTo;
+            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("button", {
+              type: "button",
+              onClick: function onClick() {
+                setCalendarOpen(false);
+                setMobileFilterOpen(true);
+              },
+              disabled: applyDisabled,
+              style: {
+                height: '52px',
+                borderRadius: '14px',
+                border: 'none',
+                background: applyDisabled ? '#e2e8f0' : 'rgb(234, 88, 12)',
+                color: applyDisabled ? '#94a3b8' : '#fff',
+                fontSize: '15px',
+                fontWeight: '800',
+                letterSpacing: '0.2px',
+                cursor: applyDisabled ? 'default' : 'pointer',
+                outline: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                boxShadow: applyDisabled ? 'none' : '0 6px 16px rgba(234,88,12,0.35)'
+              },
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("svg", {
+                width: "16",
+                height: "16",
+                viewBox: "0 0 24 24",
+                fill: "none",
+                stroke: "currentColor",
+                strokeWidth: "2.6",
+                strokeLinecap: "round",
+                strokeLinejoin: "round",
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("polyline", {
+                  points: "20 6 9 17 4 12"
+                })
+              }), "Apply"]
+            });
+          }()]
         })]
       })]
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("div", {
@@ -201940,10 +202076,10 @@ function SupplierSelect(_ref5) {
   var loading = (0,react_redux__WEBPACK_IMPORTED_MODULE_4__.useSelector)(function (state) {
     return state.properties.loading;
   });
-  var _useState31 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
-    _useState32 = _slicedToArray(_useState31, 2),
-    error = _useState32[0],
-    setError = _useState32[1];
+  var _useState33 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
+    _useState34 = _slicedToArray(_useState33, 2),
+    error = _useState34[0],
+    setError = _useState34[1];
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     var fetchSuppliers = /*#__PURE__*/function () {
       var _ref6 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2() {
@@ -202154,10 +202290,10 @@ function ExtraOptions(props) {
     toDate = _useSelector3.toDate,
     fromDate = _useSelector3.fromDate,
     option = _useSelector3.option;
-  var _useState33 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
-    _useState34 = _slicedToArray(_useState33, 2),
-    open = _useState34[0],
-    setOpen = _useState34[1];
+  var _useState35 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState36 = _slicedToArray(_useState35, 2),
+    open = _useState36[0],
+    setOpen = _useState36[1];
   var openInNewTab = (0,_hooks_useOpenInNewTab__WEBPACK_IMPORTED_MODULE_18__["default"])();
   var statementInvoice = function statementInvoice(e) {
     var qs = new URLSearchParams();
@@ -202182,10 +202318,10 @@ function ExtraOptions(props) {
       type: e
     });
   };
-  var _useState35 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
-    _useState36 = _slicedToArray(_useState35, 2),
-    emailModalOpen = _useState36[0],
-    setEmailModalOpen = _useState36[1];
+  var _useState37 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState38 = _slicedToArray(_useState37, 2),
+    emailModalOpen = _useState38[0],
+    setEmailModalOpen = _useState38[1];
   var emailInvoice = function emailInvoice() {
     return setEmailModalOpen(true);
   };
@@ -202379,50 +202515,50 @@ function List(props) {
   var isDesktop = width >= 768;
   var isTablet = width >= 600 && width < 768;
   var isMobile = !isDesktop && !isTablet;
-  var _useState37 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
-    _useState38 = _slicedToArray(_useState37, 2),
-    data = _useState38[0],
-    setData = _useState38[1];
-  var _useState39 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+  var _useState39 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
     _useState40 = _slicedToArray(_useState39, 2),
-    isLoading = _useState40[0],
-    setIsLoading = _useState40[1];
-  var _useState41 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(0),
+    data = _useState40[0],
+    setData = _useState40[1];
+  var _useState41 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
     _useState42 = _slicedToArray(_useState41, 2),
-    pastBalance = _useState42[0],
-    setPastBalance = _useState42[1];
-  var _useState43 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(""),
+    isLoading = _useState42[0],
+    setIsLoading = _useState42[1];
+  var _useState43 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(0),
     _useState44 = _slicedToArray(_useState43, 2),
-    filterText = _useState44[0],
-    setFilterText = _useState44[1];
-  var _useState45 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
+    pastBalance = _useState44[0],
+    setPastBalance = _useState44[1];
+  var _useState45 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(""),
     _useState46 = _slicedToArray(_useState45, 2),
-    selectedRows = _useState46[0],
-    setSelectedRows = _useState46[1];
+    filterText = _useState46[0],
+    setFilterText = _useState46[1];
+  var _useState47 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
+    _useState48 = _slicedToArray(_useState47, 2),
+    selectedRows = _useState48[0],
+    setSelectedRows = _useState48[1];
   var searchTerm = (0,react_redux__WEBPACK_IMPORTED_MODULE_4__.useSelector)(function (state) {
     return state.properties.searchTerm;
   });
   // ── Mobile card/table view state (parity with Sales) ──
-  var _useState47 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(function () {
+  var _useState49 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(function () {
       return localStorage.getItem('ts_purchase_view') === 'table';
     }),
-    _useState48 = _slicedToArray(_useState47, 2),
-    mobileTableView = _useState48[0],
-    setMobileTableView = _useState48[1];
-  var _useState49 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
     _useState50 = _slicedToArray(_useState49, 2),
-    expandedCard = _useState50[0],
-    setExpandedCard = _useState50[1];
-  var _useState51 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(1),
+    mobileTableView = _useState50[0],
+    setMobileTableView = _useState50[1];
+  var _useState51 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
     _useState52 = _slicedToArray(_useState51, 2),
-    page = _useState52[0],
-    setPage = _useState52[1];
-  var _useState53 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    expandedCard = _useState52[0],
+    setExpandedCard = _useState52[1];
+  var _useState53 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(1),
     _useState54 = _slicedToArray(_useState53, 2),
-    showColFilter = _useState54[0],
-    setShowColFilter = _useState54[1];
+    page = _useState54[0],
+    setPage = _useState54[1];
+  var _useState55 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState56 = _slicedToArray(_useState55, 2),
+    showColFilter = _useState56[0],
+    setShowColFilter = _useState56[1];
   var colFilterRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
-  var _useState55 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(function () {
+  var _useState57 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(function () {
       try {
         var s = localStorage.getItem('ts_purchase_cols');
         if (s) return JSON.parse(s);
@@ -202433,9 +202569,9 @@ function List(props) {
         amount: true
       };
     }),
-    _useState56 = _slicedToArray(_useState55, 2),
-    visibleCols = _useState56[0],
-    setVisibleCols = _useState56[1];
+    _useState58 = _slicedToArray(_useState57, 2),
+    visibleCols = _useState58[0],
+    setVisibleCols = _useState58[1];
   var toggleCol = function toggleCol(col) {
     var next = _objectSpread(_objectSpread({}, visibleCols), {}, _defineProperty({}, col, !visibleCols[col]));
     setVisibleCols(next);
@@ -203760,21 +203896,23 @@ function DateRangePickerLocal_UNUSED(_ref1) {
     toDate = _ref1.toDate,
     onFromChange = _ref1.onFromChange,
     onToChange = _ref1.onToChange;
-  var _useState57 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
-    _useState58 = _slicedToArray(_useState57, 2),
-    isOpen = _useState58[0],
-    setIsOpen = _useState58[1];
+  var _useState59 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState60 = _slicedToArray(_useState59, 2),
+    isOpen = _useState60[0],
+    setIsOpen = _useState60[1];
   var ref = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
   var startDate = fromDate ? new Date(fromDate + 'T00:00:00') : null;
   var endDate = toDate ? new Date(toDate + 'T00:00:00') : null;
   var formatDisplay = function formatDisplay(date) {
     if (!date) return '—';
-    var d = new Date(date + 'T00:00:00');
-    return d.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
+    var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    var _String$split$map3 = String(date).split('-').map(Number),
+      _String$split$map4 = _slicedToArray(_String$split$map3, 3),
+      y = _String$split$map4[0],
+      m = _String$split$map4[1],
+      d = _String$split$map4[2];
+    if (!y || !m || !d) return '—';
+    return "".concat(String(d).padStart(2, '0'), " ").concat(MON[m - 1], " ").concat(y);
   };
   var toYMD = function toYMD(date) {
     var y = date.getFullYear(),
@@ -204667,10 +204805,15 @@ function FilterAndOptionsPanel(props) {
     _useState22 = _slicedToArray(_useState21, 2),
     sMonthDd = _useState22[0],
     setSMonthDd = _useState22[1];
-  var _useState23 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+  // Mobile calendar mode: 'range' (From→To) or 'single' (one day). Same UX as Customer History.
+  var _useState23 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('range'),
     _useState24 = _slicedToArray(_useState23, 2),
-    sYearDd = _useState24[0],
-    setSYearDd = _useState24[1];
+    mobileDateMode = _useState24[0],
+    setMobileDateMode = _useState24[1];
+  var _useState25 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState26 = _slicedToArray(_useState25, 2),
+    sYearDd = _useState26[0],
+    setSYearDd = _useState26[1];
   var toYMD = function toYMD(d) {
     var y = d.getFullYear(),
       m = String(d.getMonth() + 1).padStart(2, '0'),
@@ -204679,12 +204822,14 @@ function FilterAndOptionsPanel(props) {
   };
   var fmtDisp = function fmtDisp(v) {
     if (!v) return '';
-    var d = new Date(v + 'T00:00:00');
-    return d.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
+    var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    var _String$split$map = String(v).split('-').map(Number),
+      _String$split$map2 = _slicedToArray(_String$split$map, 3),
+      y = _String$split$map2[0],
+      m = _String$split$map2[1],
+      d = _String$split$map2[2];
+    if (!y || !m || !d) return '';
+    return "".concat(String(d).padStart(2, '0'), " ").concat(MON[m - 1], " ").concat(y);
   };
   var handleRangeChange = function handleRangeChange(dates) {
     var _dates = _slicedToArray(dates, 2),
@@ -204701,16 +204846,27 @@ function FilterAndOptionsPanel(props) {
     if (s) setPendingFrom(toYMD(s));else setPendingFrom(null);
     if (e) setPendingTo(toYMD(e));else if (!e && s) setPendingTo(null);
   };
+  // Single-date mode: one click sets both From and To to the same day.
+  var handleSingleChange = function handleSingleChange(d) {
+    var day = Array.isArray(d) ? d[0] : d;
+    if (!day) return;
+    setRangeStart(day);
+    setRangeEnd(day);
+    var ymd = toYMD(day);
+    setPendingFrom(ymd);
+    setPendingTo(ymd);
+    setActivePreset(null);
+  };
   var openSalesCalendar = function openSalesCalendar() {
     setRangeStart(pendingFrom ? new Date(pendingFrom + 'T00:00:00') : null);
     setRangeEnd(pendingTo ? new Date(pendingTo + 'T00:00:00') : null);
     setCalendarOpen(true);
     setMobileFilterOpen(false);
   };
-  var _useState25 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
-    _useState26 = _slicedToArray(_useState25, 2),
-    activePreset = _useState26[0],
-    setActivePreset = _useState26[1];
+  var _useState27 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
+    _useState28 = _slicedToArray(_useState27, 2),
+    activePreset = _useState28[0],
+    setActivePreset = _useState28[1];
   var applyMobilePreset = function applyMobilePreset(label) {
     // Custom Range → clear any preset selection so user picks dates manually
     if (label === 'Custom Range') {
@@ -205481,7 +205637,7 @@ function FilterAndOptionsPanel(props) {
                   fontWeight: '800',
                   color: '#0f172a'
                 },
-                children: "Select Date Range"
+                children: mobileDateMode === 'single' ? 'Select Date' : 'Select Date Range'
               })]
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("button", {
               type: "button",
@@ -205526,7 +205682,120 @@ function FilterAndOptionsPanel(props) {
             style: {
               padding: '0 18px 14px'
             },
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
+              style: {
+                display: 'inline-flex',
+                width: '100%',
+                background: '#f4f4f6',
+                borderRadius: '12px',
+                padding: '4px',
+                gap: '4px'
+              },
+              children: [{
+                k: 'single',
+                label: 'Single Date'
+              }, {
+                k: 'range',
+                label: 'Date Range'
+              }].map(function (opt) {
+                var on = mobileDateMode === opt.k;
+                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("button", {
+                  type: "button",
+                  onClick: function onClick() {
+                    setMobileDateMode(opt.k);
+                    if (opt.k === 'single') {
+                      setRangeEnd(rangeStart);
+                      if (pendingFrom) setPendingTo(pendingFrom);
+                    }
+                  },
+                  style: {
+                    flex: 1,
+                    border: 'none',
+                    outline: 'none',
+                    cursor: 'pointer',
+                    borderRadius: '9px',
+                    padding: '9px 0',
+                    fontSize: '13.5px',
+                    fontWeight: on ? '800' : '600',
+                    background: on ? '#fff' : 'transparent',
+                    color: on ? 'rgb(234, 88, 12)' : '#6b7280',
+                    boxShadow: on ? '0 1px 3px rgba(15,17,21,0.12)' : 'none',
+                    transition: 'all 0.12s'
+                  },
+                  children: opt.label
+                }, opt.k);
+              })
+            })
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
+            style: {
+              padding: '0 18px 14px'
+            },
+            children: mobileDateMode === 'single' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
+              style: {
+                background: '#fff',
+                border: '2px solid ' + (pendingFrom ? 'rgb(234, 88, 12)' : '#e5e7eb'),
+                borderRadius: '12px',
+                padding: '10px 14px',
+                boxShadow: pendingFrom ? '0 0 0 3px rgba(234,88,12,0.08)' : 'none'
+              },
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
+                style: {
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  marginBottom: '3px'
+                },
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("svg", {
+                  width: "11",
+                  height: "11",
+                  viewBox: "0 0 24 24",
+                  fill: "none",
+                  stroke: "rgb(234, 88, 12)",
+                  strokeWidth: "2.2",
+                  strokeLinecap: "round",
+                  strokeLinejoin: "round",
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("rect", {
+                    x: "3",
+                    y: "4",
+                    width: "18",
+                    height: "18",
+                    rx: "2"
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("line", {
+                    x1: "16",
+                    y1: "2",
+                    x2: "16",
+                    y2: "6"
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("line", {
+                    x1: "8",
+                    y1: "2",
+                    x2: "8",
+                    y2: "6"
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("line", {
+                    x1: "3",
+                    y1: "10",
+                    x2: "21",
+                    y2: "10"
+                  })]
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("span", {
+                  style: {
+                    fontSize: '10px',
+                    fontWeight: '800',
+                    color: 'rgb(234, 88, 12)',
+                    letterSpacing: '0.6px',
+                    textTransform: 'uppercase'
+                  },
+                  children: "Date"
+                })]
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
+                style: {
+                  fontSize: '14px',
+                  fontWeight: '700',
+                  color: pendingFrom ? '#0f172a' : '#cbd5e1',
+                  whiteSpace: 'nowrap'
+                },
+                children: pendingFrom ? fmtDisp(pendingFrom) : 'Select'
+              })]
+            }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
               style: {
                 display: 'flex',
                 alignItems: 'center',
@@ -205698,7 +205967,7 @@ function FilterAndOptionsPanel(props) {
                 })]
               })]
             })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
+          }), mobileDateMode === 'range' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
             className: "sp-presets",
             style: {
               display: 'flex',
@@ -205765,10 +206034,10 @@ function FilterAndOptionsPanel(props) {
             children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)(ReactDatePicker, {
               inline: true,
               selected: rangeStart,
-              onChange: handleRangeChange,
-              startDate: rangeStart,
-              endDate: rangeEnd,
-              selectsRange: true,
+              onChange: mobileDateMode === 'single' ? handleSingleChange : handleRangeChange,
+              startDate: mobileDateMode === 'single' ? undefined : rangeStart,
+              endDate: mobileDateMode === 'single' ? undefined : rangeEnd,
+              selectsRange: mobileDateMode === 'range',
               maxDate: new Date(),
               renderCustomHeader: function renderCustomHeader(_ref4) {
                 var date = _ref4.date,
@@ -206003,44 +206272,47 @@ function FilterAndOptionsPanel(props) {
                   y2: "18"
                 })]
               }), "Cancel"]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("button", {
-              type: "button",
-              onClick: function onClick() {
-                setCalendarOpen(false);
-                setMobileFilterOpen(true);
-              },
-              disabled: !pendingFrom || !pendingTo,
-              style: {
-                height: '52px',
-                borderRadius: '14px',
-                border: 'none',
-                background: !pendingFrom || !pendingTo ? '#e2e8f0' : 'rgb(234, 88, 12)',
-                color: !pendingFrom || !pendingTo ? '#94a3b8' : '#fff',
-                fontSize: '15px',
-                fontWeight: '800',
-                letterSpacing: '0.2px',
-                cursor: !pendingFrom || !pendingTo ? 'default' : 'pointer',
-                outline: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                boxShadow: !pendingFrom || !pendingTo ? 'none' : '0 6px 16px rgba(234,88,12,0.35)'
-              },
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("svg", {
-                width: "16",
-                height: "16",
-                viewBox: "0 0 24 24",
-                fill: "none",
-                stroke: "currentColor",
-                strokeWidth: "2.6",
-                strokeLinecap: "round",
-                strokeLinejoin: "round",
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("polyline", {
-                  points: "20 6 9 17 4 12"
-                })
-              }), "Apply"]
-            })]
+            }), function () {
+              var applyDisabled = mobileDateMode === 'single' ? !pendingFrom : !pendingFrom || !pendingTo;
+              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("button", {
+                type: "button",
+                onClick: function onClick() {
+                  setCalendarOpen(false);
+                  setMobileFilterOpen(true);
+                },
+                disabled: applyDisabled,
+                style: {
+                  height: '52px',
+                  borderRadius: '14px',
+                  border: 'none',
+                  background: applyDisabled ? '#e2e8f0' : 'rgb(234, 88, 12)',
+                  color: applyDisabled ? '#94a3b8' : '#fff',
+                  fontSize: '15px',
+                  fontWeight: '800',
+                  letterSpacing: '0.2px',
+                  cursor: applyDisabled ? 'default' : 'pointer',
+                  outline: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: applyDisabled ? 'none' : '0 6px 16px rgba(234,88,12,0.35)'
+                },
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("svg", {
+                  width: "16",
+                  height: "16",
+                  viewBox: "0 0 24 24",
+                  fill: "none",
+                  stroke: "currentColor",
+                  strokeWidth: "2.6",
+                  strokeLinecap: "round",
+                  strokeLinejoin: "round",
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("polyline", {
+                    points: "20 6 9 17 4 12"
+                  })
+                }), "Apply"]
+              });
+            }()]
           })]
         })]
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
@@ -206839,10 +207111,10 @@ function SupplierSelect(_ref5) {
   var loading = (0,react_redux__WEBPACK_IMPORTED_MODULE_4__.useSelector)(function (state) {
     return state.properties.loading;
   });
-  var _useState27 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
-    _useState28 = _slicedToArray(_useState27, 2),
-    error = _useState28[0],
-    setError = _useState28[1];
+  var _useState29 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
+    _useState30 = _slicedToArray(_useState29, 2),
+    error = _useState30[0],
+    setError = _useState30[1];
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     var fetchCustomers = /*#__PURE__*/function () {
       var _ref6 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2() {
@@ -206966,10 +207238,10 @@ function FiltersForm(props) {
     toDate = _useSelector2.toDate,
     fromDate = _useSelector2.fromDate,
     option = _useSelector2.option;
-  var _useState29 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
-    _useState30 = _slicedToArray(_useState29, 2),
-    open = _useState30[0],
-    setOpen = _useState30[1];
+  var _useState31 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState32 = _slicedToArray(_useState31, 2),
+    open = _useState32[0],
+    setOpen = _useState32[1];
   var handleChange = function handleChange(e) {
     formik.setFieldValue(option, e);
     dispatch(setOption(e));
@@ -207131,10 +207403,10 @@ function ExtraOptions(props) {
     toDate = _useSelector3.toDate,
     fromDate = _useSelector3.fromDate,
     option = _useSelector3.option;
-  var _useState31 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
-    _useState32 = _slicedToArray(_useState31, 2),
-    open = _useState32[0],
-    setOpen = _useState32[1];
+  var _useState33 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState34 = _slicedToArray(_useState33, 2),
+    open = _useState34[0],
+    setOpen = _useState34[1];
   var openInNewTab = (0,_hooks_useOpenInNewTab__WEBPACK_IMPORTED_MODULE_18__["default"])();
   var statementInvoice = function statementInvoice(e) {
     openInNewTab(props.statementApi, {
@@ -207152,10 +207424,10 @@ function ExtraOptions(props) {
       type: e
     });
   };
-  var _useState33 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
-    _useState34 = _slicedToArray(_useState33, 2),
-    emailModalOpen = _useState34[0],
-    setEmailModalOpen = _useState34[1];
+  var _useState35 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState36 = _slicedToArray(_useState35, 2),
+    emailModalOpen = _useState36[0],
+    setEmailModalOpen = _useState36[1];
   var emailInvoice = function emailInvoice() {
     return setEmailModalOpen(true);
   };
@@ -207434,55 +207706,55 @@ function List(props) {
     fullView = _useSelector4.fullView;
   var _useWindowSize4 = (0,_hooks_useWindowSize__WEBPACK_IMPORTED_MODULE_22__.useWindowSize)(),
     width = _useWindowSize4.width;
-  var _useState35 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
-    _useState36 = _slicedToArray(_useState35, 2),
-    data = _useState36[0],
-    setData = _useState36[1];
-  var _useState37 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(1),
+  var _useState37 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
     _useState38 = _slicedToArray(_useState37, 2),
-    page = _useState38[0],
-    setPage = _useState38[1];
+    data = _useState38[0],
+    setData = _useState38[1];
+  var _useState39 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(1),
+    _useState40 = _slicedToArray(_useState39, 2),
+    page = _useState40[0],
+    setPage = _useState40[1];
   // Loading flag — true while the list AJAX is in flight. Shows a spinner overlay over the table
   // so the user knows the data is being refreshed when they change filters/dates.
-  var _useState39 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
-    _useState40 = _slicedToArray(_useState39, 2),
-    isLoading = _useState40[0],
-    setIsLoading = _useState40[1];
+  var _useState41 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState42 = _slicedToArray(_useState41, 2),
+    isLoading = _useState42[0],
+    setIsLoading = _useState42[1];
   var searchTerm = (0,react_redux__WEBPACK_IMPORTED_MODULE_4__.useSelector)(function (state) {
     return state.properties.searchTerm;
   });
   var isMobile = width < 600;
   var isTablet = width >= 600 && width < 1024;
-  var _useState41 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(function () {
+  var _useState43 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(function () {
       return localStorage.getItem('ts_sales_view') === 'table';
     }),
-    _useState42 = _slicedToArray(_useState41, 2),
-    mobileTableView = _useState42[0],
-    setMobileTableView = _useState42[1];
-  var _useState43 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
     _useState44 = _slicedToArray(_useState43, 2),
-    expandedCard = _useState44[0],
-    setExpandedCard = _useState44[1];
-  var _useState45 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    mobileTableView = _useState44[0],
+    setMobileTableView = _useState44[1];
+  var _useState45 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
     _useState46 = _slicedToArray(_useState45, 2),
-    showColFilter = _useState46[0],
-    setShowColFilter = _useState46[1];
+    expandedCard = _useState46[0],
+    setExpandedCard = _useState46[1];
+  var _useState47 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState48 = _slicedToArray(_useState47, 2),
+    showColFilter = _useState48[0],
+    setShowColFilter = _useState48[1];
   var colFilterRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
-  var _useState47 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
+  var _useState49 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
       show: false,
       entries: [],
       x: 0,
       y: 0,
       align: 'center'
     }),
-    _useState48 = _slicedToArray(_useState47, 2),
-    payTip = _useState48[0],
-    setPayTip = _useState48[1];
-  var payTipPortalRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
-  var _useState49 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
     _useState50 = _slicedToArray(_useState49, 2),
-    payTipPortalReady = _useState50[0],
-    setPayTipPortalReady = _useState50[1];
+    payTip = _useState50[0],
+    setPayTip = _useState50[1];
+  var payTipPortalRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  var _useState51 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState52 = _slicedToArray(_useState51, 2),
+    payTipPortalReady = _useState52[0],
+    setPayTipPortalReady = _useState52[1];
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     var d = document.createElement('div');
     document.body.appendChild(d);
@@ -207657,7 +207929,7 @@ function List(props) {
       }
     })]
   }), payTipPortalRef.current) : null;
-  var _useState51 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(function () {
+  var _useState53 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(function () {
       try {
         var s = localStorage.getItem('ts_sales_cols');
         if (s) return JSON.parse(s);
@@ -207670,9 +207942,9 @@ function List(props) {
         payments: false
       };
     }),
-    _useState52 = _slicedToArray(_useState51, 2),
-    visibleCols = _useState52[0],
-    setVisibleCols = _useState52[1];
+    _useState54 = _slicedToArray(_useState53, 2),
+    visibleCols = _useState54[0],
+    setVisibleCols = _useState54[1];
   var toggleCol = function toggleCol(col) {
     var next = _objectSpread(_objectSpread({}, visibleCols), {}, _defineProperty({}, col, !visibleCols[col]));
     setVisibleCols(next);
@@ -209577,21 +209849,25 @@ function DateRangePickerLocal_UNUSED(_ref15) {
     toDate = _ref15.toDate,
     onFromChange = _ref15.onFromChange,
     onToChange = _ref15.onToChange;
-  var _useState53 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
-    _useState54 = _slicedToArray(_useState53, 2),
-    isOpen = _useState54[0],
-    setIsOpen = _useState54[1];
+  var _useState55 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState56 = _slicedToArray(_useState55, 2),
+    isOpen = _useState56[0],
+    setIsOpen = _useState56[1];
   var ref = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
   var startDate = fromDate ? new Date(fromDate + 'T00:00:00') : null;
   var endDate = toDate ? new Date(toDate + 'T00:00:00') : null;
   var formatDisplay = function formatDisplay(date) {
+    // Parse "YYYY-MM-DD" by its own parts — never via new Date(str), which reads it
+    // as UTC and shifts the shown day one back in timezones behind UTC.
     if (!date) return '—';
-    var d = new Date(date + 'T00:00:00');
-    return d.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
+    var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    var _String$split$map3 = String(date).split('-').map(Number),
+      _String$split$map4 = _slicedToArray(_String$split$map3, 3),
+      y = _String$split$map4[0],
+      m = _String$split$map4[1],
+      d = _String$split$map4[2];
+    if (!y || !m || !d) return '—';
+    return "".concat(String(d).padStart(2, '0'), " ").concat(MON[m - 1], " ").concat(y);
   };
   var toYMD = function toYMD(date) {
     var y = date.getFullYear();
@@ -215113,11 +215389,14 @@ function NewPurchaseInvoiceApp(props) {
                       flex: 1,
                       textAlign: 'left'
                     },
-                    children: date ? new Date(date + 'T00:00:00').toLocaleDateString('en-GB', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric'
-                    }) : 'Select date'
+                    children: date ? function () {
+                      var _String$split = String(date).split('-'),
+                        _String$split2 = _slicedToArray(_String$split, 3),
+                        y = _String$split2[0],
+                        m = _String$split2[1],
+                        d = _String$split2[2];
+                      return "".concat(d, "/").concat(m, "/").concat(y);
+                    }() : 'Select date'
                   })]
                 }), dateOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.Fragment, {
                   children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("div", {
@@ -217718,11 +217997,14 @@ function NewSalesInvoiceApp(props) {
                   flex: 1,
                   textAlign: 'left'
                 },
-                children: date ? new Date(date + 'T00:00:00').toLocaleDateString('en-GB', {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric'
-                }) : 'Select date'
+                children: date ? function () {
+                  var _String$split = String(date).split('-'),
+                    _String$split2 = _slicedToArray(_String$split, 3),
+                    y = _String$split2[0],
+                    m = _String$split2[1],
+                    d = _String$split2[2];
+                  return "".concat(d, "/").concat(m, "/").concat(y);
+                }() : 'Select date'
               })]
             })]
           }), dateOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.Fragment, {
@@ -226752,12 +227034,14 @@ function ReturnHistoryApp(_ref) {
   };
   var fmtDisp = function fmtDisp(v) {
     if (!v) return '';
-    var d = new Date(v + 'T00:00:00');
-    return d.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
+    var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    var _String$split$map = String(v).split('-').map(Number),
+      _String$split$map2 = _slicedToArray(_String$split$map, 3),
+      y = _String$split$map2[0],
+      m = _String$split$map2[1],
+      d = _String$split$map2[2];
+    if (!y || !m || !d) return '';
+    return "".concat(String(d).padStart(2, '0'), " ").concat(MON[m - 1], " ").concat(y);
   };
   var handleRangeChange = function handleRangeChange(dates) {
     var _dates = _slicedToArray(dates, 2),
@@ -231882,16 +232166,14 @@ function List(props) {
   }, []);
   var fmtDisplay = function fmtDisplay(v) {
     if (!v) return '';
-    try {
-      var d = new Date(v + 'T00:00:00');
-      return d.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-      });
-    } catch (_unused) {
-      return v;
-    }
+    var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    var _String$split$map = String(v).split('-').map(Number),
+      _String$split$map2 = _slicedToArray(_String$split$map, 3),
+      y = _String$split$map2[0],
+      m = _String$split$map2[1],
+      d = _String$split$map2[2];
+    if (!y || !m || !d) return v;
+    return "".concat(String(d).padStart(2, '0'), " ").concat(MON[m - 1], " ").concat(y);
   };
   var handleDateSelect = function handleDateSelect(selectedDate) {
     if (!selectedDate) return;
@@ -234766,7 +235048,7 @@ function CommonPopup(_ref11) {
           month: 'short',
           year: 'numeric'
         });
-      } catch (_unused2) {
+      } catch (_unused) {
         return val;
       }
     };
@@ -260153,12 +260435,14 @@ function UnassignedSuppliersApp(props) {
   };
   var fmtDisplay = function fmtDisplay(v) {
     if (!v) return '';
-    var d = new Date(v + 'T00:00:00');
-    return d.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
+    var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    var _String$split$map = String(v).split('-').map(Number),
+      _String$split$map2 = _slicedToArray(_String$split$map, 3),
+      y = _String$split$map2[0],
+      m = _String$split$map2[1],
+      d = _String$split$map2[2];
+    if (!y || !m || !d) return '';
+    return "".concat(String(d).padStart(2, '0'), " ").concat(MON[m - 1], " ").concat(y);
   };
   var handleRangeChange = function handleRangeChange(dates) {
     var _dates = _slicedToArray(dates, 2),
@@ -262218,7 +262502,7 @@ function UnassignedSuppliersApp(props) {
                 },
                 children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
                   style: {
-                    padding: '0 12px 10px'
+                    padding: '12px 12px 10px'
                   },
                   children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
                     style: {
@@ -269796,12 +270080,12 @@ function DateRangePicker(_ref2) {
   };
 
   // ── Mobile sheet helpers (staged selection + Apply) ──
+  // Format a Date by its LOCAL day/month/year (never via UTC) so the shown day matches
+  // exactly what the user tapped — no timezone roll-back.
   var fmtDispDate = function fmtDispDate(d) {
-    return d ? d.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    }) : 'Select';
+    if (!d) return 'Select';
+    var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return "".concat(String(d.getDate()).padStart(2, '0'), " ").concat(MON[d.getMonth()], " ").concat(d.getFullYear());
   };
   var handleMobilePick = function handleMobilePick(dates) {
     // Single mode: react-datepicker passes a single Date (not an array).

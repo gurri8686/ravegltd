@@ -1494,7 +1494,7 @@ export default function CustomerInvoiceApp(props) {
                             <button type="button" onClick={()=>setActiveDateField(activeDateField==='date'?null:'date')}
                                 style={{width:'100%',height:'44px',borderRadius:'10px',border:'1.5px solid '+(activeDateField==='date'?'rgb(234, 88, 12)':'#e2e8f0'),background:'#fff',display:'flex',alignItems:'center',padding:'0 12px',gap:'10px',cursor:'pointer',outline:'none',transition:'all 0.15s'}}>
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgb(234, 88, 12)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                <span style={{fontSize:'13px',fontWeight:'600',color:selectedDate?'#1e293b':'#9ca3af',flex:1,textAlign:'left'}}>{selectedDate ? new Date(selectedDate+'T00:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : 'Select date'}</span>
+                                <span style={{fontSize:'13px',fontWeight:'600',color:selectedDate?'#1e293b':'#9ca3af',flex:1,textAlign:'left'}}>{selectedDate ? (() => { const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; const [y,m,d]=String(selectedDate).split('-').map(Number); return `${String(d).padStart(2,'0')} ${MON[m-1]} ${y}`; })() : 'Select date'}</span>
                                 <i className="fa fa-chevron-right" style={{fontSize:'10px',color:'#d1d5db'}}></i>
                             </button>
                             {activeDateField === 'date' && (

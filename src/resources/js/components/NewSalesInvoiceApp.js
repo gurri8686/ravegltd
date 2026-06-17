@@ -488,7 +488,7 @@ export default function NewSalesInvoiceApp(props) {
                             <button type="button" onClick={()=>setDateOpen(o=>!o)}
                                 style={{width:'100%',height:'36px',borderRadius:'8px',border:'1.5px solid '+(dateOpen?'rgb(234, 88, 12)':'#e5e7eb'),background:dateOpen?'#fff':'#fafafa',display:'flex',alignItems:'center',padding:'0 10px',gap:'8px',cursor:'pointer',outline:'none'}}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgb(234, 88, 12)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                <span style={{fontSize:'13px',fontWeight:'600',color:date?'#1e293b':'#9ca3af',flex:1,textAlign:'left'}}>{date ? new Date(date+'T00:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}) : 'Select date'}</span>
+                                <span style={{fontSize:'13px',fontWeight:'600',color:date?'#1e293b':'#9ca3af',flex:1,textAlign:'left'}}>{date ? (() => { const [y,m,d]=String(date).split('-'); return `${d}/${m}/${y}`; })() : 'Select date'}</span>
                             </button>
                         </div>
                         {/* Calendar overlay — floats below the row (absolute) so the card does NOT

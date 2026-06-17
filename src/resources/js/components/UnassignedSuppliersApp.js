@@ -41,7 +41,7 @@ function UnassignedSuppliersApp(props) {
     const { width } = useWindowSize();
 
     const toYMD = (d) => { const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0'); return y+'-'+m+'-'+dd; };
-    const fmtDisplay = (v) => { if (!v) return ''; const d=new Date(v+'T00:00:00'); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); };
+    const fmtDisplay = (v) => { if (!v) return ''; const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; const [y,m,d]=String(v).split('-').map(Number); if(!y||!m||!d) return ''; return `${String(d).padStart(2,'0')} ${MON[m-1]} ${y}`; };
     const handleRangeChange = (dates) => {
       const [start, end] = dates;
       setRangeStart(start);
@@ -554,7 +554,7 @@ function UnassignedSuppliersApp(props) {
                                 <div style={{ width: '4px', flexShrink: 0, background: 'linear-gradient(180deg,rgb(234, 88, 12),#ea580c)' }}/>
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                     {/* Top content */}
-                                    <div style={{ padding: '0 12px 10px' }}>
+                                    <div style={{ padding: '12px 12px 10px' }}>
                                         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '4px' }}>
                                             <div style={{ minWidth: 0 }}>
                                                 {/* Invoice # · Date */}

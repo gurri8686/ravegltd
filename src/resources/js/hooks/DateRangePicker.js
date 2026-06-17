@@ -199,7 +199,13 @@ export default function DateRangePicker({ fromDate, toDate, onFromChange, onToCh
     };
 
     // ── Mobile sheet helpers (staged selection + Apply) ──
-    const fmtDispDate = (d) => d ? d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : 'Select';
+    // Format a Date by its LOCAL day/month/year (never via UTC) so the shown day matches
+    // exactly what the user tapped — no timezone roll-back.
+    const fmtDispDate = (d) => {
+        if (!d) return 'Select';
+        const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return `${String(d.getDate()).padStart(2,'0')} ${MON[d.getMonth()]} ${d.getFullYear()}`;
+    };
     const handleMobilePick = (dates) => {
         // Single mode: react-datepicker passes a single Date (not an array).
         if (mode === 'single') {

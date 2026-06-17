@@ -48,7 +48,7 @@ export function ReturnHistoryApp({ type, returnsApi, entitiesApi, creditBalanceA
     const [mMonthDd, setMMonthDd] = useState(false);
     const [mYearDd, setMYearDd] = useState(false);
     const toYMD = (d) => { const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0'); return y+'-'+m+'-'+dd; };
-    const fmtDisp = (v) => { if (!v) return ''; const d=new Date(v+'T00:00:00'); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); };
+    const fmtDisp = (v) => { if (!v) return ''; const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; const [y,m,d]=String(v).split('-').map(Number); if(!y||!m||!d) return ''; return `${String(d).padStart(2,'0')} ${MON[m-1]} ${y}`; };
     const handleRangeChange = (dates) => { const [s,e]=dates; setRangeStart(s); setRangeEnd(e||null); if(s) setPendingFrom(toYMD(s)); if(e) setPendingTo(toYMD(e)); };
     const openCalendar = () => { setRangeStart(pendingFrom?new Date(pendingFrom+'T00:00:00'):null); setRangeEnd(pendingTo?new Date(pendingTo+'T00:00:00'):null); setCalendarOpen(true); setFilterOpen(false); };
 
