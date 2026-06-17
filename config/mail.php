@@ -43,6 +43,16 @@ return [
             'password' => env('MAIL_PASSWORD'),
             'timeout' => null,
             'auth_mode' => null,
+            // The local mail server's TLS cert is issued for the shared hostname
+            // (*.prod.sin2.secureserver.net), not "localhost", so peer verification
+            // fails. Connection is still encrypted; we just skip the name match.
+            'stream' => [
+                'ssl' => [
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                    'allow_self_signed' => true,
+                ],
+            ],
         ],
 
         'ses' => [
