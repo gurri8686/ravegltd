@@ -1063,7 +1063,7 @@ public function mail($id){
             'name' => $supplier->name,
             'productdata' => $productdata,
         ];
-        Mail::to($dataget->supplier->email)->send(new InvoiceMail($data));
+        $this->sendMailable($dataget->supplier->email, new InvoiceMail($data));
         $response = 1;
     } else {
         $response = 0;

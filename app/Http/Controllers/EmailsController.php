@@ -6,15 +6,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Validator;
 use App\Mail\TestEmail;
+use App\Http\Controllers\Concerns\SendsResendMail;
 
 class EmailsController extends Controller
 {
+	use SendsResendMail;
+
 	public function test(){
 		$toEmail = 'harryk.developer@gmail.com';
 		$subject = 'Laravel Gmail SMTP Test';
 		$data = ['name' => 'Harry'];
-		Mail::to($toEmail)->queue(new TestEmail($data));
-		return 'Email has been queued!';
+		$this->sendMailable($toEmail, new TestEmail($data));
+		return 'Email has been sent!';
 	}
 
 	private function configureMailerFromEnv()
@@ -91,8 +94,7 @@ class EmailsController extends Controller
 		];
 
 		try {
-			$this->configureMailerFromEnv();
-			Mail::to($toEmail)->send(new \App\Mail\CustomerInvoice($data));
+			$this->sendMailable($toEmail, new \App\Mail\CustomerInvoice($data));
 			return response()->json(['success' => true, 'payload' => 'Invoice emailed to ' . $toEmail]);
 		} catch (\Exception $ex) {
 			return response()->json(['success' => false, 'payload' => 'Could not send email: ' . $ex->getMessage()]);
@@ -161,8 +163,7 @@ class EmailsController extends Controller
 		];
 
 		try {
-			$this->configureMailerFromEnv();
-			Mail::to($toEmail)->send(new \App\Mail\SupplierInvoice($data));
+			$this->sendMailable($toEmail, new \App\Mail\SupplierInvoice($data));
 			return response()->json(['success' => true, 'payload' => 'Purchase invoice emailed to ' . $toEmail]);
 		} catch (\Exception $ex) {
 			return response()->json(['success' => false, 'payload' => 'Could not send email: ' . $ex->getMessage()]);

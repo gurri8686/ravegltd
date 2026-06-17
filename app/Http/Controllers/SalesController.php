@@ -1578,7 +1578,7 @@ class SalesController extends Controller
             'name' => $customer->name,
             'productdata' => $productdata,
         ];
-        Mail::to($dataget->customer->email)->send(new InvoiceMail($data));
+        $this->sendMailable($dataget->customer->email, new InvoiceMail($data));
         $response = 1;
     } else {
         $response = 0;
