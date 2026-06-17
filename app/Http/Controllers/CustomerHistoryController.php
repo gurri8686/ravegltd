@@ -14,10 +14,12 @@ use App\Services\CustomerPayments;
 use App\Models\Customer;
 use App\Models\CustomerHistoryEmail;
 use App\Mail\CustomerStatementMail;
+use App\Http\Controllers\Concerns\SendsResendMail;
 
 class CustomerHistoryController extends Controller
 {
 	use CustomResponse;
+	use SendsResendMail;
 
 	/** Company name shown on statements / emails. */
 	private function companyName()
@@ -223,10 +225,7 @@ class CustomerHistoryController extends Controller
 			];
 
 			try {
-				$this->configureMailer();
-
-				Mail::to($request->to_email)
-					->send(new CustomerStatementMail($mailData, $excelBinary));
+				$this->sendMailable($request->to_email, new CustomerStatementMail($mailData, $excelBinary));
 
 				CustomerHistoryEmail::create(array_merge($log, ['status' => 'sent']));
 

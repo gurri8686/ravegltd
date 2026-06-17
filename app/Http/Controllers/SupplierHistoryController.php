@@ -11,10 +11,12 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Mail;
 use App\Services\SupplierPayments;
 use App\Mail\SupplierStatementMail;
+use App\Http\Controllers\Concerns\SendsResendMail;
 
 class SupplierHistoryController extends Controller
 {
 	use CustomResponse;
+	use SendsResendMail;
 
 	private function configureMailerFromEnv()
 	{
@@ -155,9 +157,7 @@ class SupplierHistoryController extends Controller
 			];
 
 			try {
-				$this->configureMailerFromEnv();
-				Mail::to($request->to_email)
-					->send(new SupplierStatementMail($mailData, $excelBinary));
+				$this->sendMailable($request->to_email, new SupplierStatementMail($mailData, $excelBinary));
 				return $this->successResponse(['message' => 'Statement emailed to ' . $request->to_email]);
 			} catch (\Exception $mailEx) {
 				return $this->errorResponse('Could not send email: ' . $mailEx->getMessage());

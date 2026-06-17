@@ -13,6 +13,7 @@ use App\Models\StockProduct;
 use App\Models\CompanyDetailModel;
 use App\Models\InvoicePayment;
 use App\Mail\InvoiceMail;
+use App\Http\Controllers\Concerns\SendsResendMail;
 use Validator;
 use Response;
 use Session;
@@ -29,6 +30,7 @@ use Redirect;
 class SalesController extends Controller
 {
     use CustomResponse;
+    use SendsResendMail;
 
     protected $porterage = 5.25;
 
@@ -1027,9 +1029,7 @@ class SalesController extends Controller
 		];
 
 		try {
-			$this->configureMailerFromEnv();
-			\Illuminate\Support\Facades\Mail::to($request->to_email)
-				->send(new \App\Mail\DailyReportMail($mailData));
+			$this->sendMailable($request->to_email, new \App\Mail\DailyReportMail($mailData));
 			return response()->json(['success' => true, 'payload' => 'Report emailed to ' . $request->to_email]);
 		} catch (\Exception $ex) {
 			return response()->json(['success' => false, 'payload' => 'Could not send email: ' . $ex->getMessage()]);

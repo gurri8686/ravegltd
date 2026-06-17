@@ -12,10 +12,12 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Services\CustomerPayments;
 use App\Services\SupplierPayments;
 use App\Services\ProductHistory;
+use App\Http\Controllers\Concerns\SendsResendMail;
 
 class PrintController extends Controller
 {
     use CustomResponse;
+    use SendsResendMail;
 
 	private function configureMailerFromEnv()
 	{
@@ -259,9 +261,7 @@ class PrintController extends Controller
 				'attachment_name' => $excelName,
 			];
 
-			$this->configureMailerFromEnv();
-			\Illuminate\Support\Facades\Mail::to($request->to_email)
-				->send(new \App\Mail\ProductStatementMail($mailData, $excelBinary));
+			$this->sendMailable($request->to_email, new \App\Mail\ProductStatementMail($mailData, $excelBinary));
 
 			return response()->json(['success' => true, 'payload' => 'Statement emailed to ' . $request->to_email]);
 		} catch (\Exception $ex) {

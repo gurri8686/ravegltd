@@ -11,6 +11,7 @@ use App\Models\SupplierInvoiceProduct;
 use App\Models\CompanyDetailModel;
 use App\Models\SupplierPayment;
 use App\Mail\InvoiceMail;
+use App\Http\Controllers\Concerns\SendsResendMail;
 use App\Services\StockProducts;
 use Validator;
 use Response;
@@ -27,6 +28,7 @@ use Illuminate\Database\QueryException;
 class PurchaseController extends Controller
 {
     use CustomResponse;
+    use SendsResendMail;
 
     public function index(Request $request)
     {
@@ -895,9 +897,7 @@ class PurchaseController extends Controller
 		];
 
 		try {
-			$this->configureMailerFromEnv();
-			\Illuminate\Support\Facades\Mail::to($request->to_email)
-				->send(new \App\Mail\DailyReportMail($mailData));
+			$this->sendMailable($request->to_email, new \App\Mail\DailyReportMail($mailData));
 			return response()->json(['success' => true, 'payload' => 'Report emailed to ' . $request->to_email]);
 		} catch (\Exception $ex) {
 			return response()->json(['success' => false, 'payload' => 'Could not send email: ' . $ex->getMessage()]);
