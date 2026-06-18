@@ -293,7 +293,7 @@ function List(props) {
 	const [invoicesAmount, setInvoicesAmount] = useState(0);
 	const [selectedRows, setSelectedRows] = useState([]);
 	const isMobile = window.innerWidth <= 767;
-	const isTablet = window.innerWidth >= 768 && window.innerWidth <= 1024;
+	const isTablet = false; // iPad/tablets (768-1024) now render the desktop UI
 
 	const { notifySuccess, notifyError } = useToast();
 	

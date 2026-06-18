@@ -208,9 +208,9 @@ function FilterBar({ apiUrl, printApi, excelApi, emailApi, initialSupplierId }) 
 	const { currentSupplier, currentSupplierInfo, selectedInvoices, toDate, fromDate, option, suppliers } = useSelector(s => s.suppliers);
 	const openInNewTab = useOpenInNewTab();
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 767);
-	const [isTablet, setIsTablet] = useState(window.innerWidth >= 768 && window.innerWidth <= 1024);
+	const [isTablet, setIsTablet] = useState(false); // iPad/tablets (768-1024) now render the desktop UI
 	useEffect(() => {
-		const handle = () => { setIsMobile(window.innerWidth <= 767); setIsTablet(window.innerWidth >= 768 && window.innerWidth <= 1024); };
+		const handle = () => { setIsMobile(window.innerWidth <= 767); setIsTablet(false); };
 		window.addEventListener('resize', handle);
 		return () => window.removeEventListener('resize', handle);
 	}, []);

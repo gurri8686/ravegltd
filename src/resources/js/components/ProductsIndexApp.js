@@ -138,7 +138,7 @@ export default function ProductsIndexApp(props) {
 	const [statusFilter, setStatusFilter] = useState({label:'All',value:'all'});
 	const [downloadingExcel, setDownloadingExcel] = useState(false);
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 767);
-	const [isTablet, setIsTablet] = useState(window.innerWidth >= 768 && window.innerWidth <= 1024);
+	const [isTablet, setIsTablet] = useState(false); // iPad/tablets (768-1024) now render the desktop UI
 	const [viewMode, setViewMode] = useState('card');   // mobile card/list toggle
 	const [cardPage, setCardPage] = useState(1);        // mobile card view pagination
 	const [cardPerPage, setCardPerPage] = useState(50); // default 50 cards/page (options 50–500)
@@ -146,7 +146,7 @@ export default function ProductsIndexApp(props) {
 
 	// Force remove overflow:hidden from DataTable internals on mobile/tablet
 	useEffect(() => {
-		if (window.innerWidth > 1024) return;
+		if (window.innerWidth > 767) return; // surgery only for real mobile; iPad/tablet use desktop layout
 		const fix = setInterval(() => {
 			const area = document.querySelector('.pi-scroll-area');
 			if (!area) return;
@@ -167,7 +167,7 @@ export default function ProductsIndexApp(props) {
 
 	// Custom scrollbar sync
 	useEffect(() => {
-		if (window.innerWidth > 1024) return;
+		if (window.innerWidth > 767) return; // surgery only for real mobile; iPad/tablet use desktop layout
 		let rafId;
 		const init = setInterval(() => {
 			const scrollEl = document.querySelector('.pi-table-scroll');
@@ -201,7 +201,7 @@ export default function ProductsIndexApp(props) {
 	useEffect(() => {
 		const handle = () => {
 			setIsMobile(window.innerWidth <= 767);
-			setIsTablet(window.innerWidth >= 768 && window.innerWidth <= 1024);
+			setIsTablet(false); // iPad/tablets (768-1024) now render the desktop UI
 		};
 		window.addEventListener('resize', handle);
 		return () => window.removeEventListener('resize', handle);

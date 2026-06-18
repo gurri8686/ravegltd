@@ -448,7 +448,7 @@ function CreateForm({ apiUrl, onSubmit, initialCustomerId, currency }) {
 	const cur = currency || '£';
 	const fmtS = v => cur + ' ' + Number(v || 0).toLocaleString('en-GB', {minimumFractionDigits:2, maximumFractionDigits:2});
 	const isMobile = window.innerWidth <= 767;
-	const isTablet = window.innerWidth >= 768 && window.innerWidth <= 1024;
+	const isTablet = false; // iPad/tablets (768-1024) now render the desktop UI
 	const [summaryOpen, setSummaryOpen] = useState(false);
 	const collRate = Number(summaryTotals.totalAmount) > 0 ? Math.round((Number(summaryTotals.totalPaid) / Number(summaryTotals.totalAmount)) * 100) : 0;
 

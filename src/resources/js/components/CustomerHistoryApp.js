@@ -289,7 +289,7 @@ function UnifiedBar({ apiUrl, printApi, excelApi, emailApi, historyApi, initialC
 	const { currentCustomer, currentCustomerInfo, selectedInvoices, toDate, fromDate, option, customers } = useSelector(state => state.customers);
 	const openInNewTab = useOpenInNewTab();
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 767);
-	const [isTablet, setIsTablet] = useState(window.innerWidth >= 768 && window.innerWidth <= 1024);
+	const [isTablet, setIsTablet] = useState(false); // iPad/tablets (768-1024) now render the desktop UI
 	const [emailModalOpen, setEmailModalOpen] = useState(false);
 	const [ptOpen, setPtOpen] = useState(false);
 	const ptRef = useRef(null);
@@ -300,7 +300,7 @@ function UnifiedBar({ apiUrl, printApi, excelApi, emailApi, historyApi, initialC
 		return () => document.removeEventListener('mousedown', handle);
 	}, [ptOpen]);
 	useEffect(() => {
-		const handle = () => { setIsMobile(window.innerWidth <= 767); setIsTablet(window.innerWidth >= 768 && window.innerWidth <= 1024); };
+		const handle = () => { setIsMobile(window.innerWidth <= 767); setIsTablet(false); };
 		window.addEventListener('resize', handle);
 		return () => window.removeEventListener('resize', handle);
 	}, []);
@@ -585,13 +585,13 @@ function List(props) {
     const [filterText, setFilterText] = useState("");
     const [selectedRows, setSelectedRows] = useState([]);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 767);
-    const [isTablet, setIsTablet] = useState(window.innerWidth >= 768 && window.innerWidth <= 1024);
+    const [isTablet, setIsTablet] = useState(false); // iPad/tablets (768-1024) now render the desktop UI
     const customStyles = useDataTableStyles();
 
     useEffect(() => {
         const handle = () => {
             setIsMobile(window.innerWidth <= 767);
-            setIsTablet(window.innerWidth >= 768 && window.innerWidth <= 1024);
+            setIsTablet(false);
         };
         window.addEventListener('resize', handle);
         return () => window.removeEventListener('resize', handle);

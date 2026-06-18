@@ -108,7 +108,7 @@ export default function DailyBookSalesApp(props) {
 	const dispatch = useDispatch();
 	const { width } = useWindowSize();
 	const isMobile = width < 600;
-	const isTablet = width >= 600 && width < 1024;
+	const isTablet = width >= 600 && width < 768; // iPad (768+) now renders the desktop UI
 
 	useEffect(() => {
 
@@ -1178,7 +1178,7 @@ function List(props) {
     const searchTerm = useSelector(state => state.properties.searchTerm);
 
     const isMobile = width < 600;
-    const isTablet = width >= 600 && width < 1024;
+    const isTablet = width >= 600 && width < 768; // iPad (768+) now renders the desktop UI
     const [mobileTableView, setMobileTableView] = useState(() => localStorage.getItem('ts_sales_view') === 'table');
     const [expandedCard, setExpandedCard] = useState(null);
     const [showColFilter, setShowColFilter] = useState(false);
