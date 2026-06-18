@@ -66,6 +66,8 @@ export default function NewPurchaseInvoiceApp(props) {
     const [curSalePrice, setCurSalePrice] = useState('');
     const [errors, setErrors] = useState({});
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 767);
+    // Mobile: the add-product form opens as a slide-up bottom sheet (desktop keeps it inline).
+    const [addSheetOpen, setAddSheetOpen] = useState(false);
     const [dateOpen, setDateOpen] = useState(false);
     const [nsiMonthOpen, setNsiMonthOpen] = useState(false);
     const [nsiYearOpen, setNsiYearOpen] = useState(false);
@@ -108,6 +110,7 @@ export default function NewPurchaseInvoiceApp(props) {
             total: Number(curQty) * (Number(curPrice) || 0),
         }]);
         setCurProduct(null); setCurRemarks(''); setCurQty(''); setCurPrice(''); setCurSalePrice('');
+        setAddSheetOpen(false); // mobile: close the bottom sheet after a successful add
     };
 
     const removeItem = (idx) => setItems(items.filter((_,i) => i !== idx));
@@ -168,6 +171,7 @@ export default function NewPurchaseInvoiceApp(props) {
     return (
     <div style={{maxWidth:'1440px',margin:'0 auto'}}>
         <style>{`
+            @keyframes npiSheetUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
             .npi-scroll-inner{transition:transform 0.2s ease;}
             .npi-range-scroll{-webkit-appearance:none;width:100%;height:6px;border-radius:10px;background:#f0f0f0;outline:none;}
             .npi-range-scroll::-webkit-slider-thumb{-webkit-appearance:none;width:50px;height:6px;border-radius:10px;background:rgb(234, 88, 12);cursor:pointer;}
@@ -411,8 +415,30 @@ export default function NewPurchaseInvoiceApp(props) {
 
         {/* Products table */}
         {continued && <div style={{background:'#fff',borderRadius:'16px',border:'1px solid #eaecf2',boxShadow:'0 1px 4px rgba(0,0,0,0.04)',overflow:'hidden'}}>
-            {/* Add product row */}
-            <div style={{padding: isMobile ? '12px 14px' : '16px 20px',background:'#fff',borderBottom:'1px solid #eef2f7'}}>
+            {/* Add product — mobile shows a trigger button; the form itself moves into a bottom sheet (see render below). */}
+            {isMobile && (
+                <div style={{padding:'14px 16px',background:'#fff',borderBottom:'1px solid #eef2f7'}}>
+                    <button type="button" onClick={() => setAddSheetOpen(true)} style={{width:'100%',height:'46px',borderRadius:'12px',border:'1.5px dashed rgb(234, 88, 12)',background:'#fff7f2',color:'rgb(234, 88, 12)',fontSize:'14px',fontWeight:'700',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px'}}>
+                        <i className="fa fa-plus"></i> Add Product
+                    </button>
+                </div>
+            )}
+            {/* Add product row (desktop inline; on mobile this whole block is wrapped into the bottom sheet) */}
+            {(!isMobile || addSheetOpen) && (
+            <div style={isMobile
+                ? {position:'fixed',left:0,right:0,bottom:0,top:0,zIndex:6000,display:'flex',flexDirection:'column',justifyContent:'flex-end'}
+                : {}}>
+              {isMobile && <div onClick={() => setAddSheetOpen(false)} style={{position:'absolute',inset:0,background:'rgba(15,17,21,0.45)'}} />}
+              <div style={isMobile
+                ? {position:'relative',background:'#fff',borderTopLeftRadius:'18px',borderTopRightRadius:'18px',boxShadow:'0 -8px 30px rgba(0,0,0,0.18)',maxHeight:'90vh',overflowY:'auto',paddingBottom:'8px',animation:'npiSheetUp 0.22s ease'}
+                : {}}>
+                {isMobile && (
+                    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px 16px 6px'}}>
+                        <span style={{fontSize:'15px',fontWeight:'800',color:'#0f1115'}}>Add Product</span>
+                        <button type="button" onClick={() => setAddSheetOpen(false)} style={{background:'#f1f5f9',border:'none',borderRadius:'8px',width:'30px',height:'30px',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:'#475569',fontSize:'15px'}} aria-label="Close"><i className="fa fa-times"></i></button>
+                    </div>
+                )}
+            <div style={{padding: isMobile ? '12px 14px' : '16px 20px',background:'#fff',borderBottom: isMobile ? 'none' : '1px solid #eef2f7'}}>
                 {/* Row 1: Product (full width) */}
                 <div style={{marginBottom:'10px'}}>
                     <label style={lblStyle}>Product</label>
@@ -526,6 +552,9 @@ export default function NewPurchaseInvoiceApp(props) {
                     </div>
                 )}
             </div>
+              </div>
+            </div>
+            )}
 
             {/* Items table */}
             {items.length > 0 && (
