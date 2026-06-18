@@ -50,23 +50,28 @@ mix.webpackConfig({
             fs: require.resolve('crypto-browserify')
         }
     },
-    // laravel-mix excludes node_modules from Babel, so date-fns (pulled in by
-    // react-datepicker) ships its raw `?.` / `??` into the bundle. iOS 12 / Safari
-    // <13 can't parse those, so every page using a date picker fails to load and
-    // shows only the header. Transpile that one package down to ES5-safe syntax.
+    // laravel-mix excludes node_modules from Babel, so dependencies that ship
+    // modern syntax untranspiled (date-fns' `?.`/`??`, react-data-table-component's
+    // destructured-default params `function({a = 1})`, etc.) leak straight into the
+    // bundle. iOS 12 / Safari <13 then fails to PARSE app.js and every page using
+    // those libs renders only the header. Run Babel over node_modules too, down-
+    // levelling everything to the ios:12/safari:12 target. core-js stays excluded
+    // to avoid it trying to polyfill itself.
     module: {
         rules: [
             {
-                test: /\.js$/,
-                include: /node_modules[\\/]date-fns/,
+                test: /\.m?js$/,
+                include: /node_modules/,
+                exclude: /node_modules[\\/]core-js/,
                 use: {
                     loader: 'babel-loader',
                     options: {
                         babelrc: false,
                         configFile: false,
-                        plugins: [
-                            '@babel/plugin-proposal-optional-chaining',
-                            '@babel/plugin-proposal-nullish-coalescing-operator',
+                        compact: false,
+                        sourceType: 'unambiguous',
+                        presets: [
+                            ['@babel/preset-env', { targets: { ios: '12', safari: '12' } }],
                         ],
                     },
                 },
