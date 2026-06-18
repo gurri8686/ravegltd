@@ -682,11 +682,11 @@ function FilterAndOptionsPanel(props) {
                         <input
                             type="text"
                             placeholder="Search invoices…"
-                            value={useSelector(state => state.properties.searchTerm) || ''}
+                            value={mobileSearchTerm}
                             onChange={(e) => dispatch(slice.actions.setSearchTerm(e.target.value))}
                             style={{flex:'1 1 0%',border:'none',outline:'none',background:'transparent',fontSize:'13.5px',color:'#0f1115',minWidth:0,padding:0,fontFamily:'inherit'}}
                         />
-{!!(useSelector(state => state.properties.searchTerm)) && <button type="button" onClick={() => dispatch(slice.actions.setSearchTerm(''))} style={{background:'none',border:'none',cursor:'pointer',padding:'0',lineHeight:1,display:'flex',alignItems:'center'}}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>}
+{!!mobileSearchTerm && <button type="button" onClick={() => dispatch(slice.actions.setSearchTerm(''))} style={{background:'none',border:'none',cursor:'pointer',padding:'0',lineHeight:1,display:'flex',alignItems:'center'}}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>}
                     </div>
                 </div>
 
@@ -1412,6 +1412,7 @@ function List(props) {
                         <DataTable
                             columns={columns}
                             data={filteredData}
+                            responsive={false}
                             paginationPerPage={10}
                             paginationRowsPerPageOptions={[10,25,50,100]}
                             pagination

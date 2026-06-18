@@ -191,6 +191,28 @@ function FilterOptionsSearchPanel(props) {
     const { width } = useWindowSize();
     const isDesktop = width >= 768;
     const isTablet = width >= 600 && width < 768;
+    // Hoisted to the top so the same hook runs every render regardless of which
+    // width branch (mobile/tablet/desktop) is taken — calling useSelector inside
+    // a branch crashes with React #300 ("rendered fewer hooks") on rotation.
+    const reduxSearchTerm = useSelector(state => state.properties.searchTerm) || '';
+    // Alias so the mobile JSX can keep referencing `mobileSearchTerm` unchanged;
+    // both point at the same hoisted useSelector above.
+    const mobileSearchTerm = reduxSearchTerm;
+    // Mobile-path hooks hoisted to the top so the SAME hooks run in the SAME
+    // order on every render regardless of width branch (mobile/tablet/desktop).
+    // Declaring these after the tablet/desktop early returns crashed with
+    // React #300 ("rendered fewer hooks") when rotating across the breakpoints.
+    const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+    const [calendarOpen, setCalendarOpen] = useState(false);
+    const [pendingSupplier, setPendingSupplier] = useState(currentSupplier || null);
+    const [pendingFrom, setPendingFrom] = useState(fromDate || null);
+    const [pendingTo, setPendingTo] = useState(toDate || null);
+    const [rangeStart, setRangeStart] = useState(null);
+    const [rangeEnd, setRangeEnd] = useState(null);
+    const [sMonthDd, setSMonthDd] = useState(false);
+    const [mobileDateMode, setMobileDateMode] = useState('range');
+    const [sYearDd, setSYearDd] = useState(false);
+    const [activePreset, setActivePreset] = useState(null);
 
     useEffect(() => {
         const fetchSuppliers = async () => {
@@ -399,13 +421,13 @@ function FilterOptionsSearchPanel(props) {
                     <input
                         type="text"
                         placeholder="Search invoices..."
-                        value={useSelector(state => state.properties.searchTerm) || ''}
+                        value={reduxSearchTerm}
                         onChange={(e) => dispatch(slice.actions.setSearchTerm(e.target.value))}
                         style={{paddingLeft:'34px',paddingRight:'10px',paddingTop:'0',paddingBottom:'0',height:'38px',borderRadius:'9px',border:'1.5px solid #e5e7eb',fontSize:'13px',background:'#fafafa',transition:'border-color 0.15s',width:'100%',boxSizing:'border-box',outline:'none',fontFamily:'inherit'}}
                         onFocus={e => { e.target.style.borderColor='rgb(234, 88, 12)'; e.target.style.background='#fff'; }}
                         onBlur={e => { e.target.style.borderColor='#e5e7eb'; e.target.style.background='#fafafa'; }}
                     />
-{!!(useSelector(state => state.properties.searchTerm)) && <button type="button" onClick={() => dispatch(slice.actions.setSearchTerm(''))} style={{position:'absolute',right:'10px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',padding:'0',lineHeight:1,display:'flex',alignItems:'center'}}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>}
+{!!reduxSearchTerm && <button type="button" onClick={() => dispatch(slice.actions.setSearchTerm(''))} style={{position:'absolute',right:'10px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',padding:'0',lineHeight:1,display:'flex',alignItems:'center'}}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>}
                 </div>
 
                 {width >= 1024 && <div style={{width:'1px',height:'28px',background:'#e5e7eb',flexShrink:0}}></div>}
@@ -486,18 +508,6 @@ function FilterOptionsSearchPanel(props) {
     }
 
     /* ── Mobile (< 768px) — same style as Sales page ── */
-    const mobileSearchTerm = useSelector(state => state.properties.searchTerm) || '';
-    const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
-    const [calendarOpen, setCalendarOpen] = useState(false);
-    const [pendingSupplier, setPendingSupplier] = useState(currentSupplier || null);
-    const [pendingFrom, setPendingFrom] = useState(fromDate || null);
-    const [pendingTo, setPendingTo] = useState(toDate || null);
-    const [rangeStart, setRangeStart] = useState(null);
-    const [rangeEnd, setRangeEnd] = useState(null);
-    const [sMonthDd, setSMonthDd] = useState(false);
-    const [mobileDateMode, setMobileDateMode] = useState('range');
-    const [sYearDd, setSYearDd] = useState(false);
-    const [activePreset, setActivePreset] = useState(null);
     const hasActiveFilter = !!(fromDate || toDate || currentSupplier);
 
     const toYMD = (d) => { const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${dd}`; };
@@ -1303,6 +1313,7 @@ function List(props) {
                         <DataTable
                             columns={columns}
                             data={filteredData}
+                            responsive={false}
                             pagination
                             paginationPerPage={10}
                             paginationRowsPerPageOptions={[10, 25, 50, 100]}
@@ -1430,6 +1441,7 @@ function List(props) {
                         <DataTable
                             columns={mobileColumns}
                             data={paginatedData}
+                            responsive={false}
                             highlightOnHover
                             customStyles={mergedStyles}
                             progressPending={isLoading && paginatedData.length === 0}
