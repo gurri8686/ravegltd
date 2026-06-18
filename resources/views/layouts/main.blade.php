@@ -1216,6 +1216,34 @@
 	})();
 	</script>
     @stack('scripts')
+    {{-- TEMP iOS12 debug overlay: shows real JS errors on-screen (no Mac needed). Remove after diagnosing. --}}
+    <script type="text/javascript">
+    (function(){
+      function show(msg){
+        var box = document.getElementById('ios12-err-box');
+        if(!box){
+          box = document.createElement('div');
+          box.id = 'ios12-err-box';
+          box.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:2147483647;background:#7f1d1d;color:#fff;font:12px/1.4 monospace;padding:10px;max-height:45%;overflow:auto;white-space:pre-wrap;border-top:3px solid #fca5a5;';
+          var btn = document.createElement('button');
+          btn.textContent = 'X';
+          btn.style.cssText = 'position:absolute;top:6px;right:8px;background:#fff;color:#7f1d1d;border:none;border-radius:4px;padding:2px 8px;font-weight:bold;';
+          btn.onclick = function(){ box.style.display='none'; };
+          box.appendChild(btn);
+          document.body.appendChild(box);
+        }
+        var line = document.createElement('div');
+        line.textContent = msg;
+        box.appendChild(line);
+      }
+      window.addEventListener('error', function(e){
+        show('ERROR: ' + (e.message || e.error) + '  @ ' + (e.filename||'') + ':' + (e.lineno||'') + ':' + (e.colno||''));
+      });
+      window.addEventListener('unhandledrejection', function(e){
+        var r = e.reason; show('PROMISE REJECT: ' + (r && r.message ? r.message : r));
+      });
+    })();
+    </script>
     <script type="text/javascript" src="{{env('CDN_DOMAIN')}}/js/manifest.js?v={{time()}}"></script>
     <script type="text/javascript" src="{{env('CDN_DOMAIN')}}/js/vendor.js?v={{time()}}"></script>
     <script type="text/javascript" src="{{env('CDN_DOMAIN')}}/js/app.js?v={{time()}}"></script>
