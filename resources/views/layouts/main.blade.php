@@ -801,6 +801,90 @@
         color: #374151 !important;
         letter-spacing: 0.1px !important;
     }
+    /* ── iPad LANDSCAPE only → force full desktop sidebar (240px) ──
+       On iPad held sideways the theme drops into its off-canvas overlay
+       (left:-240px → sidebar gone) and the 768-1024px tablet block makes the
+       header slim/wrong. Re-assert the 992px+ desktop layout for the iPad-
+       landscape band only. Excludes iPad portrait (orientation), phones
+       (min-width/min-height) and real desktop (hover:none + pointer:coarse).
+       Theme sidebar width = 240px. */
+    @media (orientation: landscape)
+       and (min-width: 1024px)
+       and (max-width: 1366px)
+       and (min-height: 700px)
+       and (hover: none)
+       and (pointer: coarse) {
+
+        /* 0. Neutralise leftover off-canvas overlay (vertical-overlay-menu.css → left:-240px) */
+        body.vertical-overlay-menu .main-menu,
+        body.vertical-overlay-menu.menu-hide .main-menu {
+            left: 0 !important;
+            opacity: 1 !important;
+            transform: translate3d(0, 0, 0) !important;
+            width: 240px !important;
+        }
+        .sidenav-overlay { display: none !important; }
+
+        /* 1. Sidebar visible, docked, full 240px (override 60px/75px tablet + overlay) */
+        .main-menu,
+        body.vertical-layout.vertical-menu.menu-expanded .main-menu,
+        body.vertical-layout.vertical-menu.menu-collapsed .main-menu {
+            display: block !important;
+            position: fixed !important;
+            left: 0 !important;
+            width: 240px !important;
+            min-width: 240px !important;
+            max-width: 240px !important;
+            transform: translate3d(0, 0, 0) !important;
+            opacity: 1 !important;
+        }
+        .main-menu .navigation > li > a > span { visibility: visible !important; }
+
+        /* 2. Restore desktop content + navbar offset = 240px */
+        .content,
+        .app-content,
+        .footer,
+        body.vertical-layout.vertical-menu.menu-expanded .content,
+        body.vertical-layout.vertical-menu.menu-expanded .app-content,
+        body.vertical-layout.vertical-menu.menu-expanded .footer,
+        body.vertical-layout.vertical-menu.menu-collapsed .content,
+        body.vertical-layout.vertical-menu.menu-collapsed .app-content,
+        body.vertical-layout.vertical-menu.menu-collapsed .footer {
+            margin-left: 240px !important;
+        }
+        .navbar .navbar-header,
+        .header-navbar .navbar-header,
+        body.vertical-layout.vertical-menu.menu-expanded .navbar .navbar-header,
+        body.vertical-layout.vertical-menu.menu-collapsed .navbar .navbar-header {
+            width: 240px !important;
+            min-width: 240px !important;
+            max-width: 240px !important;
+            float: left !important;
+        }
+
+        /* 3. Force desktop navbar: hide mobile hamburger grid, show desktop nav cluster */
+        .nav-item.mobile-menu,
+        #mobile-sale-btn {
+            display: none !important;
+        }
+        .navbar-header .navbar-nav.flex-row {
+            display: flex !important;
+            grid-template-columns: none !important;
+            align-items: center !important;
+            width: auto !important;
+            padding: 0 !important;
+            column-gap: 0 !important;
+        }
+        #navbar-brand-li {
+            grid-column: auto !important;
+            justify-self: auto !important;
+        }
+        #navbar-mobile {
+            display: flex !important;
+            flex-basis: auto !important;
+        }
+        .navbar-container .nav .nav-item.d-none.d-md-block { display: flex !important; }
+    }
     </style>
 </head>
 <!-- END: Head-->
