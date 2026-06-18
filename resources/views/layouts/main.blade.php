@@ -148,6 +148,56 @@
         .navbar-header { float: left !important; }
         .navbar-header .navbar-nav.flex-row { display: flex !important; align-items: center !important; }
     }
+    /* ── Phone LANDSCAPE only: force the compact mobile navbar ──
+       A phone held sideways is 667–932px WIDE, so the 431–767.98px
+       "force desktop navbar" block above wrongly catches it and shows the big
+       desktop header. We re-target by HEIGHT instead: every phone in landscape
+       is <=430px tall, while the smallest tablet in landscape is ~600px tall —
+       so max-height:450px hits phones only and never tablet/desktop. This block
+       MUST stay AFTER the 431-767.98px block so its equal-!important rules win
+       on source order. It (1) undoes that block's desktop-forcing rules and
+       (2) re-applies the compact 3-column grid (hamburger | brand | Sale). */
+    @media (orientation: landscape) and (max-height: 450px) {
+        /* 1. OVERRIDE the desktop-forcing block. Re-hide the desktop/tablet
+           cluster it reveals. A landscape phone is often >=768px wide, so
+           Bootstrap SHOWS #tablet-sale-order-fix / #tablet-font-fix — hide them
+           manually here or we get a double Sale button + double font dropdown. */
+        #tablet-sale-order-fix { display: none !important; }
+        #tablet-font-fix { display: none !important; }
+        .navbar-container .nav .nav-item.d-none.d-md-block { display: none !important; }
+        #navbar-mobile { display: none !important; }
+        .navbar-header { float: none !important; }
+
+        /* 2. RE-APPLY the compact mobile navbar (mirrors the max-width:430px rules). */
+        .header-navbar .navbar-header .navbar-brand { left: unset !important; position: static !important; }
+        .nav-item .open-navbar-container { display: none !important; }
+        .navbar-header .navbar-nav.flex-row > li:last-child { display: none !important; }
+        .navbar-header .navbar-nav.flex-row {
+            display: grid !important;
+            grid-template-columns: auto 1fr auto !important;
+            align-items: center !important;
+            width: 100% !important;
+            padding: 0 8px !important;
+            column-gap: 10px !important;
+        }
+        .nav-item.mobile-menu { display: flex !important; align-items: center !important; justify-self: start !important; margin: 0 !important; grid-column: 1 !important; }
+        .nav-item.mobile-menu a.nav-link { padding: 6px 4px !important; line-height: 1 !important; }
+        .nav-item.mobile-menu .feather { color: black !important; }
+        #navbar-brand-li { display: flex !important; align-items: center !important; justify-content: center !important; justify-self: center !important; grid-column: 2 !important; position: static !important; transform: none !important; margin: 0 !important; padding: 0 !important; }
+        #navbar-brand-li .navbar-brand { display: flex !important; align-items: center !important; justify-content: center !important; padding: 0 !important; margin: 0 !important; white-space: nowrap !important; }
+        #navbar-brand-li .brand-text,
+        body.menu-collapsed #navbar-brand-li .brand-text,
+        body.menu-expanded #navbar-brand-li .brand-text { display: block !important; visibility: visible !important; opacity: 1 !important; animation: none !important; -webkit-animation: none !important; white-space: nowrap !important; font-size: 13px !important; margin: -37px !important; }
+        #navbar-brand-li .brand-text-mini { display: none !important; }
+        #navbar-brand-li img { max-width: 100% !important; height: auto !important; }
+        /* The desktop-forcing block zeroed #mobile-sale-btn with visibility:hidden;
+           width:0; height:0; overflow:hidden — display:flex alone leaves it
+           invisible/zero-size, so reset all four here. */
+        #mobile-sale-btn { display: flex !important; visibility: visible !important; width: auto !important; height: auto !important; overflow: visible !important; align-items: center !important; align-self: center !important; justify-self: end !important; grid-column: 3 !important; margin: 0 !important; }
+        #mobile-sale-btn * { visibility: visible !important; }
+        #mobile-sale-btn a { display: inline-flex !important; align-items: center !important; justify-content: center !important; }
+        #mobile-sale-btn a i { margin: 0 !important; padding: 0 !important; line-height: 1 !important; }
+    }
     /* ── Print: hide chrome, show only content ── */
     @media print {
         .header-navbar,
