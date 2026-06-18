@@ -1614,12 +1614,10 @@ export default function SupplierInvoiceApp(props) {
         const [localError, setLocalError] = useState(false);
         const panelRef = useRef(null);
 
-        // Auto-scroll the card into view when it mounts — mirrors Sales add-panel behavior
-        useEffect(() => {
-            if (panelRef.current) {
-                panelRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
-        }, []);
+        // Mobile: render as a slide-up bottom sheet. `mounted` flips after first paint
+        // so the transform transition animates the sheet in from the bottom.
+        const [mounted, setMounted] = useState(false);
+        useEffect(() => { const r = requestAnimationFrame(() => setMounted(true)); return () => cancelAnimationFrame(r); }, []);
 
         const handleSave = () => {
             if (!localProduct || localQty === '' || localPrice === '') {
@@ -1669,8 +1667,19 @@ export default function SupplierInvoiceApp(props) {
             ? {background:'#fff',borderRadius:'12px',outline:'2px solid #f97316',outlineOffset:'-2px',boxShadow:'0 4px 16px rgba(249,115,22,0.10)',marginTop:'6px',overflow:'hidden'}
             : {background:'#fff',borderRadius:'12px',overflow:'hidden',boxShadow:'0 4px 18px rgba(0,0,0,0.12)',marginTop:'6px'};
 
-        return (
-            <div ref={panelRef} style={cardStyle}>
+        return (<>
+            {/* Backdrop — tap to close */}
+            <div onMouseDown={() => setMobileSlideOpen(false)} onTouchStart={() => setMobileSlideOpen(false)}
+                 style={{position:'fixed',inset:0,zIndex:998,background:'rgba(0,0,0,0.35)'}} />
+            {/* Bottom sheet */}
+            <div ref={panelRef} onMouseDown={e => e.stopPropagation()} onTouchStart={e => e.stopPropagation()}
+                 style={{position:'fixed',bottom:0,left:0,right:0,zIndex:999,background:'#fff',borderRadius:'20px 20px 0 0',
+                         paddingBottom:'env(safe-area-inset-bottom,16px)',boxShadow:'0 -8px 32px rgba(0,0,0,0.15)',
+                         maxHeight:'88vh',overflowY:'auto',
+                         transform: mounted ? 'translateY(0)' : 'translateY(100%)', transition:'transform .28s ease'}}>
+                <div style={{display:'flex',justifyContent:'center',paddingTop:'10px',paddingBottom:'4px'}}>
+                    <div style={{width:'36px',height:'4px',borderRadius:'99px',background:'#e5e7eb'}}/>
+                </div>
                 {/* Header */}
                 <div style={{padding:'10px 14px',display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1.5px solid #f0f0f0'}}>
                     <span style={{color:'#1e293b',fontSize:'14px',fontWeight:'700',display:'flex',alignItems:'center',gap:'6px',flex:1,minWidth:0,overflow:'hidden'}}>
@@ -1752,7 +1761,7 @@ export default function SupplierInvoiceApp(props) {
                     </p>}
                 </div>
             </div>
-        );
+        </>);
     }
 
     function TableRows({ allProducts, rowsData, deleteTableRows, handleChange }) {

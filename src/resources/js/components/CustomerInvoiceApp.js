@@ -1037,6 +1037,7 @@ export default function CustomerInvoiceApp(props) {
 						setPanelSuccess(true);
 						setTimeout(() => setPanelSuccess(false), 3000);
 						setIsSavingNew(false)
+						setShowAddPanel(false); // mobile: close the add-product bottom sheet after a successful save
 						fetchPagePaymentSummary();
 
                     }if (response.data.success === false) {
@@ -2364,7 +2365,12 @@ export default function CustomerInvoiceApp(props) {
                 const isCompact = effectiveWidth < 768;
                 const lbl = {fontSize:'11px',fontWeight:'700',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:'5px',display:'block'};
                 return (
-                    <div ref={addPanelRef} style={{background:'#fff',borderRadius:'12px',overflow:'hidden',boxShadow:'0 4px 18px rgba(0,0,0,0.12)',marginTop:'6px'}}>
+                    <div style={isCompact ? {position:'fixed',left:0,right:0,top:0,bottom:0,zIndex:6000,display:'flex',flexDirection:'column',justifyContent:'flex-end'} : {}}>
+                      <style>{`@keyframes ciaSheetUp{from{transform:translateY(100%);}to{transform:translateY(0);}}`}</style>
+                      {isCompact && <div onClick={() => { deleteTableRows(panelIndex, 0); setShowAddPanel(false); }} style={{position:'absolute',inset:0,background:'rgba(15,17,21,0.45)'}} />}
+                      <div ref={addPanelRef} style={isCompact
+                        ? {position:'relative',background:'#fff',borderTopLeftRadius:'18px',borderTopRightRadius:'18px',overflow:'hidden',boxShadow:'0 -8px 30px rgba(0,0,0,0.18)',maxHeight:'90vh',overflowY:'auto',animation:'ciaSheetUp 0.22s ease'}
+                        : {background:'#fff',borderRadius:'12px',overflow:'hidden',boxShadow:'0 4px 18px rgba(0,0,0,0.12)',marginTop:'6px'}}>
                         {/* Header */}
                         <div style={{padding:'10px 14px',display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1.5px solid #f0f0f0'}}>
                             <span style={{color:'#1e293b',fontSize:'14px',fontWeight:'700',display:'flex',alignItems:'center',gap:'6px'}}><i className="fa fa-plus-circle" style={{color:'rgb(234, 88, 12)'}}></i>Add New Product</span>
@@ -2481,6 +2487,7 @@ export default function CustomerInvoiceApp(props) {
                             </div>
                         </>)}
                         </div>
+                      </div>
                     </div>
                 );
             })()}
