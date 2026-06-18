@@ -304,3 +304,49 @@ div.modal-dialog.payment-modal-wide {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * iOS 12 / Safari <= 13 react-data-table-component layout fix.
+ *
+ * RDT lays out columns as flex cells with `flex: <grow> 0 0` (flex-shrink:0,
+ * flex-basis:0) + a min-width (default 100px, some columns 140/160px). Old
+ * WebKit (iOS 12.5.8) mis-resolves `flex-basis:0` + `min-width` inside the
+ * width:100% flex row: instead of growing to share the row, every cell clamps
+ * to its min-width, the row overflows, and the table collapses to ~1 visible
+ * column with a horizontal scrollbar. Desktop Chrome / modern Safari resolve
+ * it correctly, so this must NOT touch them.
+ *
+ * Gate: `@supports not (inset: 0)`. The `inset` shorthand shipped in Safari
+ * 14.1 — the SAME release that added flex `gap` — so this block is TRUE only
+ * on iOS <= 13 (incl. 12.5.8) and FALSE on every desktop Chrome and Safari
+ * 14.1+, leaving their rendering untouched.
+ *
+ * Cure: give cells a non-zero percentage basis (which old WebKit resolves) and
+ * drop the min-width floor so columns flex to fill the row instead of overflow.
+ * ────────────────────────────────────────────────────────────────────────── */
+@supports not (inset: 0) {
+    .rdt_Table,
+    .rdt_TableHead,
+    .rdt_TableBody {
+        width: 100% !important;
+    }
+    .rdt_TableRow,
+    .rdt_TableHeadRow {
+        display: -webkit-box !important;
+        display: -webkit-flex !important;
+        display: flex !important;
+        -webkit-box-orient: horizontal;
+        -webkit-box-direction: normal;
+        -webkit-flex-direction: row;
+        flex-direction: row !important;
+        width: 100% !important;
+    }
+    .rdt_TableCol,
+    .rdt_TableCell {
+        -webkit-box-flex: 1;
+        -webkit-flex: 1 1 1% !important;
+        flex: 1 1 1% !important;   /* non-zero % basis — sidesteps the flex-basis:0 bug */
+        min-width: 0 !important;   /* drop the 100px floor that forces the overflow */
+        box-sizing: border-box !important;
+    }
+}
