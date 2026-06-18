@@ -2667,7 +2667,7 @@ function SupplierProductsTable(props) {
 											<td style={{padding:'10px 14px',textAlign:'right',fontWeight:'600'}}>{r.quantity}</td>
 											<td style={{padding:'10px 14px',textAlign:'right'}}>{currency} {Number(r.price).toFixed(2)}</td>
 											<td style={{padding:'10px 14px',textAlign:'right',fontWeight:'700',color:'#dc2626'}}>{currency} {Number(r.total).toFixed(2)}</td>
-											<td style={{padding:'10px 14px',color:'#64748b',fontSize:'12px'}}>{r.date ? new Date(r.date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—'}</td>
+											<td style={{padding:'10px 14px',color:'#64748b',fontSize:'12px'}}>{r.date ? new Date(String(r.date).replace(' ','T')).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—'}</td>
 										</tr>
 									))}
 								</tbody>

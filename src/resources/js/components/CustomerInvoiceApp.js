@@ -2639,7 +2639,7 @@ export default function CustomerInvoiceApp(props) {
 			partyLabel="Customer"
 			partyName={invoiceDetail.customer}
 			partyEmail={invoiceDetail.customer_email}
-			invoiceDate={invoiceDetail.created_date ? new Date(invoiceDetail.created_date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : ''}
+			invoiceDate={invoiceDetail.created_date ? new Date(String(invoiceDetail.created_date).replace(' ','T')).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : ''}
 			totalText={invoiceTotal > 0 ? (props.currency || '£') + ' ' + invoiceTotal.toFixed(2) : ''}
 		/>
 

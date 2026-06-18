@@ -13,9 +13,22 @@ window._ = require('lodash');
     ['toLocaleString', 'toLocaleDateString', 'toLocaleTimeString'].forEach((name) => {
         const original = Date.prototype[name];
         Date.prototype[name] = function (locales, options) {
+            // Invalid Date + a timeZone option throws a RangeError on Safari
+            // (Chrome quietly returns "Invalid Date"). Forcing our UK timeZone
+            // onto an invalid date would therefore crash every page that renders
+            // one. Skip the patch for invalid dates and let the original method
+            // handle them exactly as the browser normally would.
+            if (isNaN(this.getTime())) {
+                return original.call(this, locales, options);
+            }
             const opts = options ? { ...options } : {};
             if (opts.timeZone == null) opts.timeZone = UK_TIMEZONE;
-            return original.call(this, locales, opts);
+            try {
+                return original.call(this, locales, opts);
+            } catch (e) {
+                // Last-resort safety net: never let date formatting crash a render.
+                return original.call(this, locales, options);
+            }
         };
     });
 })();
