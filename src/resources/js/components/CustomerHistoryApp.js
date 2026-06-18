@@ -1042,9 +1042,9 @@ function List(props) {
 											{open && (
 												<div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #f1f5f9', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
 													{[{ l: 'Invoice Amount', v: fmt(row.net_amount), c: '#0f1115' }, { l: 'Paid', v: fmt(row.total_paid), c: '#16a34a' }, { l: 'Credit / Adj', v: fmt(row.credit_adj), c: '#7c3aed' }, { l: 'Balance', v: fmt(row.balance), c: bal > 0 ? '#ea580c' : '#16a34a' }].map(d => (
-														<div key={d.l}>
+														<div key={d.l} style={{ minWidth: 0 }}>
 															<div style={{ fontSize: '10px', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: '3px' }}>{d.l}</div>
-															<div style={{ fontSize: '13.5px', fontWeight: '700', color: d.c, fontVariantNumeric: 'tabular-nums' }}>{d.v}</div>
+															<div style={{ fontSize: '13.5px', fontWeight: '700', color: d.c, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.v}</div>
 														</div>
 													))}
 												</div>

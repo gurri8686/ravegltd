@@ -527,7 +527,7 @@ function CreateForm({ apiUrl, onSubmit, initialSupplierId, currency }) {
 					<div style={{display:'flex',flexDirection:'column',gap:'14px'}}>
 						<style>{`.odp-mobile-wrap .react-datepicker-wrapper,.odp-mobile-wrap .react-datepicker__input-container{display:block;width:100%}.odp-mobile-input{width:100%;height:52px!important;border-radius:12px!important;border:1px solid #E5E7EB!important;font-size:14px!important;font-weight:600!important;color:#1e293b!important;background:#fff!important;padding:0 14px 0 42px!important;outline:none!important;box-sizing:border-box!important;}`}</style>
 						{/* Row 1: Amount + Date side by side */}
-						<div style={{display:'flex',gap:'10px'}}>
+						<div style={{display:'flex',flexWrap:'wrap',gap:'10px'}}>
 							{paymentMode === 'on-account'
 								? <div style={{flex:1}}>
 									<label style={{...lblStyle,fontSize:'10px',letterSpacing:'0.7px'}}>On Account<span style={{color:'rgb(234, 88, 12)',marginLeft:'2px'}}>*</span></label>
@@ -884,8 +884,8 @@ function List(props) {
 				);
 				return (
 				<div>
-					{/* Unpaid-invoices badge + view toggle — grouped on the right, always one line */}
-					<div style={{display:'flex',alignItems:'center',justifyContent:'flex-end',marginBottom:'12px',gap:'10px',flexWrap:'nowrap'}}>
+					{/* Unpaid-invoices badge + view toggle — grouped on the right; wraps on narrow phones */}
+					<div style={{display:'flex',alignItems:'center',justifyContent:'flex-end',marginBottom:'12px',gap:'10px',flexWrap:'wrap'}}>
 						<span style={{display:'inline-flex',alignItems:'center',gap:'7px',fontSize:'13.5px',fontWeight:'700',color:'rgb(234,88,12)',flexShrink:0,whiteSpace:'nowrap'}}>
 							<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgb(234,88,12)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
 							{data.length} unpaid {data.length===1?'invoice':'invoices'}

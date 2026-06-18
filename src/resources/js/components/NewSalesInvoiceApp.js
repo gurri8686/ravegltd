@@ -684,7 +684,7 @@ export default function NewSalesInvoiceApp(props) {
             {/* Add product row */}
             <div style={{padding:'16px 20px',background:'#fff',borderBottom:'1px solid #eef2f7'}}>
                 {/* Row 1: Product + Supplier */}
-                <div style={{display:'flex',gap:'12px',marginBottom:'12px'}}>
+                <div style={{display:'flex',flexWrap: isMobile ? 'wrap' : 'nowrap',gap:'12px',marginBottom:'12px'}}>
                     <div style={{flex:1,minWidth:0}}>
                         <label style={lblStyle}>Product</label>
                         <Select options={products} value={curProduct} onChange={onProductChange}
@@ -724,7 +724,7 @@ export default function NewSalesInvoiceApp(props) {
                             />
                         </div>
                         {/* Mobile: Qty + Unit Price + Price + Add in one row */}
-                        <div style={{display:'flex',alignItems:'flex-end',gap:'8px'}}>
+                        <div style={{display:'flex',flexWrap:'wrap',alignItems:'flex-end',gap:'8px'}}>
                             <div style={{flex:1,minWidth:0}}>
                                 <label style={lblStyle}>Qty</label>
                                 <input type="number" min="0.01" max={stockCap || undefined} step="any" value={curQty}
@@ -744,7 +744,7 @@ export default function NewSalesInvoiceApp(props) {
                             </div>
                             <div style={{flexShrink:0,textAlign:'center'}}>
                                 <label style={lblStyle}>Total</label>
-                                <div style={{fontSize:'14px',fontWeight:'700',color:'#1e293b',lineHeight:'40px',whiteSpace:'nowrap'}}>
+                                <div style={{fontSize:'14px',fontWeight:'700',color:'#1e293b',lineHeight:'40px',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>
                                     {curQty && curPrice ? formatTwoDecimal(Number(curQty)*Number(curPrice)) : '0.00'}
                                 </div>
                             </div>

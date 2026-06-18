@@ -218,9 +218,9 @@ export default function RolesIndexApp(props) {
 					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
 				</span>
 				<div style={{minWidth:0}}>
-					<div style={{fontWeight:'700',color:'#0f1115',fontSize:'13.5px',whiteSpace:'nowrap'}}>{row.name}</div>
+					<div style={{fontWeight:'700',color:'#0f1115',fontSize:'13.5px',whiteSpace:'nowrap',overflow: isMobile ? 'hidden' : undefined,textOverflow: isMobile ? 'ellipsis' : undefined}}>{row.name}</div>
 					<div style={{display:'flex',gap:'6px',marginTop:'2px',alignItems:'center'}}>
-						<span style={{fontSize:'11px',color:'#6b7280',fontWeight:'600',whiteSpace:'nowrap'}}>{row.permissions_count || 0} permissions</span>
+						<span style={{fontSize:'11px',color:'#6b7280',fontWeight:'600',whiteSpace:'nowrap',overflow: isMobile ? 'hidden' : undefined,textOverflow: isMobile ? 'ellipsis' : undefined}}>{row.permissions_count || 0} permissions</span>
 					</div>
 				</div>
 			</div>
@@ -263,7 +263,7 @@ export default function RolesIndexApp(props) {
 		</div>
 		{/* Header — search + Create row */}
 		<div style={isMobile
-			? {padding:'0',display:'flex',alignItems:'center',gap:'10px'}
+			? {padding:'0',display:'flex',alignItems:'center',gap:'10px',flexWrap:'wrap'}
 			: {padding:'4px 22px 16px',display:'flex',alignItems:'center',gap:'12px'}}>
 			<div style={{flex:'1 1 0%',position:'relative'}}>
 				<span style={{position:'absolute',left: isMobile ? '13px' : '12px',top:'50%',transform:'translateY(-50%)',color:'#9ca3af',display:'flex',alignItems:'center'}}>
@@ -283,7 +283,7 @@ export default function RolesIndexApp(props) {
 			</a>
 		</div>
 		{/* Table */}
-		<div style={isMobile ? {background:'#fff',border:'1px solid #eaecf2',borderRadius:'16px',boxShadow:'0 1px 4px rgba(0,0,0,0.06)',overflow:'hidden'} : {}}>
+		<div style={isMobile ? {background:'#fff',border:'1px solid #eaecf2',borderRadius:'16px',boxShadow:'0 1px 4px rgba(0,0,0,0.06)',overflowX:'auto',WebkitOverflowScrolling:'touch'} : {}}>
 		<DataTable columns={columns} data={filteredData} pagination highlightOnHover customStyles={rolesStyles}
 			paginationPerPage={10} paginationRowsPerPageOptions={[10, 25, 50, 100]}
 			paginationComponent={SpecPagination}

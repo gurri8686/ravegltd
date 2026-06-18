@@ -843,7 +843,7 @@ function List(props) {
         <div className="sc-mob-content">
         {/* Mobile View Toggle — products count badge + Card View / Table View segmented control */}
         {isMobile && (
-          <div style={{padding:'8px 0 4px',display:'flex',alignItems:'center',justifyContent:'space-between',gap:'10px'}}>
+          <div style={{padding:'8px 0 4px',display:'flex',alignItems:'center',justifyContent:'space-between',gap:'10px',flexWrap:'wrap'}}>
             <span style={{display:'inline-flex',alignItems:'center',gap:'5px',background:'#fff7ed',border:'1px solid #fed7aa',borderRadius:'20px',padding:'4px 11px',fontSize:'11px',fontWeight:'700',color:'rgb(234, 88, 12)',flexShrink:0}}><i className="fa fa-cubes" style={{fontSize:'9px'}}></i>{filteredProducts.length} products</span>
             <div style={{display:'inline-flex',borderRadius:'10px',overflow:'hidden',border:'1.5px solid #e2e8f0',boxShadow:'0 1px 3px rgba(0,0,0,0.05)'}}>
               <button type="button" onClick={() => setMobileView('card')} style={{display:'inline-flex',alignItems:'center',gap:'6px',height:'34px',padding:'0 16px',border:'none',background:mobileView==='card'?'rgb(234, 88, 12)':'#fff',cursor:'pointer',outline:'none',transition:'all 0.2s'}}>
@@ -974,7 +974,7 @@ function List(props) {
                     <div style={{textAlign:'center'}}>
                       {!hasClosing(row) ? <span style={{fontSize:'12px',color:'#d1d5db'}}>—</span> : <span style={{background:resultBg,color:resultColor,borderRadius:'12px',padding:'2px 8px',fontSize:'10px',fontWeight:'700',display:'inline-block',whiteSpace:'nowrap'}}>{resultLabel}</span>}
                     </div>
-                    <div style={{fontSize:'10px',color:diff===0?'#94a3b8':diff>0?'#ca8a04':'#dc2626',paddingLeft:'6px',lineHeight:1.3,whiteSpace:'nowrap'}}>
+                    <div style={{fontSize:'10px',color:diff===0?'#94a3b8':diff>0?'#ca8a04':'#dc2626',paddingLeft:'6px',lineHeight:1.3,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>
                       {!hasClosing(row)?'':diff===0?'Matched':diff>0?diff+' extra':Math.abs(diff)+' missing'}
                     </div>
                   </div>

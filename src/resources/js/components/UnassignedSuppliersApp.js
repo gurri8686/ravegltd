@@ -411,22 +411,22 @@ function UnassignedSuppliersApp(props) {
                     </div>
                     <div style={{padding:'0 18px 14px'}}>
                         <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
-                            <div style={{flex:1,background:'#fff',border:'2px solid '+(pendingFrom?'rgb(234, 88, 12)':'#e5e7eb'),borderRadius:'12px',padding:'8px 12px',boxShadow:pendingFrom?'0 0 0 3px rgba(234,88,12,0.08)':'none'}}>
+                            <div style={{flex:1,minWidth:0,background:'#fff',border:'2px solid '+(pendingFrom?'rgb(234, 88, 12)':'#e5e7eb'),borderRadius:'12px',padding:'8px 12px',boxShadow:pendingFrom?'0 0 0 3px rgba(234,88,12,0.08)':'none'}}>
                                 <div style={{display:'flex',alignItems:'center',gap:'5px',marginBottom:'3px'}}>
                                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgb(234, 88, 12)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                                     <span style={{fontSize:'10px',fontWeight:'800',color:'rgb(234, 88, 12)',letterSpacing:'0.6px',textTransform:'uppercase'}}>From</span>
                                 </div>
-                                <div style={{fontSize:'14px',fontWeight:'700',color:pendingFrom?'#0f172a':'#cbd5e1',whiteSpace:'nowrap'}}>{pendingFrom?fmtDisplay(pendingFrom):'Select'}</div>
+                                <div style={{fontSize:'14px',fontWeight:'700',color:pendingFrom?'#0f172a':'#cbd5e1',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{pendingFrom?fmtDisplay(pendingFrom):'Select'}</div>
                             </div>
                             <div style={{width:'36px',height:'36px',borderRadius:'10px',background:'rgb(234, 88, 12)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,boxShadow:'0 3px 10px rgba(234,88,12,0.35)'}}>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                             </div>
-                            <div style={{flex:1,background:'#fff',border:'2px solid '+(pendingTo?'rgb(234, 88, 12)':'#e5e7eb'),borderRadius:'12px',padding:'8px 12px',boxShadow:pendingTo?'0 0 0 3px rgba(234,88,12,0.08)':'none'}}>
+                            <div style={{flex:1,minWidth:0,background:'#fff',border:'2px solid '+(pendingTo?'rgb(234, 88, 12)':'#e5e7eb'),borderRadius:'12px',padding:'8px 12px',boxShadow:pendingTo?'0 0 0 3px rgba(234,88,12,0.08)':'none'}}>
                                 <div style={{display:'flex',alignItems:'center',gap:'5px',marginBottom:'3px'}}>
                                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgb(234, 88, 12)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                                     <span style={{fontSize:'10px',fontWeight:'800',color:'rgb(234, 88, 12)',letterSpacing:'0.6px',textTransform:'uppercase'}}>To</span>
                                 </div>
-                                <div style={{fontSize:'14px',fontWeight:'700',color:pendingTo?'#0f172a':'#cbd5e1',whiteSpace:'nowrap'}}>{pendingTo?fmtDisplay(pendingTo):'Select'}</div>
+                                <div style={{fontSize:'14px',fontWeight:'700',color:pendingTo?'#0f172a':'#cbd5e1',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{pendingTo?fmtDisplay(pendingTo):'Select'}</div>
                             </div>
                         </div>
                     </div>
@@ -645,7 +645,7 @@ function UnassignedSuppliersApp(props) {
                     ))}
                     {/* Pagination */}
                     {filtered.length > 0 && (
-                        <div style={{ padding: '12px 20px', borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fafbfc' }}>
+                        <div style={{ padding: '12px 20px', borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: isMobile ? 'wrap' : 'nowrap', gap: isMobile ? '10px' : 0, background: '#fafbfc' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                 <span style={{ fontSize: '12px', color: '#64748b' }}>Rows per page:</span>
                                 <select value={perPage} onChange={(e) => { setPerPage(Number(e.target.value)); setPage(0); }}
@@ -654,7 +654,7 @@ function UnassignedSuppliersApp(props) {
                                 </select>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <span style={{ fontSize: '12px', color: '#64748b', marginRight: '8px' }}>{page * perPage + 1}-{Math.min((page + 1) * perPage, filtered.length)} of {filtered.length}</span>
+                                <span style={{ fontSize: '12px', color: '#64748b', marginRight: '8px', minWidth: isMobile ? 0 : undefined, overflow: isMobile ? 'hidden' : undefined, textOverflow: isMobile ? 'ellipsis' : undefined, whiteSpace: isMobile ? 'nowrap' : undefined }}>{page * perPage + 1}-{Math.min((page + 1) * perPage, filtered.length)} of {filtered.length}</span>
                                 <button onClick={() => setPage(0)} disabled={page === 0} style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid #e2e8f0', background: '#fff', cursor: page === 0 ? 'not-allowed' : 'pointer', color: page === 0 ? '#d1d5db' : '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>
                                     <i className="fa fa-angle-double-left"></i>
                                 </button>

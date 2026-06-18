@@ -178,7 +178,7 @@ export default function NewPurchaseInvoiceApp(props) {
         <div style={{background:'#fff',borderRadius:'14px',border:'1px solid #e5e7eb',boxShadow:'0 2px 12px rgba(0,0,0,0.06)',overflow:isMobile?'visible':'hidden',marginBottom:'16px',marginTop:'8px'}}>
         {continued ? (
             /* ── After continue: compact header with stats ── */
-            <div style={{display:'flex',alignItems:'stretch'}}>
+            <div style={{display:'flex',alignItems:'stretch',flexWrap: isMobile ? 'wrap' : 'nowrap'}}>
                 <div style={{background:'rgb(234, 88, 12)',padding:'0 18px',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,minWidth:'80px'}}>
                     <div style={{textAlign:'center'}}>
                         <span style={{fontSize:'9px',fontWeight:'700',color:'rgba(255,255,255,0.8)',letterSpacing:'1px',textTransform:'uppercase',display:'block'}}>Invoice</span>
@@ -431,7 +431,7 @@ export default function NewPurchaseInvoiceApp(props) {
                             onBlur={e => {e.target.style.borderColor='#cbd5e1';e.target.style.background='#f8fafc';}}
                         />
                     </div>
-                    <div style={{display:'flex',alignItems:'flex-end',gap:'8px'}}>
+                    <div style={{display:'flex',alignItems:'flex-end',gap:'8px',flexWrap:'wrap'}}>
                         <div style={{flex:1,minWidth:0}}>
                             <label style={lblStyle}>Qty</label>
                             <input type="number" min="0.01" step="any" value={curQty}
@@ -459,7 +459,7 @@ export default function NewPurchaseInvoiceApp(props) {
                                 onBlur={e => {e.target.style.borderColor='#e2e8f0';}}
                             />
                         </div>
-                        <div style={{flexShrink:0,textAlign:'right',lineHeight:'40px',fontSize:'13px',fontWeight:'700',color:'#1e293b',paddingBottom:'0',alignSelf:'flex-end'}}>
+                        <div style={{flexShrink:0,textAlign:'right',lineHeight:'40px',fontSize:'13px',fontWeight:'700',color:'#1e293b',paddingBottom:'0',alignSelf:'flex-end',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
                             {curQty && curPrice ? formatTwoDecimal(Number(curQty)*Number(curPrice)) : '0.00'}
                         </div>
                         <button onClick={addProduct} style={{

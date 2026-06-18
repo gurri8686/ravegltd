@@ -948,7 +948,7 @@ function ProductList(props) {
                       </div>
                     </div>
                     {/* System + Closing inline row */}
-                    <div style={{display:'flex',gap:'8px',alignItems:'center',marginBottom:'8px',borderTop:'1px solid #f8fafc',paddingTop:'8px'}}>
+                    <div style={{display:'flex',flexWrap:'wrap',gap:'8px',alignItems:'center',marginBottom:'8px',borderTop:'1px solid #f8fafc',paddingTop:'8px'}}>
                       {/* System badge */}
                       <div style={{display:'flex',alignItems:'center',gap:'6px',background:'#f8fafc',border:'1px solid #e2e8f0',borderRadius:'8px',padding:'6px 12px',flex:1,minWidth:0}}>
                         <span style={{fontSize:'9px',fontWeight:'700',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.5px',flexShrink:0}}>System</span>
@@ -964,7 +964,7 @@ function ProductList(props) {
                           <Field name={`products[${index}].stock`}>
                             {({ field }) => (
                               <input {...field} type="number" min="0"
-                                style={{width:'60px',height:'24px',border:'none',borderRadius:'4px',fontSize:'15px',fontWeight:'800',textAlign:'right',outline:'none',background:'transparent',color:'#1e293b',padding:0,marginLeft:'auto'}}
+                                style={{flex:1,minWidth:0,height:'24px',border:'none',borderRadius:'4px',fontSize:'15px',fontWeight:'800',textAlign:'right',outline:'none',background:'transparent',color:'#1e293b',padding:0,marginLeft:'auto'}}
                                 placeholder="0" value={stockValue}
                                 onChange={(e)=>{setFieldValue(`products[${index}].stock`,e.target.value);setFieldValue(`products[${index}].isSaved`,false);}}
                               />
@@ -974,7 +974,7 @@ function ProductList(props) {
                       </div>
                       {/* Diff badge */}
                       {hasDiff && (
-                        <span style={{fontSize:'11px',fontWeight:'700',color:diff>0?'#16a34a':'#ef4444',background:diff>0?'#f0fdf4':'#fef2f2',border:`1px solid ${diff>0?'#bbf7d0':'#fecaca'}`,borderRadius:'6px',padding:'2px 7px',whiteSpace:'nowrap',flexShrink:0}}>{diff>0?'+':''}{diff}</span>
+                        <span style={{fontSize:'11px',fontWeight:'700',color:diff>0?'#16a34a':'#ef4444',background:diff>0?'#f0fdf4':'#fef2f2',border:`1px solid ${diff>0?'#bbf7d0':'#fecaca'}`,borderRadius:'6px',padding:'2px 7px',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',flexShrink:0}}>{diff>0?'+':''}{diff}</span>
                       )}
                     </div>
                     {/* Remark */}

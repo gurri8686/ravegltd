@@ -2163,16 +2163,16 @@ function SupplierStockTable(props) {
 						<button onClick={closeDumpModal} style={{width:'32px',height:'32px',borderRadius:'8px',border:'1px solid #e2e8f0',background:'#fff',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',color:'#64748b',fontSize:'16px'}}>×</button>
 					</div>
 					<div style={{padding:'18px 22px'}}>
-						<div style={{display:'flex',gap:'10px',marginBottom:'16px'}}>
-							<div style={{flex:1,background:'#f8fafc',borderRadius:'10px',padding:'10px 14px',textAlign:'center'}}>
+						<div style={{display:'flex',gap:'10px',marginBottom:'16px',...(isMobileView ? {flexWrap:'wrap'} : {})}}>
+							<div style={{flex:1,...(isMobileView ? {minWidth:0} : {}),background:'#f8fafc',borderRadius:'10px',padding:'10px 14px',textAlign:'center'}}>
 								<div style={{fontSize:'9px',fontWeight:'700',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.4px'}}>Invoice</div>
 								<div style={{fontSize:'15px',fontWeight:'800',color:'rgb(234, 88, 12)',marginTop:'2px'}}>#{dumpModal.item.invoice_id}</div>
 							</div>
-							<div style={{flex:1,background:'#f0fdf4',borderRadius:'10px',padding:'10px 14px',textAlign:'center'}}>
+							<div style={{flex:1,...(isMobileView ? {minWidth:0} : {}),background:'#f0fdf4',borderRadius:'10px',padding:'10px 14px',textAlign:'center'}}>
 								<div style={{fontSize:'9px',fontWeight:'700',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.4px'}}>Available</div>
 								<div style={{fontSize:'15px',fontWeight:'800',color:'#16a34a',marginTop:'2px'}}>{dumpModal.item.stock}</div>
 							</div>
-							<div style={{flex:1,background:'#f8fafc',borderRadius:'10px',padding:'10px 14px',textAlign:'center'}}>
+							<div style={{flex:1,...(isMobileView ? {minWidth:0} : {}),background:'#f8fafc',borderRadius:'10px',padding:'10px 14px',textAlign:'center'}}>
 								<div style={{fontSize:'9px',fontWeight:'700',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.4px'}}>Unit Price</div>
 								<div style={{fontSize:'15px',fontWeight:'800',color:'#1e293b',marginTop:'2px'}}>{currency} {Number(dumpModal.item.unit_price||0).toFixed(2)}</div>
 							</div>

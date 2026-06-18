@@ -481,22 +481,22 @@ function FilterAndOptionsPanel(props) {
                         </div>
                         ) : (
                         <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
-                            <div style={{flex:1,background:'#fff',border:'2px solid '+(pendingFrom?'rgb(234, 88, 12)':'#e5e7eb'),borderRadius:'12px',padding:'8px 12px',boxShadow:pendingFrom?'0 0 0 3px rgba(234,88,12,0.08)':'none',transition:'all 0.15s'}}>
+                            <div style={{flex:1,minWidth:0,background:'#fff',border:'2px solid '+(pendingFrom?'rgb(234, 88, 12)':'#e5e7eb'),borderRadius:'12px',padding:'8px 12px',boxShadow:pendingFrom?'0 0 0 3px rgba(234,88,12,0.08)':'none',transition:'all 0.15s'}}>
                                 <div style={{display:'flex',alignItems:'center',gap:'5px',marginBottom:'3px'}}>
                                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgb(234, 88, 12)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                                     <span style={{fontSize:'10px',fontWeight:'800',color:'rgb(234, 88, 12)',letterSpacing:'0.6px',textTransform:'uppercase'}}>From</span>
                                 </div>
-                                <div style={{fontSize:'14px',fontWeight:'700',color:pendingFrom?'#0f172a':'#cbd5e1',whiteSpace:'nowrap'}}>{pendingFrom?fmtDisp(pendingFrom):'Select'}</div>
+                                <div style={{fontSize:'14px',fontWeight:'700',color:pendingFrom?'#0f172a':'#cbd5e1',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{pendingFrom?fmtDisp(pendingFrom):'Select'}</div>
                             </div>
                             <div style={{width:'36px',height:'36px',borderRadius:'10px',background:'rgb(234, 88, 12)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,boxShadow:'0 3px 10px rgba(234,88,12,0.35)'}}>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                             </div>
-                            <div style={{flex:1,background:'#fff',border:'2px solid '+(pendingTo?'rgb(234, 88, 12)':'#e5e7eb'),borderRadius:'12px',padding:'8px 12px',boxShadow:pendingTo?'0 0 0 3px rgba(234,88,12,0.08)':'none',transition:'all 0.15s'}}>
+                            <div style={{flex:1,minWidth:0,background:'#fff',border:'2px solid '+(pendingTo?'rgb(234, 88, 12)':'#e5e7eb'),borderRadius:'12px',padding:'8px 12px',boxShadow:pendingTo?'0 0 0 3px rgba(234,88,12,0.08)':'none',transition:'all 0.15s'}}>
                                 <div style={{display:'flex',alignItems:'center',gap:'5px',marginBottom:'3px'}}>
                                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgb(234, 88, 12)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                                     <span style={{fontSize:'10px',fontWeight:'800',color:'rgb(234, 88, 12)',letterSpacing:'0.6px',textTransform:'uppercase'}}>To</span>
                                 </div>
-                                <div style={{fontSize:'14px',fontWeight:'700',color:pendingTo?'#0f172a':'#cbd5e1',whiteSpace:'nowrap'}}>{pendingTo?fmtDisp(pendingTo):'Select'}</div>
+                                <div style={{fontSize:'14px',fontWeight:'700',color:pendingTo?'#0f172a':'#cbd5e1',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{pendingTo?fmtDisp(pendingTo):'Select'}</div>
                             </div>
                         </div>
                         )}
@@ -1655,7 +1655,7 @@ function List(props) {
                                             {paymentEntries.map(([mode, amt2]) => {
                                                 const modeColors = {'Cash':{bg:'#f0fdf4',color:'#15803d',border:'#86efac',icon:'fa-money'},'Card':{bg:'#eff6ff',color:'#1d4ed8',border:'#93c5fd',icon:'fa-credit-card'},'Cheque':{bg:'#f5f3ff',color:'#6d28d9',border:'#c4b5fd',icon:'fa-file-text-o'},'Bank Transfer':{bg:'#ecfeff',color:'#0e7490',border:'#67e8f9',icon:'fa-university'},'Credit':{bg:'#fff7ed',color:'rgb(234, 88, 12)',border:'#fed7aa',icon:'fa-rotate-left'}};
                                                 const s2 = modeColors[mode] || {bg:'#f8fafc',color:'#475569',border:'#e2e8f0',icon:'fa-circle'};
-                                                return <span key={mode} style={{display:'inline-flex',alignItems:'center',gap:'4px',background:s2.bg,border:`1px solid ${s2.border}`,borderRadius:'6px',padding:'2px 7px',fontSize:'10px',fontWeight:'600',color:s2.color,whiteSpace:'nowrap'}}><i className={`fa ${s2.icon}`} style={{fontSize:'9px'}}></i>{mode} {amt2.toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2})}</span>;
+                                                return <span key={mode} style={{display:'inline-flex',alignItems:'center',gap:'4px',background:s2.bg,border:`1px solid ${s2.border}`,borderRadius:'6px',padding:'2px 7px',fontSize:'10px',fontWeight:'600',color:s2.color,whiteSpace:'nowrap',maxWidth:'100%',overflow:'hidden',textOverflow:'ellipsis'}}><i className={`fa ${s2.icon}`} style={{fontSize:'9px'}}></i>{mode} {amt2.toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2})}</span>;
                                             })}
                                         </div>
                                     </div>

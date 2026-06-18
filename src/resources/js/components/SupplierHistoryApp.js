@@ -731,7 +731,7 @@ function List(props) {
 													<div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', marginTop: '2px' }}>
 														{statusBadge(row)}
 														{payEntries.length === 0 && bal > 0 && <span style={{ fontSize: '11px', fontWeight: '700', color: '#dc2626', whiteSpace: 'nowrap' }}>No Payment</span>}
-														{payEntries.map(([mode, amt2]) => { const s2 = payModeColors[mode] || { bg: '#f8fafc', color: '#475569', border: '#e2e8f0', icon: 'fa-circle' }; return <span key={mode} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: s2.bg, border: '1px solid ' + s2.border, borderRadius: '6px', padding: '2px 7px', fontSize: '10px', fontWeight: '600', color: s2.color, whiteSpace: 'nowrap' }}><i className={'fa ' + s2.icon} style={{ fontSize: '9px' }}></i>{mode} {amt2.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>; })}
+														{payEntries.map(([mode, amt2]) => { const s2 = payModeColors[mode] || { bg: '#f8fafc', color: '#475569', border: '#e2e8f0', icon: 'fa-circle' }; return <span key={mode} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: s2.bg, border: '1px solid ' + s2.border, borderRadius: '6px', padding: '2px 7px', fontSize: '10px', fontWeight: '600', color: s2.color, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}><i className={'fa ' + s2.icon} style={{ fontSize: '9px' }}></i>{mode} {amt2.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>; })}
 													</div>
 												</div>
 												<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px', flexShrink: 0 }}>
@@ -744,9 +744,9 @@ function List(props) {
 											{open && (
 												<div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #f1f5f9', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
 													{[{ l: 'Invoice Amount', v: fmt(row.net_amount), c: '#0f1115' }, { l: 'Paid', v: fmt(row.total_paid), c: '#16a34a' }, { l: 'Returns / Adj', v: fmt(row.credit_adj), c: '#7c3aed' }, { l: 'Balance', v: fmt(row.balance), c: bal > 0 ? '#ea580c' : '#16a34a' }].map(d => (
-														<div key={d.l}>
+														<div key={d.l} style={{ minWidth: 0 }}>
 															<div style={{ fontSize: '10px', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: '3px' }}>{d.l}</div>
-															<div style={{ fontSize: '13.5px', fontWeight: '700', color: d.c, fontVariantNumeric: 'tabular-nums' }}>{d.v}</div>
+															<div style={{ fontSize: '13.5px', fontWeight: '700', color: d.c, fontVariantNumeric: 'tabular-nums', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.v}</div>
 														</div>
 													))}
 												</div>

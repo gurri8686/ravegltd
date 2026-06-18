@@ -481,7 +481,7 @@ export default function ProductsIndexApp(props) {
 				</div>
 
 				{/* Count + view toggle */}
-				<div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'12px'}}>
+				<div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'12px',flexWrap:'wrap',gap:'8px'}}>
 					<span style={{display:'inline-flex',alignItems:'center',gap:'7px',fontSize:'12px',fontWeight:'700',color:'rgb(234,88,12)',background:'#fff7ed',border:'1px solid #ffedd5',borderRadius:'999px',padding:'5px 11px'}}>
 						<i className="fa fa-cube" style={{fontSize:'11px'}}></i>{filteredData.length} products
 					</span>
@@ -532,10 +532,10 @@ export default function ProductsIndexApp(props) {
 										<span style={chip}>VAT {row.tax_vat ?? '—'}</span>
 										<span style={chip}>Sold {sold}</span>
 									</div>
-									<div style={{display:'flex',alignItems:'flex-end',justifyContent:'space-between',marginTop:'14px'}}>
-										<div>
+									<div style={{display:'flex',alignItems:'flex-end',justifyContent:'space-between',marginTop:'14px',gap:'10px'}}>
+										<div style={{minWidth:0}}>
 											<div style={{fontSize:'10px',fontWeight:'700',color:'#94a3b8',letterSpacing:'0.6px',textTransform:'uppercase'}}>Selling Price</div>
-											<div style={{fontSize:'22px',fontWeight:'800',color:'#0f172a',lineHeight:'1.1',marginTop:'2px'}}>{row.selling_price ? cur+row.selling_price : '—'}</div>
+											<div style={{fontSize:'22px',fontWeight:'800',color:'#0f172a',lineHeight:'1.1',marginTop:'2px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{row.selling_price ? cur+row.selling_price : '—'}</div>
 											{(() => {
 												const val = Number(row.profit_loss ?? 0);
 												if (val === 0 && sold === 0) return <div style={{fontSize:'12px',fontWeight:'600',color:'#94a3b8',marginTop:'5px'}}>No sales yet</div>;
@@ -548,7 +548,7 @@ export default function ProductsIndexApp(props) {
 												);
 											})()}
 										</div>
-										<div style={{display:'flex',gap:'8px'}}>
+										<div style={{display:'flex',gap:'8px',flexShrink:0}}>
 											<a href={'/product_history/view?product='+row.id} title="History" style={actBtn}><i className="fa fa-history"></i></a>
 											<a href={'/management/products/edit/'+row.id+'/edit'} title="Edit" style={actBtn}><i className="fa fa-pencil"></i></a>
 										</div>

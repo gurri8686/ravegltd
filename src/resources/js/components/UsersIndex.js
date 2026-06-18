@@ -26,6 +26,7 @@ const store = configureStore({ reducer: { properties: slice.reducer } });
 function ConfirmModal({ user, onConfirm, onCancel, loading }) {
   if (!user) return null;
   const name = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+  const cmMobile = typeof window !== 'undefined' && window.innerWidth <= 767;
   return (
     <div style={{position:'fixed',inset:0,zIndex:99999,display:'flex',alignItems:'center',justifyContent:'center',padding:'20px'}}>
       <div onClick={onCancel} style={{position:'absolute',inset:0,background:'rgba(0,0,0,0.45)',backdropFilter:'blur(4px)'}}></div>
@@ -38,13 +39,13 @@ function ConfirmModal({ user, onConfirm, onCancel, loading }) {
           You are about to permanently delete <span style={{fontWeight:'700',color:'#1f2937'}}>"{name}"</span>.<br/>
           <span style={{color:'#ef4444',fontWeight:'600'}}>This action cannot be undone!</span>
         </div>
-        <div style={{display:'flex',justifyContent:'center',gap:'12px'}}>
+        <div style={{display:'flex',justifyContent:'center',gap:'12px',flexWrap: cmMobile ? 'wrap' : 'nowrap'}}>
           <button onClick={onCancel} disabled={loading}
-            style={{width:'130px',height:'46px',borderRadius:'10px',border:'1px solid #d1d5db',background:'#fff',color:'#6b7280',fontWeight:'600',fontSize:'14px',cursor:'pointer',outline:'none'}}>
+            style={{...(cmMobile ? {flex:'1 1 120px'} : {width:'130px'}),height:'46px',borderRadius:'10px',border:'1px solid #d1d5db',background:'#fff',color:'#6b7280',fontWeight:'600',fontSize:'14px',cursor:'pointer',outline:'none'}}>
             Cancel
           </button>
           <button onClick={onConfirm} disabled={loading}
-            style={{width:'160px',height:'46px',borderRadius:'10px',border:'none',background:loading?'#fca5a5':'#ef4444',color:'#fff',fontWeight:'700',fontSize:'14px',cursor:loading?'not-allowed':'pointer',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:'7px',outline:'none',boxShadow:loading?'none':'0 4px 14px rgba(239,68,68,0.4)'}}>
+            style={{...(cmMobile ? {flex:'1 1 140px'} : {width:'160px'}),height:'46px',borderRadius:'10px',border:'none',background:loading?'#fca5a5':'#ef4444',color:'#fff',fontWeight:'700',fontSize:'14px',cursor:loading?'not-allowed':'pointer',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:'7px',outline:'none',boxShadow:loading?'none':'0 4px 14px rgba(239,68,68,0.4)'}}>
             {loading
               ? <><i className="fa fa-spinner fa-spin" style={{fontSize:'13px'}}></i> Deleting...</>
               : <>Yes, delete it!</>}

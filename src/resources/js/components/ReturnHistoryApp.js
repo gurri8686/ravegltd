@@ -138,8 +138,8 @@ export function ReturnHistoryApp({ type, returnsApi, entitiesApi, creditBalanceA
                             <span style={{fontSize:'10px',fontWeight:'800',color:'#374151',letterSpacing:'0.6px',textTransform:'uppercase'}}>Summary</span>
                         </div>
                         <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
-                            <div style={{display:'flex',gap:'8px'}}>
-                                {statCards.map((s,i)=>(<span key={i} style={{fontSize:'12px',fontWeight:'700',color:s.color}}>{s.value}</span>))}
+                            <div style={{display:'flex',gap:'8px',minWidth:0}}>
+                                {statCards.map((s,i)=>(<span key={i} style={{fontSize:'12px',fontWeight:'700',color:s.color,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',minWidth:0}}>{s.value}</span>))}
                             </div>
                             <i className={'fa fa-chevron-'+(summaryOpen?'up':'down')} style={{fontSize:'9px',color:'#9ca3af'}}/>
                         </div>
@@ -152,7 +152,7 @@ export function ReturnHistoryApp({ type, returnsApi, entitiesApi, creditBalanceA
                                     <React.Fragment key={lbl}>
                                         <div style={{flex:1,minWidth:0}}>
                                             <div style={{fontSize:'9px',color:'#9ca3af',fontWeight:'700',letterSpacing:'0.7px',textTransform:'uppercase',marginBottom:'4px'}}>{lbl}</div>
-                                            <div style={{fontSize:'20px',fontWeight:'700',color:'#111827',lineHeight:1.1,letterSpacing:'-0.5px'}}>{value}</div>
+                                            <div style={{fontSize:'20px',fontWeight:'700',color:'#111827',lineHeight:1.1,letterSpacing:'-0.5px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{value}</div>
                                         </div>
                                         {i < statCards.length-1 && <div style={{width:'1px',background:'#e5e7eb',margin:'0 8px',alignSelf:'stretch',flexShrink:0}}/>}
                                     </React.Fragment>
@@ -398,7 +398,7 @@ export function ReturnHistoryApp({ type, returnsApi, entitiesApi, creditBalanceA
                                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgb(234, 88, 12)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                                     <span style={{fontSize:'10px',fontWeight:'800',color:'rgb(234, 88, 12)',letterSpacing:'0.6px',textTransform:'uppercase'}}>From</span>
                                 </div>
-                                <div style={{fontSize:'14px',fontWeight:'700',color:pendingFrom?'#0f172a':'#cbd5e1',whiteSpace:'nowrap'}}>{pendingFrom?fmtDisp(pendingFrom):'Select'}</div>
+                                <div style={{fontSize:'14px',fontWeight:'700',color:pendingFrom?'#0f172a':'#cbd5e1',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{pendingFrom?fmtDisp(pendingFrom):'Select'}</div>
                             </div>
                             <div style={{width:'36px',height:'36px',borderRadius:'10px',background:'rgb(234, 88, 12)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,boxShadow:'0 3px 10px rgba(234,88,12,0.35)'}}>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -408,7 +408,7 @@ export function ReturnHistoryApp({ type, returnsApi, entitiesApi, creditBalanceA
                                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgb(234, 88, 12)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                                     <span style={{fontSize:'10px',fontWeight:'800',color:'rgb(234, 88, 12)',letterSpacing:'0.6px',textTransform:'uppercase'}}>To</span>
                                 </div>
-                                <div style={{fontSize:'14px',fontWeight:'700',color:pendingTo?'#0f172a':'#cbd5e1',whiteSpace:'nowrap'}}>{pendingTo?fmtDisp(pendingTo):'Select'}</div>
+                                <div style={{fontSize:'14px',fontWeight:'700',color:pendingTo?'#0f172a':'#cbd5e1',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{pendingTo?fmtDisp(pendingTo):'Select'}</div>
                             </div>
                         </div>
                     </div>

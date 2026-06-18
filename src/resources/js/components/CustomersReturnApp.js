@@ -215,6 +215,7 @@ function CustomerSelect({ apiUrl, onSubmit }) {
 // Unified filter bar
 function FilterBar({ apiUrl, initialCustomerId, noCard = false }) {
 	const dispatch = useDispatch();
+	const isMobile = window.innerWidth <= 767;
 	const { date, toDate, customers } = useSelector(state => state.customers);
 	const { options, loading, error, handleChange } = CustomerSelect({ apiUrl });
 
@@ -255,7 +256,7 @@ function FilterBar({ apiUrl, initialCustomerId, noCard = false }) {
 	const currentCustomer = useSelector(state => state.customers.currentCustomer);
 
 	const filterContent = (
-		<div style={{padding:'16px 20px',display:'grid',gridTemplateColumns:'1fr 1fr',gap:'14px',alignItems:'end', ...(noCard ? {} : {background:'linear-gradient(to bottom,#fafbfc,#fff)',borderRadius:'12px'})}}>
+		<div style={{padding:'16px 20px',display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:'14px',alignItems:'end', ...(noCard ? {} : {background:'linear-gradient(to bottom,#fafbfc,#fff)',borderRadius:'12px'})}}>
 			<div>
 				<label style={{fontSize:'10px',fontWeight:'700',color:'#64748b',letterSpacing:'0.8px',textTransform:'uppercase',marginBottom:'6px',display:'block'}}>Customer</label>
 					{initialCustomerId && currentCustomerInfo?.name ? (
@@ -1948,16 +1949,16 @@ function CustomerProductsTable(props) {
 						{/* Modal Body */}
 						<div style={{padding:'18px 22px'}}>
 							{/* Info */}
-							<div style={{display:'flex',gap:'10px',marginBottom:'16px'}}>
-								<div style={{flex:1,background:'#f8fafc',borderRadius:'10px',padding:'10px 14px',textAlign:'center'}}>
+							<div style={{display:'flex',gap:'10px',marginBottom:'16px',...(isMobile ? {flexWrap:'wrap'} : {})}}>
+								<div style={{flex:1,...(isMobile ? {minWidth:0} : {}),background:'#f8fafc',borderRadius:'10px',padding:'10px 14px',textAlign:'center'}}>
 									<div style={{fontSize:'9px',fontWeight:'700',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.4px'}}>Invoice</div>
 									<div style={{fontSize:'15px',fontWeight:'800',color:'#f97316',marginTop:'2px'}}>#{returnModal.item.invoice_id}</div>
 								</div>
-								<div style={{flex:1,background:'#f0fdf4',borderRadius:'10px',padding:'10px 14px',textAlign:'center'}}>
+								<div style={{flex:1,...(isMobile ? {minWidth:0} : {}),background:'#f0fdf4',borderRadius:'10px',padding:'10px 14px',textAlign:'center'}}>
 									<div style={{fontSize:'9px',fontWeight:'700',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.4px'}}>Available</div>
 									<div style={{fontSize:'15px',fontWeight:'800',color:'#16a34a',marginTop:'2px'}}>{returnModal.item.available}</div>
 								</div>
-								<div style={{flex:1,background:'#f8fafc',borderRadius:'10px',padding:'10px 14px',textAlign:'center'}}>
+								<div style={{flex:1,...(isMobile ? {minWidth:0} : {}),background:'#f8fafc',borderRadius:'10px',padding:'10px 14px',textAlign:'center'}}>
 									<div style={{fontSize:'9px',fontWeight:'700',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.4px'}}>Unit Price</div>
 									<div style={{fontSize:'15px',fontWeight:'800',color:'#1e293b',marginTop:'2px'}}>{currency} {Number(returnModal.item.unit_price).toFixed(2)}</div>
 								</div>
@@ -1992,7 +1993,7 @@ function CustomerProductsTable(props) {
 							{/* Refund Amount */}
 							<div style={{background:'#fef2f2',borderRadius:'10px',padding:'14px 16px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
 								<span style={{fontSize:'13px',fontWeight:'600',color:'#64748b'}}>Refund Amount</span>
-								<div style={{display:'flex',alignItems:'center',gap:'6px'}}><span style={{fontSize:'14px',fontWeight:'700',color:'#dc2626'}}>{currency}</span><input type="number" min="0" step="0.01" value={customPrice !== '' ? customPrice : autoPrice.toFixed(2)} onChange={e => setCustomPrice(e.target.value)} style={{width:'100px',height:'36px',borderRadius:'8px',border:'1.5px solid #fca5a5',fontSize:'16px',fontWeight:'800',color:'#dc2626',textAlign:'right',padding:'0 8px',outline:'none',background:'#fef2f2'}} onFocus={e=>e.target.style.borderColor='#dc2626'} onBlur={e=>e.target.style.borderColor='#fca5a5'} /></div>
+								<div style={{display:'flex',alignItems:'center',gap:'6px'}}><span style={{fontSize:'14px',fontWeight:'700',color:'#dc2626'}}>{currency}</span><input type="number" min="0" step="0.01" value={customPrice !== '' ? customPrice : autoPrice.toFixed(2)} onChange={e => setCustomPrice(e.target.value)} style={{...(isMobile ? {flex:1,maxWidth:'120px',minWidth:0} : {width:'100px'}),height:'36px',borderRadius:'8px',border:'1.5px solid #fca5a5',fontSize:'16px',fontWeight:'800',color:'#dc2626',textAlign:'right',padding:'0 8px',outline:'none',background:'#fef2f2'}} onFocus={e=>e.target.style.borderColor='#dc2626'} onBlur={e=>e.target.style.borderColor='#fca5a5'} /></div>
 							</div>
 						</div>
 						{/* Modal Footer */}

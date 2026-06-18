@@ -349,7 +349,7 @@ export default function CustomersIndexApp(props) {
 		const cardFrom = totalItems === 0 ? 0 : cardSafePage * cardPerPage + 1;
 		const cardTo = Math.min((cardSafePage + 1) * cardPerPage, totalItems);
 		const fmt2 = (v) => { const n = Number(v) || 0; return n.toLocaleString('en-GB', {minimumFractionDigits:2, maximumFractionDigits:2}); };
-		const chip = {display:'inline-flex',alignItems:'center',gap:'4px',fontSize:'11px',fontWeight:'600',color:'#475569',background:'#f8fafc',border:'1px solid #eaecf2',borderRadius:'7px',padding:'4px 9px',whiteSpace:'nowrap'};
+		const chip = {display:'inline-flex',alignItems:'center',gap:'4px',fontSize:'11px',fontWeight:'600',color:'#475569',background:'#f8fafc',border:'1px solid #eaecf2',borderRadius:'7px',padding:'4px 9px',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',maxWidth:'100%'};
 		const actBtn = {width:'36px',height:'36px',borderRadius:'9px',border:'1px solid #eaecf2',background:'#fff',display:'inline-flex',alignItems:'center',justifyContent:'center',textDecoration:'none',fontSize:'13px',flexShrink:0};
 		const navBtnStyle = (d) => ({width:'32px',height:'32px',borderRadius:'7px',background:'#fff',border:'1px solid #e8e8ec',color:d?'#c8c8cf':'#6b7280',cursor:d?'not-allowed':'pointer',display:'inline-flex',alignItems:'center',justifyContent:'center',padding:0});
 		const paginatorInner = (
@@ -370,7 +370,7 @@ export default function CustomersIndexApp(props) {
 		return (
 			<div>
 				{/* Count + view toggle */}
-				<div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'12px'}}>
+				<div style={{display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:'8px',marginBottom:'12px'}}>
 					<span style={{display:'inline-flex',alignItems:'center',gap:'8px',fontSize:'14px',fontWeight:'700',color:'rgb(234,88,12)'}}>
 						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgb(234,88,12)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>{totalItems} customers
 					</span>
@@ -438,10 +438,10 @@ export default function CustomersIndexApp(props) {
 										<span style={chip}>Unpaid <b style={{color:unpaid>0?'#ef4444':'#64748b',marginLeft:'3px'}}>{cur}{fmt2(unpaid)}</b></span>
 										<span style={chip}>Paid <b style={{color:'#16a34a',marginLeft:'3px'}}>{cur}{fmt2(paid)}</b></span>
 									</div>
-									<div style={{display:'flex',alignItems:'flex-end',justifyContent:'space-between',marginTop:'14px'}}>
-										<div>
+									<div style={{display:'flex',alignItems:'flex-end',justifyContent:'space-between',flexWrap:'wrap',gap:'10px',marginTop:'14px'}}>
+										<div style={{minWidth:0}}>
 											<div style={{fontSize:'10px',fontWeight:'700',color:'#94a3b8',letterSpacing:'0.6px',textTransform:'uppercase'}}>Total Sales</div>
-											<div style={{fontSize:'22px',fontWeight:'800',color:'#0f172a',lineHeight:'1.1',marginTop:'2px'}}>{cur}{fmt2(total)}</div>
+											<div style={{fontSize:'22px',fontWeight:'800',color:'#0f172a',lineHeight:'1.1',marginTop:'2px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{cur}{fmt2(total)}</div>
 										</div>
 										<div style={{display:'flex',gap:'7px'}}>
 											{acts.map((a,j)=>{const ed=a.title==='Edit';return (<a key={j} href={a.href} title={a.title} style={{...actBtn,color:ed?'rgb(234, 88, 12)':'#1f2937',background:ed?'#fff5ed':'#fff',border:ed?'1px solid #ffedd5':'1px solid #eaecf2'}}><i className={a.icon}></i></a>);})}
