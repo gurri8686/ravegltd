@@ -1,5 +1,5 @@
 const mix = require('laravel-mix');
-const NodePolyfillPlugin = require("node-polyfill-webpack-plugin") 
+const NodePolyfillPlugin = require("node-polyfill-webpack-plugin")
 /**
  * env loader
  */
@@ -49,5 +49,45 @@ mix.webpackConfig({
         fallback: {
             fs: require.resolve('crypto-browserify')
         }
-    }
+    },
+    // laravel-mix excludes node_modules from Babel, so date-fns (pulled in by
+    // react-datepicker) ships its raw `?.` / `??` into the bundle. iOS 12 / Safari
+    // <13 can't parse those, so every page using a date picker fails to load and
+    // shows only the header. Transpile that one package down to ES5-safe syntax.
+    module: {
+        rules: [
+            {
+                test: /\.js$/,
+                include: /node_modules[\\/]date-fns/,
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        babelrc: false,
+                        configFile: false,
+                        plugins: [
+                            '@babel/plugin-proposal-optional-chaining',
+                            '@babel/plugin-proposal-nullish-coalescing-operator',
+                        ],
+                    },
+                },
+            },
+        ],
+    },
+});
+
+// iOS 12 / Safari 10-12 fails to PARSE the bundle (then renders only the Blade
+// header) because Terser collapses ternaries like `a?0.3:1` to `a?.3:1`, which
+// that WebKit reads as optional chaining → "Unexpected token '.'". `keep_numbers`
+// stops the `0.3`→`.3` collapse; `safari10`/`ecma:5` keep the rest old-WebKit-safe.
+// Set via mix.options so laravel-mix's own TerserPlugin picks it up.
+mix.options({
+    terser: {
+        terserOptions: {
+            ecma: 5,
+            safari10: true,
+            compress: { ecma: 5 },
+            mangle: { safari10: true },
+            format: { ecma: 5, safari10: true, keep_numbers: true },
+        },
+    },
 });
