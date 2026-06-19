@@ -1415,26 +1415,8 @@ export default function CustomerInvoiceApp(props) {
                 </div>
                 )}
 
-                {/* Search + Filter */}
-                <div style={{display:'flex',alignItems:'center',gap:'8px',padding:'0 0 10px'}}>
-                    <div style={{flex:1,display:'flex',alignItems:'center',gap:'8px',height:'44px',border:'1.5px solid #e5e7eb',borderRadius:'12px',background:'#fff',padding:'0 12px',minWidth:0}}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                        <input type="text" placeholder="Search product..." value={mobileSearch} onChange={e=>setMobileSearch(e.target.value)}
-                            style={{flex:1,height:'100%',border:'none',outline:'none',fontSize:'13px',color:'#374151',background:'transparent',minWidth:0}} />
-                        {mobileSearch && (
-                            <button type="button" onClick={()=>setMobileSearch('')} style={{background:'none',border:'none',cursor:'pointer',padding:'2px',display:'flex',alignItems:'center',outline:'none',flexShrink:0}}>
-                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                            </button>
-                        )}
-                    </div>
-                    <button type="button" onClick={()=>setMobileFilterOpen(v=>!v)}
-                        style={{flexShrink:0,height:'44px',width:'44px',borderRadius:'12px',border:'none',background:'rgb(234, 88, 12)',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',position:'relative',outline:'none',boxShadow:'0 3px 10px rgba(234,88,12,0.3)'}}>
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-                    </button>
-                </div>
-
-                {/* Action buttons — Email / Print / Download cards */}
-                <div style={{display:'flex',gap:'10px',padding:'0'}}>
+                {/* Action buttons — Email / Print / Download cards + Filter button at the right end */}
+                <div style={{display:'flex',alignItems:'center',gap:'10px',padding:'0 0 10px'}}>
                     {[
                         {label:emailsend==1?'Sending...':'Email', icon:'fa-envelope-o', onClick:()=>sendEmail(props.id)},
                         {label:'Print',    icon:'fa-print',    href:"/data_entry/sales_entry/invoice/invoiceview/"+props.id, target:'_blank'},
@@ -1444,6 +1426,11 @@ export default function CustomerInvoiceApp(props) {
                         const inner = <><i className={"fa "+icon} style={{fontSize:'14px',color:'rgb(234, 88, 12)'}}></i>{label}</>;
                         return href ? <a key={label} href={href} target={target} style={st}>{inner}</a> : <button key={label} onClick={onClick} style={st}>{inner}</button>;
                     })}
+                    {/* Filter button — right end of the action row */}
+                    <button type="button" onClick={()=>setMobileFilterOpen(v=>!v)}
+                        style={{flexShrink:0,height:'46px',width:'46px',borderRadius:'12px',border:'none',background:'rgb(234, 88, 12)',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',position:'relative',outline:'none',boxShadow:'0 3px 10px rgba(234,88,12,0.3)'}}>
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                    </button>
                 </div>
 
             </div>
@@ -2149,11 +2136,15 @@ export default function CustomerInvoiceApp(props) {
 							if (fieldToggle === '' && invoiceproductid === 0) return null;
 							if (mobileSearch && product && typeof product === 'object' && product.label && !product.label.toLowerCase().includes(mobileSearch.toLowerCase())) return null;
 							if (fieldToggle === '' && invoiceproductid !== 0) {
-								return (() => { const lbl = {fontSize:'11px',fontWeight:'700',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:'5px',display:'block'}; return (
-									<div key={'card_edit_'+index} style={{background:'#fff',borderRadius:'12px',outline:'2px solid rgb(234, 88, 12)',outlineOffset:'-2px',boxShadow:'0 4px 16px rgba(234,88,12,0.10)',marginBottom:'8px',overflow:'hidden'}}>
+								return (() => { const lbl = {fontSize:'11px',fontWeight:'700',color:'#64748b',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:'5px',display:'block'}; const cancelEdit = () => { const r = [...rowsData]; r[index]['fieldToggle'] = 'checked'; if(r[index]['_origSupplierId'] !== undefined) { r[index]['supplier_id'] = r[index]['_origSupplierId']; } if(r[index]['_origPrice'] !== undefined) { r[index]['price'] = r[index]['_origPrice']; r[index]['totalPrice'] = r[index]['_origTotalPrice']; } delete r[index]['_editNoSupplier']; delete r[index]['_origSupplierId']; delete r[index]['_origPrice']; delete r[index]['_origTotalPrice']; setRowsData(r); }; return (
+									<div key={'card_edit_'+index} style={{position:'fixed',left:0,right:0,top:0,bottom:0,zIndex:6000,display:'flex',flexDirection:'column',justifyContent:'flex-end'}}>
+									  <style>{`@keyframes ciaSheetUp{from{transform:translateY(100%);}to{transform:translateY(0);}}`}</style>
+									  <div onClick={cancelEdit} style={{position:'absolute',inset:0,background:'rgba(15,17,21,0.45)'}} />
+									  <div style={{position:'relative',background:'#fff',borderTopLeftRadius:'18px',borderTopRightRadius:'18px',outline:'2px solid rgb(234, 88, 12)',outlineOffset:'-2px',overflow:'hidden',boxShadow:'0 -8px 30px rgba(0,0,0,0.18)',maxHeight:'90vh',overflowY:'auto',animation:'ciaSheetUp 0.22s ease'}}>
+									  <div style={{display:'flex',justifyContent:'center',padding:'8px 0 2px'}}><div style={{width:'38px',height:'4px',borderRadius:'2px',background:'#e2e8f0'}} /></div>
 										{/* Edit Header */}
 										<div style={{padding:'10px 14px',display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1.5px solid #f0f0f0'}}>
-											<div style={{color:'#1e293b',fontSize:'13px',fontWeight:'700',display:'flex',alignItems:'center',gap:'6px',flex:1,minWidth:0,overflow:'hidden'}}>
+											<div style={{color:'#1e293b',fontSize:'14px',fontWeight:'700',display:'flex',alignItems:'center',gap:'6px',flex:1,minWidth:0,overflow:'hidden'}}>
 												<i className="fa fa-pencil-square-o" style={{color:'rgb(234, 88, 12)'}}></i>
 												<span style={{whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{product ? product.label : ''}</span>
 												{supplier_id && supplier_id.value ? <span style={{fontWeight:'400',color:'#94a3b8',fontSize:'12px',flexShrink:0}}>· {supplier_id.label}</span> : null}
@@ -2196,30 +2187,31 @@ export default function CustomerInvoiceApp(props) {
 												</div>
 											)}
 											{/* Row 1: Qty + Price side by side */}
-											<div style={{display:'flex',gap:'10px',marginBottom:'12px'}}>
+											<div style={{display:'flex',gap:'10px',marginBottom:'14px',alignItems:'flex-end'}}>
 												<div style={{flex:1}}>
 													<label style={lbl}>Quantity</label>
-													<input type="number" min="1" step="1" className="form-control" defaultValue={quantity} onChange={e => handleQtyChange(index, e)} onKeyDown={e => { if([".","-","+","e","E"].includes(e.key)) e.preventDefault(); }} placeholder="0" style={{padding:'8px 10px',fontSize:'14px',borderRadius:'8px',border: mdata.qtyWarning ? '2px solid #f59e0b' : '1.5px solid #e5e7eb'}} />
+													<input type="number" min="1" step="1" defaultValue={quantity} onChange={e => handleQtyChange(index, e)} onKeyDown={e => { if([".","-","+","e","E"].includes(e.key)) e.preventDefault(); }} placeholder="0" style={{width:'100%',height:'42px',padding:'0 12px',fontSize:'15px',fontWeight:'600',borderRadius:'10px',border: mdata.qtyWarning ? '2px solid #f59e0b' : '1.5px solid #e5e7eb',outline:'none',background:'#fafbfc',color:'#1e293b',boxSizing:'border-box'}} onFocus={e=>{e.target.style.borderColor='rgb(234, 88, 12)';e.target.style.background='#fff';}} onBlur={e=>{if(!mdata.qtyWarning){e.target.style.borderColor='#e5e7eb';}e.target.style.background='#fafbfc';}} />
 													{mdata.qtyWarning && <div style={{color:'#b45309',fontSize:'11px',fontWeight:'600',marginTop:'4px',display:'flex',alignItems:'center',gap:'4px'}}><i className="fa fa-exclamation-triangle"></i> {mdata.qtyWarning}</div>}
 												</div>
 												<div style={{flex:1.3}}>
 													<label style={lbl}>Unit Price</label>
-													<div className="input-group" style={{flexWrap:'nowrap'}}>
-														<div className="input-group-prepend"><span className="input-group-text" style={{padding:'8px 8px',fontSize:'13px',borderRadius:'8px 0 0 8px',background:'#fff7ed',border:'1.5px solid #e5e7eb',borderRight:'none',color:'rgb(234, 88, 12)',fontWeight:'700'}}>{props.currency}</span></div>
-														<input type="number" min="0" className="form-control" defaultValue={price} onChange={e => handlePriceChange(index, e)} placeholder="0.00" style={{padding:'8px 10px',fontSize:'14px',borderRadius:'0 8px 8px 0',border:'1.5px solid #e5e7eb'}} />
+													<div style={{display:'flex',height:'42px',borderRadius:'10px',overflow:'hidden',border:'1.5px solid #e5e7eb'}}>
+														<span style={{padding:'0 10px',fontSize:'14px',background:'#fff7ed',color:'rgb(234, 88, 12)',fontWeight:'700',display:'flex',alignItems:'center',borderRight:'1.5px solid #e5e7eb'}}>{props.currency}</span>
+														<input type="number" min="0" defaultValue={price} onChange={e => handlePriceChange(index, e)} placeholder="0.00" style={{flex:1,border:'none',outline:'none',padding:'0 12px',fontSize:'15px',fontWeight:'600',background:'#fafbfc',color:'#1e293b',minWidth:0}} onFocus={e=>{e.target.parentElement.style.borderColor='rgb(234, 88, 12)';}} onBlur={e=>{e.target.parentElement.style.borderColor='#e5e7eb';}} />
 													</div>
 												</div>
 											</div>
 											{/* Row 2: Remarks full width */}
-											<div style={{marginBottom:'14px'}}>
+											<div style={{marginBottom:'16px'}}>
 												<label style={lbl}>Remarks</label>
-												<input type="text" className="form-control" defaultValue={remarks} onChange={e => handleRemarksChange(index, e)} placeholder="Add a note..." style={{padding:'8px 10px',fontSize:'14px',borderRadius:'8px',border:'1.5px solid #e5e7eb'}} />
+												<input type="text" defaultValue={remarks} onChange={e => handleRemarksChange(index, e)} placeholder="Add a note..." style={{width:'100%',height:'42px',padding:'0 12px',fontSize:'14px',borderRadius:'10px',border:'1.5px solid #e5e7eb',outline:'none',background:'#fafbfc',color:'#1e293b',boxSizing:'border-box'}} onFocus={e=>{e.target.style.borderColor='rgb(234, 88, 12)';e.target.style.background='#fff';}} onBlur={e=>{e.target.style.borderColor='#e5e7eb';e.target.style.background='#fafbfc';}} />
 											</div>
 											{/* Save Button */}
-											<button onClick={(evnt) => handleUpdateChange(index, evnt)} style={{width:'100%',height:'44px',fontSize:'14px',fontWeight:'700',borderRadius:'8px',display:'flex',alignItems:'center',justifyContent:'center',gap:'6px',background:'rgb(234, 88, 12)',border:'none',color:'#fff',cursor:'pointer'}}>
+											<button onClick={(evnt) => handleUpdateChange(index, evnt)} style={{width:'100%',height:'48px',fontSize:'15px',fontWeight:'700',borderRadius:'12px',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',background:'rgb(234, 88, 12)',border:'none',color:'#fff',cursor:'pointer',boxShadow:'0 3px 12px rgba(234,88,12,0.3)'}}>
 												<i className="fa fa-check-circle"></i> Save Changes
 											</button>
 										</div>
+									</div>
 									</div>
 								); })()
 							}

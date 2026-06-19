@@ -547,27 +547,7 @@ function FilterOptionsSearchPanel(props) {
 
     return (
         <>
-        {/* ── Search + Filter row (Sales-style) ── */}
-        <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'10px'}}>
-            <div style={{flex:1,display:'flex',alignItems:'center',gap:'8px',height:'44px',border:'1.5px solid #e5e7eb',borderRadius:'12px',background:'#fff',padding:'0 12px',minWidth:0}}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input type="text" placeholder="Search invoice, supplier..."
-                    value={mobileSearchTerm}
-                    onChange={e => dispatch(slice.actions.setSearchTerm(e.target.value))}
-                    style={{flex:1,border:'none',outline:'none',fontSize:'13px',color:'#374151',background:'transparent',minWidth:0}}
-                />
-                {!!mobileSearchTerm && (
-                    <button type="button" onClick={() => dispatch(slice.actions.setSearchTerm(''))} style={{background:'none',border:'none',cursor:'pointer',padding:'2px',display:'flex',alignItems:'center',flexShrink:0}}>
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                    </button>
-                )}
-            </div>
-            <button type="button" onClick={() => { setPendingFrom(fromDate||null); setPendingTo(toDate||null); setPendingSupplier(currentSupplier||null); setMobileFilterOpen(v=>!v); }}
-                style={{flexShrink:0,height:'44px',width:'44px',borderRadius:'12px',border:'none',background:'rgb(234, 88, 12)',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',position:'relative',outline:'none',boxShadow:'0 3px 10px rgba(234,88,12,0.3)'}}>
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-                {hasActiveFilter && <span style={{position:'absolute',top:'5px',right:'5px',width:'7px',height:'7px',borderRadius:'50%',background:'#fff',border:'1.5px solid rgb(234, 88, 12)'}}/>}
-            </button>
-        </div>
+        {/* Search input removed on mobile; the filter button now lives at the right end of the Email/Print/Excel row below. */}
 
         {/* ── Filter bottom sheet ── */}
         {mobileFilterOpen && (
@@ -797,6 +777,12 @@ function FilterOptionsSearchPanel(props) {
             </button>
             <button type="button" onClick={()=>statementInvoice('excel')} disabled={downloadingExcel} style={{flex:1,height:'46px',borderRadius:'12px',border:'1px solid #eef0f3',background:'#fff',color:'#374151',fontSize:'12px',fontWeight:'700',cursor:downloadingExcel?'default':'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:'7px',outline:'none',boxShadow:'0 1px 3px rgba(0,0,0,0.05)'}}>
                 <i className={downloadingExcel ? "fa fa-spinner fa-spin" : "fa fa-file-excel-o"} style={{fontSize:'14px',color:'rgb(234, 88, 12)'}}></i>{downloadingExcel ? 'Preparing…' : 'Excel'}
+            </button>
+            {/* Filter button — right end of the action row */}
+            <button type="button" onClick={() => { setPendingFrom(fromDate||null); setPendingTo(toDate||null); setPendingSupplier(currentSupplier||null); setMobileFilterOpen(v=>!v); }}
+                style={{flexShrink:0,height:'46px',width:'46px',borderRadius:'12px',border:'none',background:'rgb(234, 88, 12)',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',position:'relative',outline:'none',boxShadow:'0 3px 10px rgba(234,88,12,0.3)'}}>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                {hasActiveFilter && <span style={{position:'absolute',top:'5px',right:'5px',width:'7px',height:'7px',borderRadius:'50%',background:'#fff',border:'1.5px solid rgb(234, 88, 12)'}}/>}
             </button>
         </div>
         <DailyReportEmailModal
