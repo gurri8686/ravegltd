@@ -2140,19 +2140,30 @@ export default function CustomerInvoiceApp(props) {
 									<div key={'card_edit_'+index} style={{position:'fixed',left:0,right:0,top:0,bottom:0,zIndex:6000,display:'flex',flexDirection:'column',justifyContent:'flex-end'}}>
 									  <style>{`@keyframes ciaSheetUp{from{transform:translateY(100%);}to{transform:translateY(0);}}`}</style>
 									  <div onClick={cancelEdit} style={{position:'absolute',inset:0,background:'rgba(15,17,21,0.45)'}} />
-									  <div style={{position:'relative',background:'#fff',borderTopLeftRadius:'18px',borderTopRightRadius:'18px',outline:'2px solid rgb(234, 88, 12)',outlineOffset:'-2px',overflow:'hidden',boxShadow:'0 -8px 30px rgba(0,0,0,0.18)',maxHeight:'90vh',overflowY:'auto',animation:'ciaSheetUp 0.22s ease'}}>
+									  <div style={{position:'relative',background:'#fff',borderTopLeftRadius:'18px',borderTopRightRadius:'18px',overflow:'hidden',boxShadow:'0 -8px 30px rgba(0,0,0,0.18)',maxHeight:'90vh',overflowY:'auto',animation:'ciaSheetUp 0.22s ease'}}>
 									  <div style={{display:'flex',justifyContent:'center',padding:'8px 0 2px'}}><div style={{width:'38px',height:'4px',borderRadius:'2px',background:'#e2e8f0'}} /></div>
 										{/* Edit Header */}
 										<div style={{padding:'10px 14px',display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1.5px solid #f0f0f0'}}>
 											<div style={{color:'#1e293b',fontSize:'14px',fontWeight:'700',display:'flex',alignItems:'center',gap:'6px',flex:1,minWidth:0,overflow:'hidden'}}>
 												<i className="fa fa-pencil-square-o" style={{color:'rgb(234, 88, 12)'}}></i>
-												<span style={{whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{product ? product.label : ''}</span>
-												{supplier_id && supplier_id.value ? <span style={{fontWeight:'400',color:'#94a3b8',fontSize:'12px',flexShrink:0}}>· {supplier_id.label}</span> : null}
+												<span style={{whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>Edit Product</span>
 											</div>
 											<button onClick={() => { const r = [...rowsData]; r[index]['fieldToggle'] = 'checked'; if(r[index]['_origSupplierId'] !== undefined) { r[index]['supplier_id'] = r[index]['_origSupplierId']; } if(r[index]['_origPrice'] !== undefined) { r[index]['price'] = r[index]['_origPrice']; r[index]['totalPrice'] = r[index]['_origTotalPrice']; } delete r[index]['_editNoSupplier']; delete r[index]['_origSupplierId']; delete r[index]['_origPrice']; delete r[index]['_origTotalPrice']; setRowsData(r); }} style={{background:'#f3f4f6',border:'none',color:'#666',fontSize:'13px',cursor:'pointer',padding:'4px 10px',borderRadius:'6px',flexShrink:0}}>✕</button>
 										</div>
 										{/* Edit Body */}
 										<div style={{padding:'14px 16px'}}>
+											{/* Product (read-only - cannot change product when editing) */}
+											<div style={{marginBottom:'12px'}}>
+												<label style={lbl}>Product</label>
+												<div style={{width:'100%',minHeight:'42px',padding:'10px 12px',fontSize:'15px',fontWeight:'600',borderRadius:'10px',border:'1.5px solid #e5e7eb',background:'#f8fafc',color:'#1e293b',display:'flex',alignItems:'center',boxSizing:'border-box'}}>{product ? product.label : ''}</div>
+											</div>
+											{/* Supplier (read-only display) */}
+											{supplier_id && supplier_id.value ? (
+												<div style={{marginBottom:'12px'}}>
+													<label style={lbl}>Supplier</label>
+													<div style={{width:'100%',minHeight:'42px',padding:'10px 12px',fontSize:'15px',fontWeight:'600',borderRadius:'10px',border:'1.5px solid #e5e7eb',background:'#f8fafc',color:'#1e293b',display:'flex',alignItems:'center',boxSizing:'border-box'}}>{supplier_id.label}</div>
+												</div>
+											) : null}
 											{/* Supplier dropdown — only when product originally had no supplier */}
 											{mdata._editNoSupplier && mdata.supplier && mdata.supplier.length > 0 && (
 												<div style={{marginBottom:'12px'}}>

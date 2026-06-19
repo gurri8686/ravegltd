@@ -702,16 +702,8 @@ export default function SupplierInvoiceApp(props) {
                                 )}
                             </div>
 
-                            {/* Search + Filter — search input removed on mobile (filter button kept) */}
-                            <div style={{display:'flex',alignItems:'center',gap:'8px',padding:'0 0 10px'}}>
-                                <button type="button" onClick={()=>setMobileFilterOpen(v=>!v)}
-                                    style={{flexShrink:0,height:'44px',width:'44px',borderRadius:'12px',border:'none',background:'rgb(234, 88, 12)',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',position:'relative',outline:'none',boxShadow:'0 3px 10px rgba(234,88,12,0.3)'}}>
-                                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-                                </button>
-                            </div>
-
-                            {/* Action buttons — Email / Print / Download cards */}
-                            <div style={{display:'flex',gap:'10px',padding:'0'}}>
+                            {/* Action buttons — Email / Print / Download cards + Filter button at the right end */}
+                            <div style={{display:'flex',alignItems:'center',gap:'10px',padding:'0 0 10px'}}>
                                 {[
                                     {label:'Email', icon:'fa-envelope-o', onClick:() => setEmailModalOpen(true)},
                                     {label:'Print', icon:'fa-print', href:"/data_entry/purchase_entry/invoice/invoiceview/"+props.id, target:'_blank'},
@@ -721,6 +713,11 @@ export default function SupplierInvoiceApp(props) {
                                     const inner = <><i className={"fa "+icon} style={{fontSize:'14px',color:'rgb(234, 88, 12)'}}></i>{label}</>;
                                     return onClick ? <button key={label} type="button" onClick={onClick} style={st}>{inner}</button> : <a key={label} href={href} target={target} style={st}>{inner}</a>;
                                 })}
+                                {/* Filter button — right end of the action row */}
+                                <button type="button" onClick={()=>setMobileFilterOpen(v=>!v)}
+                                    style={{flexShrink:0,height:'46px',width:'46px',borderRadius:'12px',border:'none',background:'rgb(234, 88, 12)',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',position:'relative',outline:'none',boxShadow:'0 3px 10px rgba(234,88,12,0.3)'}}>
+                                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                                </button>
                             </div>
                         </div>
 
@@ -1674,7 +1671,7 @@ export default function SupplierInvoiceApp(props) {
                 <div style={{padding:'10px 14px',display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1.5px solid #f0f0f0'}}>
                     <span style={{color:'#1e293b',fontSize:'14px',fontWeight:'700',display:'flex',alignItems:'center',gap:'6px',flex:1,minWidth:0,overflow:'hidden'}}>
                         <i className={isEditing ? "fa fa-pencil-square-o" : "fa fa-plus-circle"} style={{color:'#f97316'}}></i>
-                        <span style={{whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{isEditing ? (localProduct ? localProduct.label : 'Edit Product') : 'Add New Product'}</span>
+                        <span style={{whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{isEditing ? 'Edit Product' : 'Add New Product'}</span>
                     </span>
                     <button onClick={() => setMobileSlideOpen(false)} style={{background:'#f3f4f6',border:'none',color:'#666',fontSize:'13px',cursor:'pointer',padding:'4px 10px',borderRadius:'6px',flexShrink:0}}>✕</button>
                 </div>
@@ -1683,11 +1680,15 @@ export default function SupplierInvoiceApp(props) {
                     {/* Product */}
                     <div style={{marginBottom:'14px'}}>
                         <label style={lbl}>Product</label>
-                        <Select key={'mob_purchase_product_'+index} options={allProducts} menuPortalTarget={document.body}
+                        {isEditing ? (
+							<div style={{width:'100%',minHeight:'42px',padding:'10px 12px',fontSize:'15px',fontWeight:'600',borderRadius:'10px',border:'1.5px solid #e5e7eb',background:'#f8fafc',color:'#1e293b',display:'flex',alignItems:'center',boxSizing:'border-box'}}>{localProduct ? localProduct.label : ''}</div>
+						) : (
+							<Select key={'mob_purchase_product_'+index} options={allProducts} menuPortalTarget={document.body}
                             styles={{...fixedSelectStyles({width:'100%',maxWidth:'100%'}),control:(b,s)=>({...b,minHeight:'42px',fontSize:'14px',fontWeight:'600',borderRadius:'10px',border:s.isFocused?'1.5px solid #f97316':'1.5px solid #e5e7eb',boxShadow:s.isFocused?'0 0 0 3px rgba(249,115,22,0.08)':'none',background:'#fafbfc'}),menuPortal:(base)=>({...base,zIndex:9999})}}
                             defaultValue={localProduct}
                             onChange={(val) => setLocalProduct(val)}
                             placeholder="Search product..." />
+						)}
                     </div>
                     {/* Qty + Unit Price + Sell Price — 3 columns on mobile, premium inputs */}
                     <div style={{display:'flex',gap:'8px',marginBottom:'14px',alignItems:'flex-end'}}>
