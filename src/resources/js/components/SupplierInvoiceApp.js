@@ -702,18 +702,8 @@ export default function SupplierInvoiceApp(props) {
                                 )}
                             </div>
 
-                            {/* Search + Filter */}
+                            {/* Search + Filter — search input removed on mobile (filter button kept) */}
                             <div style={{display:'flex',alignItems:'center',gap:'8px',padding:'0 0 10px'}}>
-                                <div style={{flex:1,display:'flex',alignItems:'center',gap:'8px',height:'44px',border:'1.5px solid #e5e7eb',borderRadius:'12px',background:'#fff',padding:'0 12px',minWidth:0}}>
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                                    <input type="text" placeholder="Search product..." value={mobileSearch} onChange={e=>setMobileSearch(e.target.value)}
-                                        style={{flex:1,height:'100%',border:'none',outline:'none',fontSize:'13px',color:'#374151',background:'transparent',minWidth:0}} />
-                                    {mobileSearch && (
-                                        <button type="button" onClick={()=>setMobileSearch('')} style={{background:'none',border:'none',cursor:'pointer',padding:'2px',display:'flex',alignItems:'center',outline:'none',flexShrink:0}}>
-                                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                        </button>
-                                    )}
-                                </div>
                                 <button type="button" onClick={()=>setMobileFilterOpen(v=>!v)}
                                     style={{flexShrink:0,height:'44px',width:'44px',borderRadius:'12px',border:'none',background:'rgb(234, 88, 12)',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',position:'relative',outline:'none',boxShadow:'0 3px 10px rgba(234,88,12,0.3)'}}>
                                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
